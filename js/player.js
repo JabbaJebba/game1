@@ -57,94 +57,20 @@ class Player {
 
         this.isMining = false;
 
-        // --- A KEY: Left movement OR mine left ---
-        if (keys.mineLeft.isDown) {
-            const { left, top, bottom } = this.getTileBounds();
-            const mineX = left - 1;
+        // Remember position before movement
+        const oldX = this.x;
+        const oldY = this.y;
 
-            // Check if there's any solid block immediately to the left
-            let blockedLeft = false;
-            for (let y = top; y <= bottom; y++) {
-                if (this.world.isSolid(mineX, y)) {
-                    blockedLeft = true;
-                    break;
-                }
-            }
-
-            if (blockedLeft && now - this.lastMineTime >= this.mineCooldown) {
-                // Mine left
-                for (let y = top; y <= bottom; y++) {
-                    this.tryMine(mineX, y);
-                }
-                this.showMineIndicator(mineX * 32 + 16, (top + bottom + 1) / 2 * 32, 32, (bottom - top + 1) * 32);
-                this.lastMineTime = now;
-                this.isMining = true;
-            } else if (!blockedLeft) {
-                // Move left
-                this.vx = -this.speed;
-                this.facingRight = false;
-            }
-        }
-
-        // --- D KEY: Right movement OR mine right ---
-        else if (keys.mineRight.isDown) {
-            const { right, top, bottom } = this.getTileBounds();
-            const mineX = right + 1;
-
-            let blockedRight = false;
-            for (let y = top; y <= bottom; y++) {
-                if (this.world.isSolid(mineX, y)) {
-                    blockedRight = true;
-                    break;
-                }
-            }
-
-            if (blockedRight && now - this.lastMineTime >= this.mineCooldown) {
-                for (let y = top; y <= bottom; y++) {
-                    this.tryMine(mineX, y);
-                }
-                this.showMineIndicator(mineX * 32 + 16, (top + bottom + 1) / 2 * 32, 32, (bottom - top + 1) * 32);
-                this.lastMineTime = now;
-                this.isMining = true;
-            } else if (!blockedRight) {
-                this.vx = this.speed;
-                this.facingRight = true;
-            }
-        }
-
-        // --- Arrow keys: pure movement (no mining) ---
-        else if (keys.left.isDown) {
+        // Horizontal movement - A/D and Arrow keys
+        if (keys.mineLeft.isDown || keys.left.isDown) {
             this.vx = -this.speed;
             this.facingRight = false;
-        } else if (keys.right.isDown) {
+        } else if (keys.mineRight.isDown || keys.right.isDown) {
             this.vx = this.speed;
             this.facingRight = true;
         } else {
             this.vx *= this.friction;
             if (Math.abs(this.vx) < 10) this.vx = 0;
-        }
-
-        // --- S KEY: Mine down (if on ground) ---
-        if (keys.mineDown.isDown && now - this.lastMineTime >= this.mineCooldown) {
-            const { left, right, bottom } = this.getTileBounds();
-            const mineY = bottom + 1;
-
-            let blockedBelow = false;
-            for (let x = left; x <= right; x++) {
-                if (this.world.isSolid(x, mineY)) {
-                    blockedBelow = true;
-                    break;
-                }
-            }
-
-            if (blockedBelow) {
-                for (let x = left; x <= right; x++) {
-                    this.tryMine(x, mineY);
-                }
-                this.showMineIndicator((left + right + 1) / 2 * 32, mineY * 32 + 16, (right - left + 1) * 32, 32);
-                this.lastMineTime = now;
-                this.isMining = true;
-            }
         }
 
         // Jump
@@ -156,9 +82,54 @@ class Player {
         // Apply gravity
         this.vy += this.gravity * dt;
 
-        // Apply velocity with collision
+        // Apply movement
         this.moveX(this.vx * dt);
         this.moveY(this.vy * dt);
+
+        // --- A KEY: Mine left if movement was blocked ---
+        if (keys.mineLeft.isDown && Math.abs(this.x - oldX) < 1 && now - this.lastMineTime >= this.mineCooldown) {
+            const { left, top, bottom } = this.getTileBounds();
+            const mineX = left - 1;
+            let minedAny = false;
+            for (let y = top; y <= bottom; y++) {
+                if (this.tryMine(mineX, y)) minedAny = true;
+            }
+            if (minedAny) {
+                this.showMineIndicator(mineX * 32 + 16, (top + bottom + 1) / 2 * 32, 32, (bottom - top + 1) * 32);
+                this.lastMineTime = now;
+                this.isMining = true;
+            }
+        }
+
+        // --- D KEY: Mine right if movement was blocked ---
+        if (keys.mineRight.isDown && Math.abs(this.x - oldX) < 1 && now - this.lastMineTime >= this.mineCooldown) {
+            const { right, top, bottom } = this.getTileBounds();
+            const mineX = right + 1;
+            let minedAny = false;
+            for (let y = top; y <= bottom; y++) {
+                if (this.tryMine(mineX, y)) minedAny = true;
+            }
+            if (minedAny) {
+                this.showMineIndicator(mineX * 32 + 16, (top + bottom + 1) / 2 * 32, 32, (bottom - top + 1) * 32);
+                this.lastMineTime = now;
+                this.isMining = true;
+            }
+        }
+
+        // --- S KEY: Mine down if on ground ---
+        if (keys.mineDown.isDown && this.onGround && now - this.lastMineTime >= this.mineCooldown) {
+            const { left, right, bottom } = this.getTileBounds();
+            const mineY = bottom + 1;
+            let minedAny = false;
+            for (let x = left; x <= right; x++) {
+                if (this.tryMine(x, mineY)) minedAny = true;
+            }
+            if (minedAny) {
+                this.showMineIndicator((left + right + 1) / 2 * 32, mineY * 32 + 16, (right - left + 1) * 32, 32);
+                this.lastMineTime = now;
+                this.isMining = true;
+            }
+        }
 
         // Update sprite position
         this.sprite.x = this.x;
