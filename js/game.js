@@ -18,17 +18,19 @@ class GameScene extends Phaser.Scene {
         
         // Input keys
         this.keys = {
-            left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
-            right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
+            left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),
+            right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT),
             jump: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
             up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
             down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
-            mine: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),
+            mineLeft: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+            mineDown: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
+            mineRight: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
         };
         
         // Find spawn point
         let spawnX = Math.floor(this.worldWidth / 2);
-        let spawnY = this.world.getSurfaceY(spawnX) - 2;
+        let spawnY = this.world.getSurfaceY(spawnX) - 3;
         
         // Create player
         this.player = new Player(this, spawnX, spawnY);
@@ -106,7 +108,7 @@ class GameScene extends Phaser.Scene {
             .join(' | ');
         
         this.infoText.setText(
-            `Controls: WASD/Arrows=Move, Space=Jump, Left Click=Mine, Right Click=Place\n` +
+            `Controls: Arrows=Move, Space/W=Jump, A=Mine Left, D=Mine Right, S=Mine Down, Right Click=Place\n` +
             `Time: ${dayProgress > 0.3 ? 'Day' : 'Night'} | ` +
             `Pos: ${Math.floor(this.player.x)}, ${Math.floor(this.player.y)}\n` +
             `Inventory: ${inventoryText || 'Empty'}`
