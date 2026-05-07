@@ -24,6 +24,7 @@ class Player {
         // State
         this.onGround = false;
         this.facingRight = true;
+        this.isMining = false;
 
         // Mining cooldown (ms)
         this.mineCooldown = 180;
@@ -31,7 +32,7 @@ class Player {
 
         // Create graphics
         this.sprite = scene.add.rectangle(this.x, this.y, this.width, this.height, 0x3498db);
-        this.sprite.setOrigin(0.5, 1); // Bottom center origin
+        this.sprite.setOrigin(0.5, 1);
 
         // Eyes to show direction
         this.eyeLeft = scene.add.circle(this.x - 12, this.y - this.height + 18, 5, 0xffffff);
@@ -52,9 +53,67 @@ class Player {
     update(delta) {
         const dt = delta / 1000;
         const keys = this.scene.keys;
+        const now = this.scene.time.now;
 
-        // Horizontal movement - Arrow keys only
-        if (keys.left.isDown) {
+        this.isMining = false;
+
+        // --- A KEY: Left movement OR mine left ---
+        if (keys.mineLeft.isDown) {
+            const { left, top, bottom } = this.getTileBounds();
+            const mineX = left - 1;
+
+            // Check if there's any solid block immediately to the left
+            let blockedLeft = false;
+            for (let y = top; y <= bottom; y++) {
+                if (this.world.isSolid(mineX, y)) {
+                    blockedLeft = true;
+                    break;
+                }
+            }
+
+            if (blockedLeft && now - this.lastMineTime >= this.mineCooldown) {
+                // Mine left
+                for (let y = top; y <= bottom; y++) {
+                    this.tryMine(mineX, y);
+                }
+                this.showMineIndicator(mineX * 32 + 16, (top + bottom + 1) / 2 * 32, 32, (bottom - top + 1) * 32);
+                this.lastMineTime = now;
+                this.isMining = true;
+            } else if (!blockedLeft) {
+                // Move left
+                this.vx = -this.speed;
+                this.facingRight = false;
+            }
+        }
+
+        // --- D KEY: Right movement OR mine right ---
+        else if (keys.mineRight.isDown) {
+            const { right, top, bottom } = this.getTileBounds();
+            const mineX = right + 1;
+
+            let blockedRight = false;
+            for (let y = top; y <= bottom; y++) {
+                if (this.world.isSolid(mineX, y)) {
+                    blockedRight = true;
+                    break;
+                }
+            }
+
+            if (blockedRight && now - this.lastMineTime >= this.mineCooldown) {
+                for (let y = top; y <= bottom; y++) {
+                    this.tryMine(mineX, y);
+                }
+                this.showMineIndicator(mineX * 32 + 16, (top + bottom + 1) / 2 * 32, 32, (bottom - top + 1) * 32);
+                this.lastMineTime = now;
+                this.isMining = true;
+            } else if (!blockedRight) {
+                this.vx = this.speed;
+                this.facingRight = true;
+            }
+        }
+
+        // --- Arrow keys: pure movement (no mining) ---
+        else if (keys.left.isDown) {
             this.vx = -this.speed;
             this.facingRight = false;
         } else if (keys.right.isDown) {
@@ -65,7 +124,30 @@ class Player {
             if (Math.abs(this.vx) < 10) this.vx = 0;
         }
 
-        // Jump - W or Space
+        // --- S KEY: Mine down (if on ground) ---
+        if (keys.mineDown.isDown && now - this.lastMineTime >= this.mineCooldown) {
+            const { left, right, bottom } = this.getTileBounds();
+            const mineY = bottom + 1;
+
+            let blockedBelow = false;
+            for (let x = left; x <= right; x++) {
+                if (this.world.isSolid(x, mineY)) {
+                    blockedBelow = true;
+                    break;
+                }
+            }
+
+            if (blockedBelow) {
+                for (let x = left; x <= right; x++) {
+                    this.tryMine(x, mineY);
+                }
+                this.showMineIndicator((left + right + 1) / 2 * 32, mineY * 32 + 16, (right - left + 1) * 32, 32);
+                this.lastMineTime = now;
+                this.isMining = true;
+            }
+        }
+
+        // Jump
         if ((keys.jump.isDown || keys.up.isDown) && this.onGround) {
             this.vy = -this.jumpPower;
             this.onGround = false;
@@ -93,8 +175,11 @@ class Player {
         this.pupilRight.x = this.x + 12 + eyeOffsetX * 1.5;
         this.pupilRight.y = this.y - this.height + 18;
 
-        // Mining with A/S/D
-        this.handleKeyboardMining();
+        // Hide mine indicator if not mining
+        if (!this.isMining) {
+            this.mineIndicator.setStrokeStyle(2, 0xff0000, 0);
+            this.mineIndicator.setFillStyle(0xff0000, 0);
+        }
 
         // Placing
         this.handlePlacing();
@@ -139,7 +224,6 @@ class Player {
         const { left, right, top, bottom } = this.getTileBounds();
         const feetRow = Math.floor(this.y / 32);
 
-        // Feet collision (landing)
         if (this.vy > 0) {
             for (let tx = left; tx <= right; tx++) {
                 if (this.world.isSolid(tx, feetRow)) {
@@ -149,9 +233,7 @@ class Player {
                     break;
                 }
             }
-        }
-        // Head collision
-        else if (this.vy < 0) {
+        } else if (this.vy < 0) {
             for (let tx = left; tx <= right; tx++) {
                 if (this.world.isSolid(tx, top)) {
                     this.y = (top + 1) * 32 + this.height;
@@ -159,49 +241,6 @@ class Player {
                     break;
                 }
             }
-        }
-    }
-
-    handleKeyboardMining() {
-        const keys = this.scene.keys;
-        const now = this.scene.time.now;
-
-        if (now - this.lastMineTime < this.mineCooldown) return;
-
-        let mined = false;
-        const { left, right, top, bottom } = this.getTileBounds();
-
-        // Mine left (A key)
-        if (keys.mineLeft.isDown) {
-            const mineX = left - 1;
-            for (let y = top; y <= bottom; y++) {
-                if (this.tryMine(mineX, y)) mined = true;
-            }
-            this.showMineIndicator(mineX * 32 + 16, (top + bottom + 1) / 2 * 32, 32, (bottom - top + 1) * 32);
-        }
-        // Mine right (D key)
-        else if (keys.mineRight.isDown) {
-            const mineX = right + 1;
-            for (let y = top; y <= bottom; y++) {
-                if (this.tryMine(mineX, y)) mined = true;
-            }
-            this.showMineIndicator(mineX * 32 + 16, (top + bottom + 1) / 2 * 32, 32, (bottom - top + 1) * 32);
-        }
-        // Mine down (S key)
-        else if (keys.mineDown.isDown) {
-            const mineY = bottom + 1;
-            for (let x = left; x <= right; x++) {
-                if (this.tryMine(x, mineY)) mined = true;
-            }
-            this.showMineIndicator((left + right + 1) / 2 * 32, mineY * 32 + 16, (right - left + 1) * 32, 32);
-        } else {
-            // Hide indicator when not mining
-            this.mineIndicator.setStrokeStyle(2, 0xff0000, 0);
-            this.mineIndicator.setFillStyle(0xff0000, 0);
-        }
-
-        if (mined) {
-            this.lastMineTime = now;
         }
     }
 
