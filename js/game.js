@@ -2,17 +2,25 @@ class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene' });
     }
-    
+
+    init(data) {
+        this.planet = data.planet || { name: 'Asteroid Alpha', depth: 300, size: 200, richness: 0.8 };
+        this.shipGrid = data.shipGrid || [];
+        this.shipInventory = data.shipInventory || {};
+        this.credits = data.credits || 0;
+        this.shipFuel = data.shipFuel || 20000;
+        this.shipFuelCapacity = data.shipFuelCapacity || 20000;
+    }
+
     create() {
-        this.worldWidth = 200;
-        this.worldHeight = 300;
+        this.worldWidth = this.planet.size;
+        this.worldHeight = this.planet.depth;
         this.tileSize = 32;
-        
+
         this.world = new WorldGenerator(this.worldWidth, this.worldHeight);
-        
+
         this.tileGraphics = this.add.graphics();
-        
-        // Color lookup
+
         this.tileColors = {
             [this.world.TILE_AIR]: null,
             [this.world.TILE_DIRT]: 0x8B4513,
@@ -28,21 +36,18 @@ class GameScene extends Phaser.Scene {
             [this.world.TILE_DIAMOND]: 0xB9F2FF,
             [this.world.TILE_AMETHYST]: 0x9966CC,
         };
-        
+
         this.metalSymbols = {
             [this.world.TILE_COPPER]: 'Cu',
             [this.world.TILE_IRON]: 'Fe',
             [this.world.TILE_GOLD]: 'Au',
         };
-        
-        // Cache for metal labels: key = "x,y", value = Phaser.Text object
+
         this.labelCache = new Map();
-        
-        // Track which tiles have been drawn (for label cleanup)
         this.drawnMetals = new Set();
-        
+
         this.renderWorld();
-        
+
         this.keys = {
             left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),
             right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT),
@@ -53,24 +58,25 @@ class GameScene extends Phaser.Scene {
             mineDown: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
             mineRight: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
         };
-        
+
         let spawnX = Math.floor(this.worldWidth / 2);
         let spawnY = this.world.getSurfaceY(spawnX) - 5;
-        
-        this.player = new Player(this, spawnX, spawnY);
-        
+
+        let fuelForRun = Math.min(5000, this.shipFuel);
+        this.player = new Player(this, spawnX, spawnY, { fuel: fuelForRun });
+
         this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1);
         this.cameras.main.setBounds(0, 0, this.worldWidth * this.tileSize, this.worldHeight * this.tileSize);
         this.cameras.main.setBackgroundColor('#87CEEB');
-        
+
         this.input.on('pointerdown', (pointer) => {
             if (pointer.button === 0) {}
         });
-        
+
         this.cursorHighlight = this.add.rectangle(0, 0, 32, 32);
         this.cursorHighlight.setStrokeStyle(2, 0xffffff, 0.8);
         this.cursorHighlight.setFillStyle(0xffffff, 0.1);
-        
+
         this.infoText = this.add.text(10, 10, '', {
             fontSize: '16px',
             fill: '#ffffff',
@@ -78,41 +84,77 @@ class GameScene extends Phaser.Scene {
             strokeThickness: 3
         });
         this.infoText.setScrollFactor(0);
-        
+
+        // TELEPORT button
+        this.teleportBtn = this.add.text(1100, 20, 'TELEPORT', {
+            fontSize: '20px',
+            fill: '#FF4444',
+            stroke: '#000000',
+            strokeThickness: 3,
+            backgroundColor: '#330000',
+            padding: { x: 10, y: 5 }
+        }).setScrollFactor(0).setInteractive();
+
+        this.teleportBtn.on('pointerdown', () => this.teleportBack());
+        this.teleportBtn.on('pointerover', () => this.teleportBtn.setStyle({ fill: '#FF6666' }));
+        this.teleportBtn.on('pointerout', () => this.teleportBtn.setStyle({ fill: '#FF4444' }));
+
+        // Planet name display
+        this.planetText = this.add.text(640, 20, this.planet.name.toUpperCase(), {
+            fontSize: '18px',
+            fill: '#FFD700',
+            stroke: '#000000',
+            strokeThickness: 2
+        }).setOrigin(0.5).setScrollFactor(0);
+
         this.timeOfDay = 0;
-        
         this.stars = this.add.graphics();
         this.generateStars();
     }
-    
+
+    teleportBack() {
+        // Merge player inventory into ship inventory
+        for (const [tile, count] of Object.entries(this.player.inventory)) {
+            if (!this.shipInventory[tile]) this.shipInventory[tile] = 0;
+            this.shipInventory[tile] += count;
+        }
+
+        // Return to ship scene
+        this.scene.start('ShipScene', {
+            shipGrid: this.shipGrid,
+            shipInventory: this.shipInventory,
+            credits: this.credits,
+            shipFuel: this.shipFuel,
+            shipFuelCapacity: this.shipFuelCapacity,
+        });
+    }
+
     update(time, delta) {
         this.player.update(delta);
-        
-        // Re-render visible tiles each frame (camera may have moved)
         this.renderWorld();
-        
+
         const pointer = this.input.activePointer;
         const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
         const tileX = Math.floor(worldPoint.x / 32);
         const tileY = Math.floor(worldPoint.y / 32);
         this.cursorHighlight.x = tileX * 32 + 16;
         this.cursorHighlight.y = tileY * 32 + 16;
-        
+
         this.timeOfDay += delta * 0.0001;
         const dayProgress = (Math.sin(this.timeOfDay) + 1) / 2;
         const darkness = 1 - dayProgress * 0.7;
-        
+
         const r = Math.floor(135 * darkness);
         const g = Math.floor(206 * darkness);
         const b = Math.floor(235 * darkness);
         this.cameras.main.setBackgroundColor(`rgb(${r},${g},${b})`);
-        
+
         this.stars.setAlpha(1 - dayProgress);
-        
+
         const inventoryText = Object.entries(this.player.inventory)
             .map(([k, v]) => `${this.getTileName(parseInt(k))}: ${v}`)
             .join(' | ');
-        
+
         this.infoText.setText(
             `Controls: Arrows=Move, Space/W=Jump, A=Mine Left, D=Mine Right, S=Mine Down\n` +
             `Time: ${dayProgress > 0.3 ? 'Day' : 'Night'} | ` +
@@ -121,15 +163,15 @@ class GameScene extends Phaser.Scene {
             `Inventory: ${inventoryText || 'Empty'}`
         );
     }
-    
+
     getVisibleTileRange() {
         const cam = this.cameras.main;
-        const margin = 2; // draw a couple tiles outside viewport
+        const margin = 2;
         const startX = Math.floor((cam.scrollX - margin * this.tileSize) / this.tileSize);
         const endX = Math.ceil((cam.scrollX + cam.width + margin * this.tileSize) / this.tileSize);
         const startY = Math.floor((cam.scrollY - margin * this.tileSize) / this.tileSize);
         const endY = Math.ceil((cam.scrollY + cam.height + margin * this.tileSize) / this.tileSize);
-        
+
         return {
             startX: Math.max(0, startX),
             endX: Math.min(this.worldWidth, endX),
@@ -137,15 +179,13 @@ class GameScene extends Phaser.Scene {
             endY: Math.min(this.worldHeight, endY)
         };
     }
-    
+
     renderWorld() {
         this.tileGraphics.clear();
-        
+
         const { startX, endX, startY, endY } = this.getVisibleTileRange();
-        
-        // Track which metals should be visible this frame
         const visibleMetals = new Set();
-        
+
         for (let x = startX; x < endX; x++) {
             for (let y = startY; y < endY; y++) {
                 const tile = this.world.getTile(x, y);
@@ -157,11 +197,11 @@ class GameScene extends Phaser.Scene {
                     this.tileGraphics.fillRect(px, py, 32, 32);
                     this.tileGraphics.lineStyle(1, 0x000000, 0.1);
                     this.tileGraphics.strokeRect(px, py, 32, 32);
-                    
+
                     if (this.metalSymbols[tile]) {
                         const key = `${x},${y}`;
                         visibleMetals.add(key);
-                        
+
                         let label = this.labelCache.get(key);
                         if (!label) {
                             label = this.add.text(px + 16, py + 16, this.metalSymbols[tile], {
@@ -179,32 +219,29 @@ class GameScene extends Phaser.Scene {
                 }
             }
         }
-        
-        // Hide labels for metals no longer visible (scrolled off-screen or mined)
+
         for (const [key, label] of this.labelCache) {
             if (!visibleMetals.has(key)) {
                 label.setVisible(false);
             }
         }
     }
-    
+
     updateTile(x, y) {
-        // Redraw only the changed tile and its neighbors
         const tile = this.world.getTile(x, y);
         const px = x * 32;
         const py = y * 32;
-        
-        // Clear just this tile area (overdraw with background or new tile)
-        this.tileGraphics.fillStyle(0x87CEEB, 1); // sky color for air
+
+        this.tileGraphics.fillStyle(0x87CEEB, 1);
         this.tileGraphics.fillRect(px, py, 32, 32);
-        
+
         if (tile !== this.world.TILE_AIR) {
             const color = this.tileColors[tile] || 0xffffff;
             this.tileGraphics.fillStyle(color, 1);
             this.tileGraphics.fillRect(px, py, 32, 32);
             this.tileGraphics.lineStyle(1, 0x000000, 0.1);
             this.tileGraphics.strokeRect(px, py, 32, 32);
-            
+
             if (this.metalSymbols[tile]) {
                 const key = `${x},${y}`;
                 let label = this.labelCache.get(key);
@@ -221,19 +258,17 @@ class GameScene extends Phaser.Scene {
                 label.setVisible(true);
                 label.setPosition(px + 16, py + 16);
             } else {
-                // If tile is no longer metal, hide its label
                 const key = `${x},${y}`;
                 const label = this.labelCache.get(key);
                 if (label) label.setVisible(false);
             }
         } else {
-            // Tile became air - hide any label
             const key = `${x},${y}`;
             const label = this.labelCache.get(key);
             if (label) label.setVisible(false);
         }
     }
-    
+
     getTileName(tile) {
         const names = {
             [this.world.TILE_AIR]: 'Air',
@@ -252,7 +287,7 @@ class GameScene extends Phaser.Scene {
         };
         return names[tile] || 'Unknown';
     }
-    
+
     generateStars() {
         this.stars.fillStyle(0xffffff, 1);
         for (let i = 0; i < 200; i++) {
@@ -277,7 +312,7 @@ const config = {
             debug: false
         }
     },
-    scene: GameScene,
+    scene: [ShipScene, GalaxyScene, GameScene],
     pixelArt: true,
     roundPixels: true
 };

@@ -1,5 +1,5 @@
 class Player {
-    constructor(scene, x, y) {
+    constructor(scene, x, y, data = {}) {
         this.scene = scene;
         this.world = scene.world;
 
@@ -46,7 +46,7 @@ class Player {
         this.mineIndicator.setFillStyle(0xff0000, 0);
 
         // Fuel system
-        this.maxFuel = 5000;
+        this.maxFuel = data.fuel || 5000;
         this.fuel = this.maxFuel;
         this.fuelCosts = {
             [this.world.TILE_DIRT]: 10,
