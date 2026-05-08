@@ -42,17 +42,12 @@ class GameScene extends Phaser.Scene {
         // Background color
         this.cameras.main.setBackgroundColor('#87CEEB');
         
-        // Mouse input
+        // Mouse input - mining only
         this.input.on('pointerdown', (pointer) => {
             if (pointer.button === 0) {
-                // Left click - mine
-            } else if (pointer.button === 2) {
-                // Right click - place (prevent context menu)
+                // Left click - mine (no-op for now, keys handle mining)
             }
         });
-        
-        // Prevent context menu on right click
-        this.input.mouse.disableContextMenu();
         
         // Cursor highlight
         this.cursorHighlight = this.add.rectangle(0, 0, 32, 32);
@@ -108,7 +103,7 @@ class GameScene extends Phaser.Scene {
             .join(' | ');
         
         this.infoText.setText(
-            `Controls: Arrows=Move, Space/W=Jump, A=Mine Left, D=Mine Right, S=Mine Down, Right Click=Place\n` +
+            `Controls: Arrows=Move, Space/W=Jump, A=Mine Left, D=Mine Right, S=Mine Down\n` +
             `Time: ${dayProgress > 0.3 ? 'Day' : 'Night'} | ` +
             `Pos: ${Math.floor(this.player.x)}, ${Math.floor(this.player.y)}\n` +
             `Inventory: ${inventoryText || 'Empty'}`
@@ -118,24 +113,34 @@ class GameScene extends Phaser.Scene {
     renderWorld() {
         this.tileGraphics.clear();
         
+        // Clean up old metal labels
+        if (this.metalLabels) {
+            this.metalLabels.forEach(l => l.destroy());
+        }
+        this.metalLabels = [];
+        
         const colors = {
             [this.world.TILE_AIR]: null,
             [this.world.TILE_DIRT]: 0x8B4513,
             [this.world.TILE_GRASS]: 0x228B22,
             [this.world.TILE_STONE]: 0x808080,
-            [this.world.TILE_COPPER]: 0xB87333,    // Cu - copper
+            [this.world.TILE_COPPER]: 0xB87333,    // Cu
             [this.world.TILE_BEDROCK]: 0x333333,
-            [this.world.TILE_IRON]: 0xC0C0C0,     // Fe - iron gray
-            [this.world.TILE_GOLD]: 0xFFD700,    // Au - gold
-            [this.world.TILE_RUBY]: 0xDC143C,    // red
-            [this.world.TILE_SAPPHIRE]: 0x0F52BA, // blue
-            [this.world.TILE_EMERALD]: 0x50C878,  // green
-            [this.world.TILE_DIAMOND]: 0xB9F2FF,  // cyan
-            [this.world.TILE_AMETHYST]: 0x9966CC, // purple
+            [this.world.TILE_IRON]: 0xA0A0A0,     // Fe - lighter gray for contrast
+            [this.world.TILE_GOLD]: 0xFFD700,     // Au
+            [this.world.TILE_RUBY]: 0xDC143C,
+            [this.world.TILE_SAPPHIRE]: 0x0F52BA,
+            [this.world.TILE_EMERALD]: 0x50C878,
+            [this.world.TILE_DIAMOND]: 0xB9F2FF,
+            [this.world.TILE_AMETHYST]: 0x9966CC,
         };
         
-        // Only render visible tiles would be better, but for simplicity render all
-        // In a real game, use Phaser's tilemap system
+        const metalSymbols = {
+            [this.world.TILE_COPPER]: 'Cu',
+            [this.world.TILE_IRON]: 'Fe',
+            [this.world.TILE_GOLD]: 'Au',
+        };
+        
         for (let x = 0; x < this.worldWidth; x++) {
             for (let y = 0; y < this.worldHeight; y++) {
                 const tile = this.world.getTile(x, y);
@@ -143,10 +148,20 @@ class GameScene extends Phaser.Scene {
                     const color = colors[tile] || 0xffffff;
                     this.tileGraphics.fillStyle(color, 1);
                     this.tileGraphics.fillRect(x * 32, y * 32, 32, 32);
-                    
-                    // Add subtle border
                     this.tileGraphics.lineStyle(1, 0x000000, 0.1);
                     this.tileGraphics.strokeRect(x * 32, y * 32, 32, 32);
+                    
+                    // Add element symbol on metal tiles
+                    if (metalSymbols[tile]) {
+                        const label = this.add.text(x * 32 + 16, y * 32 + 16, metalSymbols[tile], {
+                            fontSize: '12px',
+                            fontFamily: 'monospace',
+                            fill: '#000000',
+                            stroke: '#ffffff',
+                            strokeThickness: 2,
+                        }).setOrigin(0.5);
+                        this.metalLabels.push(label);
+                    }
                 }
             }
         }

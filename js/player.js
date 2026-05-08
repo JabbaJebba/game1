@@ -152,8 +152,8 @@ class Player {
             this.mineIndicator.setFillStyle(0xff0000, 0);
         }
 
-        // Placing
-        this.handlePlacing();
+        // Placing removed
+        // this.handlePlacing();
 
         // Keep in world bounds
         const worldWidthPx = this.world.width * 32;
@@ -232,31 +232,6 @@ class Player {
         this.mineIndicator.setSize(w, h);
         this.mineIndicator.setStrokeStyle(2, 0xff0000, 0.6);
         this.mineIndicator.setFillStyle(0xff0000, 0.15);
-    }
-
-    handlePlacing() {
-        if (!this.scene.input.activePointer.rightButtonDown()) return;
-
-        const pointer = this.scene.input.activePointer;
-        const worldPoint = this.scene.cameras.main.getWorldPoint(pointer.x, pointer.y);
-        const tileX = Math.floor(worldPoint.x / 32);
-        const tileY = Math.floor(worldPoint.y / 32);
-
-        const dx = (tileX * 32 + 16) - this.x;
-        const dy = (tileY * 32 + 16) - this.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < 120) {
-            const tile = this.world.getTile(tileX, tileY);
-            if (tile === this.world.TILE_AIR) {
-                const { left, right, top, bottom } = this.getTileBounds();
-
-                if (tileX < left || tileX > right || tileY < top || tileY > bottom) {
-                    this.world.setTile(tileX, tileY, this.world.TILE_DIRT);
-                    this.scene.updateTile(tileX, tileY);
-                }
-            }
-        }
     }
 
     addToInventory(tile) {
