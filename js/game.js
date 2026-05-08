@@ -113,10 +113,11 @@ class GameScene extends Phaser.Scene {
     }
 
     teleportBack() {
-        // Merge player inventory into ship inventory
-        for (const [tile, count] of Object.entries(this.player.inventory)) {
-            if (!this.shipInventory[tile]) this.shipInventory[tile] = 0;
-            this.shipInventory[tile] += count;
+        // Merge player inventory into ship inventory (convert tile IDs to names)
+        for (const [tileId, count] of Object.entries(this.player.inventory)) {
+            const name = this.getTileName(parseInt(tileId));
+            if (!this.shipInventory[name]) this.shipInventory[name] = 0;
+            this.shipInventory[name] += count;
         }
 
         // Return to ship scene
