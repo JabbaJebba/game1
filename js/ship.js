@@ -250,12 +250,12 @@ class ShipScene extends Phaser.Scene {
     }
 
     createSidePanels() {
-        // Left panel - Inventory
+        // Left panel - Inventory (shortened to make room for build panel)
         const leftBg = this.add.graphics();
         leftBg.fillStyle(0x151525, 0.9);
-        leftBg.fillRoundedRect(10, 70, 260, 520, 8);
+        leftBg.fillRoundedRect(10, 70, 260, 290, 8);
         leftBg.lineStyle(1, 0x444466, 0.5);
-        leftBg.strokeRoundedRect(10, 70, 260, 520, 8);
+        leftBg.strokeRoundedRect(10, 70, 260, 290, 8);
 
         this.add.text(20, 80, 'INVENTORY', {
             fontSize: '16px', fill: '#FFD700', fontStyle: 'bold', fontFamily: 'monospace'
@@ -616,19 +616,20 @@ class ShipScene extends Phaser.Scene {
     createBuildPanel() {
         const panelX = 10;
         const panelY = 370;
+        const panelH = 340;
 
         const buildBg = this.add.graphics();
         buildBg.fillStyle(0x151525, 0.9);
-        buildBg.fillRoundedRect(panelX, panelY, 260, 280, 8);
+        buildBg.fillRoundedRect(panelX, panelY, 260, panelH, 8);
         buildBg.lineStyle(1, 0x444466, 0.5);
-        buildBg.strokeRoundedRect(panelX, panelY, 260, 280, 8);
+        buildBg.strokeRoundedRect(panelX, panelY, 260, panelH, 8);
 
         this.add.text(panelX + 10, panelY + 10, 'BUILD ROOMS', {
             fontSize: '16px', fill: '#00FFFF', fontStyle: 'bold', fontFamily: 'monospace'
         });
 
         this.buildButtons = [];
-        let y = panelY + 40;
+        let y = panelY + 38;
         Object.entries(this.roomTypes).forEach(([key, def]) => {
             if (def.cost === 0) return;
             const btn = this.createBuildButton(panelX + 130, y, `${def.icon} ${def.name}`, def.cost, key, () => {
@@ -637,25 +638,24 @@ class ShipScene extends Phaser.Scene {
                 this.selectedRoomCell = null;
                 this.drawShipGrid();
                 this.hideRoomControls();
-                // Update build status
                 this.buildStatusText.setText(`Building: ${def.icon} ${def.name}\nHover grid to preview, click to place`);
             });
             this.buildButtons.push(btn);
-            y += 34;
+            y += 30;
         });
 
-        this.buildStatusText = this.add.text(panelX + 10, panelY + 210, 'Select a room to build', {
+        this.buildStatusText = this.add.text(panelX + 10, panelY + 310, 'Select a room to build', {
             fontSize: '12px', fill: '#aaaaaa', fontFamily: 'monospace'
         });
 
         // Cancel build button
-        const cancelBtn = this.createButton(panelX + 130, panelY + 250, 'CANCEL BUILD', () => {
+        const cancelBtn = this.createButton(panelX + 130, panelY + 335, 'CANCEL BUILD', () => {
             this.buildMode = false;
             this.selectedRoom = null;
             this.ghostGraphics.clear();
             if (this.ghostIcon) { this.ghostIcon.destroy(); this.ghostIcon = null; }
             this.buildStatusText.setText('Select a room to build');
-        }, 240, 28);
+        }, 240, 26);
     }
 
     createBuildButton(x, y, text, cost, roomKey, callback) {
@@ -663,7 +663,7 @@ class ShipScene extends Phaser.Scene {
         const label = this.add.text(x, y, text, {
             fontSize: '12px', fill: '#ffffff', fontFamily: 'monospace'
         }).setOrigin(0.5);
-        const costLabel = this.add.text(x + 110, y, `${cost}cr`, {
+        const costLabel = this.add.text(x + 100, y, `${cost}cr`, {
             fontSize: '11px', fill: '#FFD700', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
