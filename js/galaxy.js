@@ -7,8 +7,8 @@ class GalaxyScene extends Phaser.Scene {
         this.shipGrid = data.shipGrid || [];
         this.shipInventory = data.shipInventory || {};
         this.credits = data.credits || 0;
-        this.shipFuel = data.shipFuel || 20000;
-        this.shipFuelCapacity = data.shipFuelCapacity || 20000;
+        this.shipFuel = data.shipFuel !== undefined ? data.shipFuel : 20000;
+        this.shipFuelCapacity = data.shipFuelCapacity !== undefined ? data.shipFuelCapacity : 20000;
         this.engineLevel = this.calculateEngineLevel();
         this.rockCompositions = data.rockCompositions || {};
     }

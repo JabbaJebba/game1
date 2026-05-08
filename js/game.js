@@ -8,8 +8,8 @@ class GameScene extends Phaser.Scene {
         this.shipGrid = data.shipGrid || [];
         this.shipInventory = data.shipInventory || {};
         this.credits = data.credits || 0;
-        this.shipFuel = data.shipFuel || 20000;
-        this.shipFuelCapacity = data.shipFuelCapacity || 20000;
+        this.shipFuel = data.shipFuel !== undefined ? data.shipFuel : 20000;
+        this.shipFuelCapacity = data.shipFuelCapacity !== undefined ? data.shipFuelCapacity : 20000;
         this.rockType = data.rockType || { name: 'Stone' };
         this.rockCompositions = data.rockCompositions || {};
     }
