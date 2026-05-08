@@ -149,20 +149,20 @@ class WorldGenerator {
     }
     
     generateVeins(surfaceY) {
-        // Metal veins - longer, thicker, fewer
-        // Copper: shallow, widespread
-        this.createVeins(this.TILE_COPPER, 10, surfaceY + 8, surfaceY + 90, 25, 70, 3, 7);
-        // Iron: mid-depth
-        this.createVeins(this.TILE_IRON, 8, surfaceY + 40, surfaceY + 160, 20, 60, 3, 6);
-        // Gold: deep, rare, chunky
-        this.createVeins(this.TILE_GOLD, 5, surfaceY + 100, surfaceY + 285, 15, 45, 2, 5);
+        // Metal veins - shorter, more numerous
+        // Copper: shallow, small scattered veins
+        this.createVeins(this.TILE_COPPER, 30, surfaceY + 8, surfaceY + 90, 8, 15, 2, 3);
+        // Iron: mid-depth, modest veins
+        this.createVeins(this.TILE_IRON, 25, surfaceY + 40, surfaceY + 160, 6, 12, 2, 3);
+        // Gold: deep, tight small clusters
+        this.createVeins(this.TILE_GOLD, 18, surfaceY + 100, surfaceY + 285, 5, 10, 1, 2);
         
-        // Gem veins - small pockets/clusters
-        this.createVeins(this.TILE_RUBY, 8, surfaceY + 10, surfaceY + 120, 4, 12, 1, 3);
-        this.createVeins(this.TILE_SAPPHIRE, 7, surfaceY + 30, surfaceY + 160, 4, 10, 1, 3);
-        this.createVeins(this.TILE_EMERALD, 6, surfaceY + 50, surfaceY + 190, 3, 8, 1, 3);
-        this.createVeins(this.TILE_DIAMOND, 4, surfaceY + 120, surfaceY + 285, 2, 6, 1, 2);
-        this.createVeins(this.TILE_AMETHYST, 5, surfaceY + 70, surfaceY + 250, 3, 9, 1, 3);
+        // Gem veins - tiny pockets, 2-7 tiles max per vein
+        this.createVeins(this.TILE_RUBY, 20, surfaceY + 10, surfaceY + 120, 2, 4, 1, 1);
+        this.createVeins(this.TILE_SAPPHIRE, 18, surfaceY + 30, surfaceY + 160, 2, 4, 1, 1);
+        this.createVeins(this.TILE_EMERALD, 15, surfaceY + 50, surfaceY + 190, 2, 4, 1, 1);
+        this.createVeins(this.TILE_DIAMOND, 12, surfaceY + 120, surfaceY + 285, 2, 3, 1, 1);
+        this.createVeins(this.TILE_AMETHYST, 15, surfaceY + 70, surfaceY + 250, 2, 4, 1, 1);
     }
     
     createVeins(type, count, yMin, yMax, lengthMin, lengthMax, thicknessMin, thicknessMax) {
