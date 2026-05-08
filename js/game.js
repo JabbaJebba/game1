@@ -63,6 +63,7 @@ class GameScene extends Phaser.Scene {
         let spawnY = this.world.getSurfaceY(spawnX) - 5;
 
         let fuelForRun = Math.min(5000, this.shipFuel);
+        this.shipFuel -= fuelForRun; // Deduct from ship tank
         this.player = new Player(this, spawnX, spawnY, { fuel: fuelForRun });
 
         this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1);
@@ -119,6 +120,9 @@ class GameScene extends Phaser.Scene {
             if (!this.shipInventory[name]) this.shipInventory[name] = 0;
             this.shipInventory[name] += count;
         }
+
+        // Return unused player fuel to ship tank
+        this.shipFuel += this.player.fuel;
 
         // Return to ship scene
         this.scene.start('ShipScene', {
