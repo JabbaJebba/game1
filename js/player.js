@@ -49,9 +49,8 @@ class Player {
         this.maxFuel = data.fuel || 5000;
         this.fuel = this.maxFuel;
         this.fuelCosts = {
-            [this.world.TILE_DIRT]: 10,
             [this.world.TILE_GRASS]: 10,
-            [this.world.TILE_STONE]: 10,
+            [this.world.TILE_ROCK]: 10,
             [this.world.TILE_COPPER]: 10,
             [this.world.TILE_IRON]: 10,
             [this.world.TILE_GOLD]: 10,
@@ -259,6 +258,28 @@ class Player {
     }
 
     addToInventory(tile) {
+        let itemName;
+        if (tile === this.world.TILE_ROCK) {
+            itemName = this.world.rockType?.name || 'Rock';
+        } else if (tile === this.world.TILE_COPPER) {
+            itemName = 'Copper Ore';
+        } else if (tile === this.world.TILE_IRON) {
+            itemName = 'Iron Ore';
+        } else if (tile === this.world.TILE_GOLD) {
+            itemName = 'Gold Ore';
+        } else if (tile === this.world.TILE_RUBY) {
+            itemName = 'Ruby';
+        } else if (tile === this.world.TILE_SAPPHIRE) {
+            itemName = 'Sapphire';
+        } else if (tile === this.world.TILE_EMERALD) {
+            itemName = 'Emerald';
+        } else if (tile === this.world.TILE_DIAMOND) {
+            itemName = 'Diamond';
+        } else if (tile === this.world.TILE_AMETHYST) {
+            itemName = 'Amethyst';
+        } else {
+            itemName = String(tile);
+        }
         if (!this.inventory[tile]) this.inventory[tile] = 0;
         this.inventory[tile]++;
     }

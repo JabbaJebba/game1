@@ -10,6 +10,7 @@ class GalaxyScene extends Phaser.Scene {
         this.shipFuel = data.shipFuel || 20000;
         this.shipFuelCapacity = data.shipFuelCapacity || 20000;
         this.engineLevel = this.calculateEngineLevel();
+        this.rockCompositions = data.rockCompositions || {};
     }
 
     calculateEngineLevel() {
@@ -25,12 +26,10 @@ class GalaxyScene extends Phaser.Scene {
     create() {
         this.cameras.main.setBackgroundColor('#0a0a1a');
 
-        // Title
         this.add.text(640, 30, 'GALAXY MAP', {
             fontSize: '32px', fill: '#FFD700', fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        // Back button
         this.createButton(100, 40, '← BACK TO SHIP', () => {
             this.scene.start('ShipScene', {
                 shipGrid: this.shipGrid,
@@ -38,30 +37,45 @@ class GalaxyScene extends Phaser.Scene {
                 credits: this.credits,
                 shipFuel: this.shipFuel,
                 shipFuelCapacity: this.shipFuelCapacity,
+                rockCompositions: this.rockCompositions,
             });
         }, 180, 36);
 
-        // Planet definitions
-        this.planets = [
-            { name: 'Asteroid Alpha', depth: 300, size: 200, richness: 0.8, engineReq: 0, color: 0x888888, desc: 'Small rocky body. Basic ores.' },
-            { name: 'Asteroid Beta', depth: 400, size: 250, richness: 1.0, engineReq: 0, color: 0xAA8866, desc: 'Larger asteroid. Better gem rates.' },
-            { name: 'Planet Gamma', depth: 500, size: 300, richness: 1.2, engineReq: 1, color: 0x448844, desc: 'Small planet. Deeper, richer.' },
-            { name: 'Planet Delta', depth: 600, size: 300, richness: 1.3, engineReq: 1, color: 0x6644AA, desc: 'Dense core. Rare gems common.' },
-            { name: 'Moon Epsilon', depth: 700, size: 350, richness: 1.5, engineReq: 2, color: 0xCCCCCC, desc: 'Large moon. Deep mining.' },
-            { name: 'Gas Giant Ring', depth: 800, size: 400, richness: 1.8, engineReq: 2, color: 0xFFAA44, desc: 'Ancient ring debris. Legendary ores.' },
+        // Rock type definitions - each location has unique rock with composition
+        this.rockTypes = [
+            { name: 'Basalt', copper: 0.30, iron: 0.25, gold: 0.08, gemChance: 0.03, color: 0x808080, desc: 'Volcanic rock. Rich in copper.' },
+            { name: 'Granite', copper: 0.20, iron: 0.35, gold: 0.12, gemChance: 0.05, color: 0x9B9B7A, desc: 'Crystalline. Iron-rich.' },
+            { name: 'Obsidian', copper: 0.10, iron: 0.15, gold: 0.25, gemChance: 0.02, color: 0x2D2D2D, desc: 'Glassy volcanic. Gold-heavy.' },
+            { name: 'Pumice', copper: 0.35, iron: 0.10, gold: 0.05, gemChance: 0.08, color: 0xC0C0C0, desc: 'Light and porous. Gem-rich.' },
+            { name: 'Slate', copper: 0.15, iron: 0.30, gold: 0.15, gemChance: 0.04, color: 0x556B2F, desc: 'Metamorphic. Balanced ores.' },
+            { name: 'Marble', copper: 0.08, iron: 0.20, gold: 0.20, gemChance: 0.10, color: 0xF5F5DC, desc: 'Calcite crystal. Gem paradise.' },
         ];
 
-        // Draw planets
+        this.planets = [
+            { name: 'Asteroid Alpha', depth: 300, size: 200, richness: 0.8, engineReq: 0, color: 0x888888, desc: 'Small rocky body. Basalt composition.' },
+            { name: 'Asteroid Beta', depth: 400, size: 250, richness: 1.0, engineReq: 0, color: 0xAA8866, desc: 'Larger asteroid. Granite veins.' },
+            { name: 'Planet Gamma', depth: 500, size: 300, richness: 1.2, engineReq: 1, color: 0x448844, desc: 'Small planet. Obsidian core.' },
+            { name: 'Planet Delta', depth: 600, size: 300, richness: 1.3, engineReq: 1, color: 0x6644AA, desc: 'Dense core. Pumice mantle.' },
+            { name: 'Moon Epsilon', depth: 700, size: 350, richness: 1.5, engineReq: 2, color: 0xCCCCCC, desc: 'Large moon. Slate deposits.' },
+            { name: 'Gas Giant Ring', depth: 800, size: 400, richness: 1.8, engineReq: 2, color: 0xFFAA44, desc: 'Ancient ring debris. Marble.' },
+        ];
+
+        // Assign rock type to each planet
+        this.planets.forEach((planet, i) => {
+            planet.rockType = this.rockTypes[i % this.rockTypes.length];
+        });
+
         const startX = 200;
         const startY = 150;
         const gapX = 220;
         const gapY = 140;
 
+        this.planetObjects = [];
+
         this.planets.forEach((planet, i) => {
             const px = startX + (i % 3) * gapX;
             const py = startY + Math.floor(i / 3) * gapY;
 
-            // Planet circle
             const circle = this.add.circle(px, py, 30, planet.color);
             circle.setStrokeStyle(2, 0xffffff, 0.5);
 
@@ -70,8 +84,6 @@ class GalaxyScene extends Phaser.Scene {
                 circle.on('pointerover', () => circle.setScale(1.2));
                 circle.on('pointerout', () => circle.setScale(1));
                 circle.on('pointerdown', () => this.selectPlanet(planet));
-
-                // Orbital ring
                 this.add.ellipse(px, py, 70, 20, 0xffffff, 0).setStrokeStyle(1, 0xffffff, 0.2);
             } else {
                 circle.setFillStyle(0x333333);
@@ -80,19 +92,21 @@ class GalaxyScene extends Phaser.Scene {
                 }).setOrigin(0.5);
             }
 
-            // Name
             this.add.text(px, py + 50, planet.name, {
                 fontSize: '14px', fill: '#ffffff'
             }).setOrigin(0.5);
+
+            // Rock type label below name
+            this.add.text(px, py + 66, planet.rockType.name, {
+                fontSize: '10px', fill: '#aaaaaa'
+            }).setOrigin(0.5);
         });
 
-        // Stats
         this.add.text(860, 120, 'SHIP STATUS', { fontSize: '18px', fill: '#00FF00' });
         this.add.text(860, 150, `Engine Level: ${this.engineLevel}`, { fontSize: '14px', fill: '#ffffff' });
         this.add.text(860, 180, `Fuel: ${this.shipFuel}`, { fontSize: '14px', fill: '#ffffff' });
         this.add.text(860, 210, `Credits: ${this.credits}`, { fontSize: '14px', fill: '#ffffff' });
 
-        // Planet info panel (updates on selection)
         this.infoPanel = this.add.text(860, 280, 'Select a planet', {
             fontSize: '14px', fill: '#aaaaaa', wordWrap: { width: 300 }
         });
@@ -100,16 +114,17 @@ class GalaxyScene extends Phaser.Scene {
 
     selectPlanet(planet) {
         this.selectedPlanet = planet;
+        const rt = planet.rockType;
         this.infoPanel.setText(
             `${planet.name}\n` +
-            `Depth: ${planet.depth} tiles\n` +
-            `Map size: ${planet.size} wide\n` +
-            `Ore richness: ${(planet.richness * 100).toFixed(0)}%\n` +
-            `\n${planet.desc}\n\n` +
-            `Click LAUNCH to begin mining run.`
+            `Rock: ${rt.name}\n` +
+            `  Cu: ${(rt.copper * 100).toFixed(0)}% | Fe: ${(rt.iron * 100).toFixed(0)}%\n` +
+            `  Au: ${(rt.gold * 100).toFixed(0)}% | Gems: ${(rt.gemChance * 100).toFixed(0)}%\n` +
+            `Depth: ${planet.depth} tiles | Size: ${planet.size}\n` +
+            `Richness: ${(planet.richness * 100).toFixed(0)}%\n` +
+            `\n${planet.desc}\n\nClick LAUNCH to begin mining run.`
         );
 
-        // Show launch button
         if (this.launchBtn) {
             this.launchBtn.rect.destroy();
             this.launchBtn.text.destroy();
@@ -120,6 +135,8 @@ class GalaxyScene extends Phaser.Scene {
                 return;
             }
             this.shipFuel -= 5000;
+            // Store composition for this rock type
+            this.rockCompositions[rt.name] = { ...rt };
             this.scene.start('GameScene', {
                 planet: planet,
                 shipGrid: this.shipGrid,
@@ -127,6 +144,8 @@ class GalaxyScene extends Phaser.Scene {
                 credits: this.credits,
                 shipFuel: this.shipFuel,
                 shipFuelCapacity: this.shipFuelCapacity,
+                rockType: rt,
+                rockCompositions: this.rockCompositions,
             });
         }, 200, 50);
     }

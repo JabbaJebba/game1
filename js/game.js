@@ -10,6 +10,8 @@ class GameScene extends Phaser.Scene {
         this.credits = data.credits || 0;
         this.shipFuel = data.shipFuel || 20000;
         this.shipFuelCapacity = data.shipFuelCapacity || 20000;
+        this.rockType = data.rockType || { name: 'Stone' };
+        this.rockCompositions = data.rockCompositions || {};
     }
 
     create() {
@@ -17,15 +19,14 @@ class GameScene extends Phaser.Scene {
         this.worldHeight = this.planet.depth;
         this.tileSize = 32;
 
-        this.world = new WorldGenerator(this.worldWidth, this.worldHeight);
+        this.world = new WorldGenerator(this.worldWidth, this.worldHeight, this.rockType);
 
         this.tileGraphics = this.add.graphics();
 
         this.tileColors = {
             [this.world.TILE_AIR]: null,
-            [this.world.TILE_DIRT]: 0x8B4513,
             [this.world.TILE_GRASS]: 0x228B22,
-            [this.world.TILE_STONE]: 0x808080,
+            [this.world.TILE_ROCK]: 0x808080,
             [this.world.TILE_COPPER]: 0xB87333,
             [this.world.TILE_BEDROCK]: 0x333333,
             [this.world.TILE_IRON]: 0xA0A0A0,
@@ -124,6 +125,11 @@ class GameScene extends Phaser.Scene {
         // Return unused player fuel to ship tank
         this.shipFuel += this.player.fuel;
 
+        // Store rock composition for this type
+        if (this.rockType && this.rockType.name) {
+            this.rockCompositions[this.rockType.name] = { ...this.rockType };
+        }
+
         // Return to ship scene
         this.scene.start('ShipScene', {
             shipGrid: this.shipGrid,
@@ -131,6 +137,7 @@ class GameScene extends Phaser.Scene {
             credits: this.credits,
             shipFuel: this.shipFuel,
             shipFuelCapacity: this.shipFuelCapacity,
+            rockCompositions: this.rockCompositions,
         });
     }
 
@@ -277,13 +284,12 @@ class GameScene extends Phaser.Scene {
     getTileName(tile) {
         const names = {
             [this.world.TILE_AIR]: 'Air',
-            [this.world.TILE_DIRT]: 'Dirt',
             [this.world.TILE_GRASS]: 'Grass',
-            [this.world.TILE_STONE]: 'Stone',
-            [this.world.TILE_COPPER]: 'Cu',
+            [this.world.TILE_ROCK]: this.rockType.name || 'Rock',
+            [this.world.TILE_COPPER]: 'Copper Ore',
             [this.world.TILE_BEDROCK]: 'Bedrock',
-            [this.world.TILE_IRON]: 'Fe',
-            [this.world.TILE_GOLD]: 'Au',
+            [this.world.TILE_IRON]: 'Iron Ore',
+            [this.world.TILE_GOLD]: 'Gold Ore',
             [this.world.TILE_RUBY]: 'Ruby',
             [this.world.TILE_SAPPHIRE]: 'Sapphire',
             [this.world.TILE_EMERALD]: 'Emerald',

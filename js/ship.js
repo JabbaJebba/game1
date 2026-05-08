@@ -9,6 +9,7 @@ class ShipScene extends Phaser.Scene {
         this.credits = data.credits || 0;
         this.shipFuel = data.shipFuel || 20000;
         this.shipFuelCapacity = data.shipFuelCapacity || 20000;
+        this.rockCompositions = data.rockCompositions || {};
         this.powerGen = 0;
         this.powerUse = 0;
         this.powerStored = 0;
@@ -38,22 +39,24 @@ class ShipScene extends Phaser.Scene {
             fontSize: '32px', fill: '#ffffff', fontStyle: 'bold'
         }).setOrigin(0.5);
 
+        // All rooms: power set to 0 for now (per Boss request)
         this.roomTypes = {
-            solar: { name: 'Solar Panel', size: 1, power: 20, cost: 0, color: 0xFFD700 },
+            solar: { name: 'Solar Panel', size: 1, power: 0, cost: 0, color: 0xFFD700 },
             battery: { name: 'Battery', size: 1, powerCap: 50, cost: 100, color: 0x4169E1 },
             fuelTank: { name: 'Fuel Tank', size: 1, fuelCap: 10000, cost: 200, color: 0xFF4500 },
-            refinery: { name: 'Refinery', size: 2, power: -15, cost: 500, color: 0x8B4513 },
-            trade: { name: 'Trade Terminal', size: 1, power: -5, cost: 300, color: 0x00FF00 },
-            drill: { name: 'Drill Workshop', size: 2, power: -10, cost: 400, color: 0xA9A9A9 },
-            engine: { name: 'Engine', size: 2, power: -20, cost: 1000, color: 0xFF6347 },
-            quarters: { name: 'Quarters', size: 1, power: -2, cost: 150, color: 0x9370DB },
+            refinery: { name: 'Refinery', size: 2, power: 0, cost: 500, color: 0x8B4513 },
+            trade: { name: 'Trade Terminal', size: 1, power: 0, cost: 300, color: 0x00FF00 },
+            drill: { name: 'Drill Workshop', size: 2, power: 0, cost: 400, color: 0xA9A9A9 },
+            engine: { name: 'Engine', size: 2, power: 0, cost: 1000, color: 0xFF6347 },
+            quarters: { name: 'Quarters', size: 1, power: 0, cost: 150, color: 0x9370DB },
+            crusher: { name: 'Crusher', size: 2, power: 0, cost: 300, color: 0x8B8B83 },
+            smelter: { name: 'Smelter', size: 2, power: 0, cost: 500, color: 0xCD5C5C },
         };
 
         this.gemPrices = {
             'Ruby': 50, 'Sapphire': 75, 'Emerald': 100, 'Diamond': 200, 'Amethyst': 80,
         };
 
-        // Fuel prices: balanced so gem sales ~ break even per run
         this.fuelPrices = { 1000: 400, 5000: 2000 };
 
         this.placeStarterRooms();
@@ -67,6 +70,7 @@ class ShipScene extends Phaser.Scene {
             this.scene.start('GalaxyScene', {
                 shipGrid: this.shipGrid, shipInventory: this.shipInventory,
                 credits: this.credits, shipFuel: this.shipFuel, shipFuelCapacity: this.shipFuelCapacity,
+                rockCompositions: this.rockCompositions,
             });
         });
 
@@ -174,7 +178,7 @@ class ShipScene extends Phaser.Scene {
 
     createRoomControlsPanel() {
         this.controlsPanel = this.add.container(860, 280);
-        this.controlsBg = this.add.rectangle(0, 0, 380, 320, 0x222233, 0.9).setOrigin(0);
+        this.controlsBg = this.add.rectangle(0, 0, 380, 340, 0x222233, 0.9).setOrigin(0);
         this.controlsTitle = this.add.text(10, 10, 'ROOM CONTROLS', { fontSize: '16px', fill: '#00FFFF' });
         this.controlsContent = this.add.text(10, 40, 'Click a room to interact', { fontSize: '14px', fill: '#aaaaaa' });
         this.controlsPanel.add([this.controlsBg, this.controlsTitle, this.controlsContent]);
@@ -187,7 +191,7 @@ class ShipScene extends Phaser.Scene {
         this.controlButtons.forEach(b => { if (b.rect) b.rect.destroy(); if (b.text) b.text.destroy(); });
         this.controlButtons = [];
 
-        let content = `Selected: ${def.name}\nSize: ${def.size}x${def.size} | Power: ${def.power > 0 ? '+' : ''}${def.power}\n\n`;
+        let content = `Selected: ${def.name}\nSize: ${def.size}x${def.size}\n\n`;
 
         if (room.type === 'trade') {
             content += '--- CLICK GEM TO SELL ---\n';
@@ -221,44 +225,144 @@ class ShipScene extends Phaser.Scene {
         } else if (room.type === 'fuelTank') {
             content += `Ship Fuel: ${this.shipFuel} / ${this.shipFuelCapacity}\nCapacity bonus: +${def.fuelCap}\n`;
             this.controlsContent.setText(content);
+
+        } else if (room.type === 'crusher') {
+            this.controlsContent.setText(content + '--- CRUSHER ---\n');
+            let y = 110;
+
+            // Find all rock types in inventory
+            const rockTypesInInv = Object.keys(this.shipInventory).filter(k =>
+                this.rockCompositions[k] && !k.startsWith('Crushed')
+            );
+
+            if (rockTypesInInv.length === 0) {
+                const noneBtn = this.createControlButton(10, y, 'No rocks in inventory', () => {}, 360, 28);
+                noneBtn.rect.removeInteractive();
+                this.controlButtons.push(noneBtn);
+                y += 34;
+            } else {
+                rockTypesInInv.forEach(rockName => {
+                    const count = this.shipInventory[rockName] || 0;
+                    const crushBtn = this.createControlButton(10, y, `Crush ${rockName} (${count}) → 2 Crushed`, () => {
+                        if (count >= 1) {
+                            this.shipInventory[rockName]--;
+                            if (this.shipInventory[rockName] <= 0) delete this.shipInventory[rockName];
+                            const crushedName = `Crushed ${rockName}`;
+                            this.shipInventory[crushedName] = (this.shipInventory[crushedName] || 0) + 2;
+                            this.updateUI();
+                            this.showRoomControls(room);
+                        }
+                    }, 360, 28);
+                    this.controlButtons.push(crushBtn);
+                    y += 34;
+                });
+            }
+
+            y += 10;
+            // Extraction from crushed rock
+            const crushedTypes = Object.keys(this.shipInventory).filter(k => k.startsWith('Crushed '));
+            if (crushedTypes.length > 0) {
+                this.controlsContent.setText(this.controlsContent.text + '\n--- EXTRACT ORES ---\n');
+                crushedTypes.forEach(crushedName => {
+                    const count = this.shipInventory[crushedName] || 0;
+                    const rockName = crushedName.replace('Crushed ', '');
+                    const comp = this.rockCompositions[rockName];
+                    if (comp && count >= 5) {
+                        const extractBtn = this.createControlButton(10, y, `Extract from ${crushedName} (${count})`, () => {
+                            this.extractFromCrushedRock(crushedName, comp);
+                            this.updateUI();
+                            this.showRoomControls(room);
+                        }, 360, 32);
+                        this.controlButtons.push(extractBtn);
+                        y += 38;
+                    } else if (comp) {
+                        const needBtn = this.createControlButton(10, y, `${crushedName}: need 5 (have ${count})`, () => {}, 360, 28);
+                        needBtn.rect.removeInteractive();
+                        this.controlButtons.push(needBtn);
+                        y += 34;
+                    }
+                });
+            }
+
+        } else if (room.type === 'smelter') {
+            this.controlsContent.setText(content + '--- SMELTER (3 ore → 1 ingot) ---\n');
+            let y = 110;
+            const recipes = [
+                { ore: 'Copper Ore', ingot: 'Copper Ingot' },
+                { ore: 'Iron Ore', ingot: 'Iron Ingot' },
+                { ore: 'Gold Ore', ingot: 'Gold Ingot' },
+            ];
+            recipes.forEach(r => {
+                const count = this.shipInventory[r.ore] || 0;
+                const canSmelt = count >= 3;
+                const smeltBtn = this.createControlButton(10, y,
+                    `${r.ore}: ${count} ${canSmelt ? '→ SMELT' : '(need 3)'}`, () => {
+                        if (count >= 3) {
+                            this.shipInventory[r.ore] -= 3;
+                            if (this.shipInventory[r.ore] <= 0) delete this.shipInventory[r.ore];
+                            this.shipInventory[r.ingot] = (this.shipInventory[r.ingot] || 0) + 1;
+                            this.updateUI();
+                            this.showRoomControls(room);
+                        }
+                    }, 360, 28);
+                if (!canSmelt) smeltBtn.rect.removeInteractive();
+                this.controlButtons.push(smeltBtn);
+                y += 34;
+            });
+
         } else if (room.type === 'refinery') {
-            content += 'Refinery active.\n(Processing recipes coming soon)\n';
+            content += 'Refinery active.\n(Advanced processing coming soon)\n';
             this.controlsContent.setText(content);
+
         } else {
             content += 'No special controls for this room.';
             this.controlsContent.setText(content);
         }
 
-        // DESTROY button (for all rooms except starter rooms)
+        // DESTROY button
         if (def.cost > 0) {
             const refund = Math.floor(def.cost * 0.5);
-            const destroyBtn = this.createControlButton(10, 280, `DESTROY ROOM — Refund ${refund}cr`, () => {
+            const destroyBtn = this.createControlButton(10, 300, `DESTROY ROOM — Refund ${refund}cr`, () => {
                 this.destroyRoom(room);
             }, 360, 32);
             this.controlButtons.push(destroyBtn);
         }
     }
 
-    destroyRoom(room) {
-        const def = this.roomTypes[room.type];
-        const size = def.size;
-        const mx = room.masterX;
-        const my = room.masterY;
-        const refund = Math.floor(def.cost * 0.5);
+    extractFromCrushedRock(crushedName, comp) {
+        const count = this.shipInventory[crushedName] || 0;
+        if (count < 5) return;
 
-        // Remove from grid
-        for (let dx = 0; dx < size; dx++) {
-            for (let dy = 0; dy < size; dy++) {
-                this.shipGrid[mx + dx][my + dy] = null;
-            }
+        this.shipInventory[crushedName] -= 5;
+        if (this.shipInventory[crushedName] <= 0) delete this.shipInventory[crushedName];
+
+        // Roll for each resource type based on composition
+        let results = [];
+        if (Math.random() < comp.copper) {
+            const qty = 1 + Math.floor(Math.random() * 2);
+            this.shipInventory['Copper Ore'] = (this.shipInventory['Copper Ore'] || 0) + qty;
+            results.push(`${qty} Copper Ore`);
+        }
+        if (Math.random() < comp.iron) {
+            const qty = 1 + Math.floor(Math.random() * 2);
+            this.shipInventory['Iron Ore'] = (this.shipInventory['Iron Ore'] || 0) + qty;
+            results.push(`${qty} Iron Ore`);
+        }
+        if (Math.random() < comp.gold) {
+            const qty = 1;
+            this.shipInventory['Gold Ore'] = (this.shipInventory['Gold Ore'] || 0) + qty;
+            results.push(`${qty} Gold Ore`);
+        }
+        if (Math.random() < comp.gemChance) {
+            const gems = ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst'];
+            const gem = gems[Math.floor(Math.random() * gems.length)];
+            this.shipInventory[gem] = (this.shipInventory[gem] || 0) + 1;
+            results.push(`1 ${gem}`);
         }
 
-        this.credits += refund;
-        this.selectedRoomCell = null;
-        this.calculatePower();
-        this.updateUI();
-        this.drawShipGrid();
-        this.hideRoomControls();
+        if (results.length === 0) {
+            results.push('Nothing found this time');
+        }
     }
 
     createControlButton(x, y, text, callback, w = 360, h = 30) {
@@ -278,18 +382,15 @@ class ShipScene extends Phaser.Scene {
         this.controlsContent.setText('Click a room to interact');
     }
 
-    // Sell quantity popup
     createSellPopup() {
         this.sellPopup = this.add.container(640, 360);
         this.sellPopup.setVisible(false);
         this.sellPopup.setDepth(10);
 
-        // Dark overlay background
         this.sellBg = this.add.rectangle(0, 0, 400, 280, 0x111122, 0.95).setOrigin(0.5);
         this.sellTitle = this.add.text(0, -110, 'SELL', { fontSize: '20px', fill: '#FFD700', fontStyle: 'bold' }).setOrigin(0.5);
         this.sellInfo = this.add.text(0, -70, '', { fontSize: '14px', fill: '#ffffff' }).setOrigin(0.5);
 
-        // Quick buttons
         const btnData = [
             { label: '1', qty: 1, y: -30 },
             { label: '10', qty: 10, y: 10 },
@@ -307,12 +408,10 @@ class ShipScene extends Phaser.Scene {
             this.sellQuickBtns.push({ rect, text: txt });
         });
 
-        // Custom input area
         this.sellCustomLabel = this.add.text(80, -30, 'CUSTOM:', { fontSize: '14px', fill: '#aaaaaa' }).setOrigin(0.5);
         this.sellCustomBg = this.add.rectangle(80, 10, 120, 32, 0x222233).setStrokeStyle(1, 0x666688);
         this.sellCustomText = this.add.text(80, 10, '0', { fontSize: '14px', fill: '#ffffff' }).setOrigin(0.5);
 
-        // Custom +/- buttons
         const minusBtn = this.add.rectangle(20, 10, 28, 28, 0x444466).setInteractive();
         const minusTxt = this.add.text(20, 10, '-', { fontSize: '16px', fill: '#ffffff' }).setOrigin(0.5);
         minusBtn.on('pointerdown', () => {
@@ -328,7 +427,6 @@ class ShipScene extends Phaser.Scene {
             if (val < max) this.sellCustomText.setText(String(val + 1));
         });
 
-        // Sell custom button
         const sellCustomBtn = this.add.rectangle(80, 60, 120, 32, 0x228822).setInteractive();
         const sellCustomTxt = this.add.text(80, 60, 'SELL CUSTOM', { fontSize: '13px', fill: '#ffffff' }).setOrigin(0.5);
         sellCustomBtn.on('pointerover', () => sellCustomBtn.setFillStyle(0x44aa44));
@@ -338,7 +436,6 @@ class ShipScene extends Phaser.Scene {
             if (qty > 0) this.confirmSell(qty);
         });
 
-        // Cancel button
         const cancelBtn = this.add.rectangle(0, 120, 160, 32, 0x882222).setInteractive();
         const cancelTxt = this.add.text(0, 120, 'CANCEL', { fontSize: '14px', fill: '#ffffff' }).setOrigin(0.5);
         cancelBtn.on('pointerover', () => cancelBtn.setFillStyle(0xaa4444));
@@ -372,7 +469,7 @@ class ShipScene extends Phaser.Scene {
         if (!this.pendingSellGem) return;
         const count = this.shipInventory[this.pendingSellGem] || 0;
         const price = this.gemPrices[this.pendingSellGem];
-        if (qty === -1) qty = count; // ALL
+        if (qty === -1) qty = count;
         qty = Math.min(qty, count);
         if (qty <= 0) return;
 
@@ -382,8 +479,6 @@ class ShipScene extends Phaser.Scene {
 
         this.closeSellPopup();
         this.updateUI();
-
-        // Refresh trade panel if open
         if (this.selectedRoomCell) {
             const room = this.shipGrid[this.selectedRoomCell.x][this.selectedRoomCell.y];
             if (room && room.type === 'trade') this.showRoomControls(room);
@@ -463,6 +558,27 @@ class ShipScene extends Phaser.Scene {
         if (this.powerGen > this.powerUse) {
             this.powerStored = Math.min(this.powerCapacity, this.powerStored + (this.powerGen - this.powerUse));
         }
+    }
+
+    destroyRoom(room) {
+        const def = this.roomTypes[room.type];
+        const size = def.size;
+        const mx = room.masterX;
+        const my = room.masterY;
+        const refund = Math.floor(def.cost * 0.5);
+
+        for (let dx = 0; dx < size; dx++) {
+            for (let dy = 0; dy < size; dy++) {
+                this.shipGrid[mx + dx][my + dy] = null;
+            }
+        }
+
+        this.credits += refund;
+        this.selectedRoomCell = null;
+        this.calculatePower();
+        this.updateUI();
+        this.drawShipGrid();
+        this.hideRoomControls();
     }
 
     placeRoom(gx, gy, type) {
