@@ -45,6 +45,23 @@ class Player {
         this.mineIndicator.setStrokeStyle(2, 0xff0000, 0);
         this.mineIndicator.setFillStyle(0xff0000, 0);
 
+        // Fuel system
+        this.maxFuel = 5000;
+        this.fuel = this.maxFuel;
+        this.fuelCosts = {
+            [this.world.TILE_DIRT]: 10,
+            [this.world.TILE_GRASS]: 10,
+            [this.world.TILE_STONE]: 10,
+            [this.world.TILE_COPPER]: 10,
+            [this.world.TILE_IRON]: 10,
+            [this.world.TILE_GOLD]: 10,
+            [this.world.TILE_RUBY]: 10,
+            [this.world.TILE_SAPPHIRE]: 10,
+            [this.world.TILE_EMERALD]: 10,
+            [this.world.TILE_DIAMOND]: 10,
+            [this.world.TILE_AMETHYST]: 10,
+        };
+
         // Inventory
         this.inventory = {};
         this.selectedSlot = 0;
@@ -217,13 +234,20 @@ class Player {
 
     tryMine(tileX, tileY) {
         const tile = this.world.getTile(tileX, tileY);
-        if (tile !== this.world.TILE_AIR && tile !== this.world.TILE_BEDROCK) {
-            this.world.setTile(tileX, tileY, this.world.TILE_AIR);
-            this.addToInventory(tile);
-            this.scene.updateTile(tileX, tileY);
-            return true;
+        if (tile === this.world.TILE_AIR || tile === this.world.TILE_BEDROCK) {
+            return false;
         }
-        return false;
+        
+        const cost = this.fuelCosts[tile] || 10;
+        if (this.fuel < cost) {
+            return false; // not enough fuel
+        }
+        
+        this.fuel -= cost;
+        this.world.setTile(tileX, tileY, this.world.TILE_AIR);
+        this.addToInventory(tile);
+        this.scene.updateTile(tileX, tileY);
+        return true;
     }
 
     showMineIndicator(x, y, w, h) {

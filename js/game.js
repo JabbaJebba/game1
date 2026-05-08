@@ -117,6 +117,7 @@ class GameScene extends Phaser.Scene {
             `Controls: Arrows=Move, Space/W=Jump, A=Mine Left, D=Mine Right, S=Mine Down\n` +
             `Time: ${dayProgress > 0.3 ? 'Day' : 'Night'} | ` +
             `Pos: ${Math.floor(this.player.x)}, ${Math.floor(this.player.y)}\n` +
+            `Fuel: ${this.player.fuel}/${this.player.maxFuel} | ` +
             `Inventory: ${inventoryText || 'Empty'}`
         );
     }
