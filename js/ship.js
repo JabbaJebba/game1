@@ -177,7 +177,9 @@ class ShipScene extends Phaser.Scene {
         const gx = Math.floor((pointer.x - this.gridOffsetX) / this.tileSize);
         const gy = Math.floor((pointer.y - this.gridOffsetY) / this.tileSize);
 
+        // Clear previous ghost graphics and text
         this.ghostGraphics.clear();
+        if (this.ghostIcon) { this.ghostIcon.destroy(); this.ghostIcon = null; }
 
         if (gx < 0 || gx >= this.gridW || gy < 0 || gy >= this.gridH) return;
 
@@ -205,12 +207,10 @@ class ShipScene extends Phaser.Scene {
         this.ghostGraphics.lineStyle(2, def.color, 0.8);
         this.ghostGraphics.strokeRect(px, py, size * this.tileSize, size * this.tileSize);
         // Ghost icon
-        const ghostIcon = this.add.text(px + size * this.tileSize / 2, py + size * this.tileSize / 2,
+        this.ghostIcon = this.add.text(px + size * this.tileSize / 2, py + size * this.tileSize / 2,
             def.icon, { fontSize: '22px', fill: '#ffffff' }).setOrigin(0.5);
-        ghostIcon.setAlpha(0.5);
-        ghostIcon.setDepth(3);
-        // Store reference so we can clear it next frame
-        this.ghostIcon = ghostIcon;
+        this.ghostIcon.setAlpha(0.5);
+        this.ghostIcon.setDepth(3);
     }
 
     handleGridClick(pointer) {
@@ -644,9 +644,18 @@ class ShipScene extends Phaser.Scene {
             y += 34;
         });
 
-        this.buildStatusText = this.add.text(panelX + 10, panelY + 250, 'Select a room to build', {
+        this.buildStatusText = this.add.text(panelX + 10, panelY + 210, 'Select a room to build', {
             fontSize: '12px', fill: '#aaaaaa', fontFamily: 'monospace'
         });
+
+        // Cancel build button
+        const cancelBtn = this.createButton(panelX + 130, panelY + 250, 'CANCEL BUILD', () => {
+            this.buildMode = false;
+            this.selectedRoom = null;
+            this.ghostGraphics.clear();
+            if (this.ghostIcon) { this.ghostIcon.destroy(); this.ghostIcon = null; }
+            this.buildStatusText.setText('Select a room to build');
+        }, 240, 28);
     }
 
     createBuildButton(x, y, text, cost, roomKey, callback) {
@@ -660,13 +669,16 @@ class ShipScene extends Phaser.Scene {
 
         rect.on('pointerover', () => rect.setFillStyle(0x555577));
         rect.on('pointerout', () => rect.setFillStyle(0x333355));
-        rect.on('pointerdown', callback);
-
-        // Click again to cancel build mode
         rect.on('pointerdown', () => {
-            if (this.selectedRoom === roomKey && this.buildMode) {
-                // Toggle off - but the above callback already turned it on
-                // Instead: only the first click enables. Second click on same room cancels.
+            if (this.buildMode && this.selectedRoom === roomKey) {
+                // Toggle off
+                this.buildMode = false;
+                this.selectedRoom = null;
+                this.ghostGraphics.clear();
+                if (this.ghostIcon) { this.ghostIcon.destroy(); this.ghostIcon = null; }
+                if (this.buildStatusText) this.buildStatusText.setText('Select a room to build');
+            } else {
+                callback();
             }
         });
 
