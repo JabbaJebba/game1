@@ -114,8 +114,8 @@ class WorldGenerator {
         // Flat surface at ~20% down
         const surfaceY = Math.floor(this.height * 0.2);
         
+        // Pass 1: Base terrain (grass, dirt, stone, bedrock)
         for (let x = 0; x < this.width; x++) {
-            // Slight variation for visual texture, but flat overall
             let variation = (this.noise.noise2D(x * 0.02, 0) * 2);
             let localSurface = surfaceY + Math.floor(variation);
             
@@ -130,75 +130,103 @@ class WorldGenerator {
                     this.tiles[x][y] = this.TILE_BEDROCK;
                 } else {
                     this.tiles[x][y] = this.TILE_STONE;
-                    
-                    // Soft depth-based ore generation
-                    // Convert depth to 0-1 range (excluding bedrock zone)
-                    let depthRatio = depth / (this.height - surfaceY - 10);
-                    if (depthRatio > 1) depthRatio = 1;
-                    
-                    // Metals - soft zones with overlap
-                    // Copper: starts shallow, fades mid
-                    let copperChance = 0;
-                    if (depthRatio < 0.6) {
-                        copperChance = 0.03 * (1 - depthRatio);
-                    }
-                    
-                    // Iron: peaks mid-depth
-                    let ironChance = 0;
-                    if (depthRatio > 0.15 && depthRatio < 0.75) {
-                        let ironPeak = Math.abs(depthRatio - 0.45);
-                        ironChance = 0.04 * (1 - ironPeak * 2);
-                    }
-                    
-                    // Gold: deep only
-                    let goldChance = 0;
-                    if (depthRatio > 0.4) {
-                        goldChance = 0.03 * depthRatio;
-                    }
-                    
-                    // Gems - rarer, any depth but deeper = more valuable
-                    let rubyChance = depthRatio > 0.1 ? 0.008 * depthRatio : 0;
-                    let sapphireChance = depthRatio > 0.2 ? 0.007 * Math.min(depthRatio * 1.2, 1) : 0;
-                    let emeraldChance = depthRatio > 0.3 ? 0.006 * Math.min(depthRatio * 1.3, 1) : 0;
-                    let diamondChance = depthRatio > 0.5 ? 0.005 * depthRatio : 0;
-                    let amethystChance = depthRatio > 0.4 ? 0.006 * (0.8 + depthRatio * 0.5) : 0;
-                    
-                    // Apply noise for natural clustering
-                    let oreNoise = this.noise.noise2D(x * 0.08, y * 0.08);
-                    let clusterMult = 1 + oreNoise * 0.5; // 0.5 to 1.5x multiplier
-                    
-                    // Pick one resource per block, metals prioritized over gems
-                    let rand = Math.random();
-                    
-                    if (rand < copperChance * clusterMult) {
-                        this.tiles[x][y] = this.TILE_COPPER;
-                    } else if (rand < (copperChance + ironChance) * clusterMult) {
-                        this.tiles[x][y] = this.TILE_IRON;
-                    } else if (rand < (copperChance + ironChance + goldChance) * clusterMult) {
-                        this.tiles[x][y] = this.TILE_GOLD;
-                    } else {
-                        // Gems compete separately (rarer)
-                        let gemRand = Math.random();
-                        if (gemRand < rubyChance * clusterMult * 2) {
-                            this.tiles[x][y] = this.TILE_RUBY;
-                        } else if (gemRand < (rubyChance + sapphireChance) * clusterMult * 2) {
-                            this.tiles[x][y] = this.TILE_SAPPHIRE;
-                        } else if (gemRand < (rubyChance + sapphireChance + emeraldChance) * clusterMult * 2) {
-                            this.tiles[x][y] = this.TILE_EMERALD;
-                        } else if (gemRand < (rubyChance + sapphireChance + emeraldChance + diamondChance) * clusterMult * 2) {
-                            this.tiles[x][y] = this.TILE_DIAMOND;
-                        } else if (gemRand < (rubyChance + sapphireChance + emeraldChance + diamondChance + amethystChance) * clusterMult * 2) {
-                            this.tiles[x][y] = this.TILE_AMETHYST;
-                        }
-                    }
                 }
             }
-            
-            // Add caves using noise
+        }
+        
+        // Pass 2: Ore veins
+        this.generateVeins(surfaceY);
+        
+        // Pass 3: Caves (carve through everything including ore - realistic)
+        for (let x = 0; x < this.width; x++) {
             for (let y = surfaceY + 8; y < this.height - 8; y++) {
                 let caveNoise = this.noise.noise2D(x * 0.05, y * 0.05);
                 if (caveNoise > 0.35) {
                     this.tiles[x][y] = this.TILE_AIR;
+                }
+            }
+        }
+    }
+    
+    generateVeins(surfaceY) {
+        // Metal veins - longer, thicker, fewer
+        // Copper: shallow, widespread
+        this.createVeins(this.TILE_COPPER, 10, surfaceY + 8, surfaceY + 90, 25, 70, 3, 7);
+        // Iron: mid-depth
+        this.createVeins(this.TILE_IRON, 8, surfaceY + 40, surfaceY + 160, 20, 60, 3, 6);
+        // Gold: deep, rare, chunky
+        this.createVeins(this.TILE_GOLD, 5, surfaceY + 100, surfaceY + 285, 15, 45, 2, 5);
+        
+        // Gem veins - small pockets/clusters
+        this.createVeins(this.TILE_RUBY, 8, surfaceY + 10, surfaceY + 120, 4, 12, 1, 3);
+        this.createVeins(this.TILE_SAPPHIRE, 7, surfaceY + 30, surfaceY + 160, 4, 10, 1, 3);
+        this.createVeins(this.TILE_EMERALD, 6, surfaceY + 50, surfaceY + 190, 3, 8, 1, 3);
+        this.createVeins(this.TILE_DIAMOND, 4, surfaceY + 120, surfaceY + 285, 2, 6, 1, 2);
+        this.createVeins(this.TILE_AMETHYST, 5, surfaceY + 70, surfaceY + 250, 3, 9, 1, 3);
+    }
+    
+    createVeins(type, count, yMin, yMax, lengthMin, lengthMax, thicknessMin, thicknessMax) {
+        for (let i = 0; i < count; i++) {
+            let x = Math.floor(Math.random() * this.width);
+            let y = yMin + Math.floor(Math.random() * (yMax - yMin));
+            let length = lengthMin + Math.floor(Math.random() * (lengthMax - lengthMin));
+            let baseThickness = thicknessMin + Math.floor(Math.random() * (thicknessMax - thicknessMin));
+            
+            // Direction bias: horizontal for metals, more meandering for gems
+            let horizontalBias = (lengthMax > 15) ? 0.7 : 0.5;
+            
+            for (let step = 0; step < length; step++) {
+                // Random walk with horizontal bias
+                let dx, dy;
+                if (Math.random() < horizontalBias) {
+                    dx = (Math.random() < 0.5) ? 1 : -1;
+                    dy = (Math.random() < 0.3) ? ((Math.random() < 0.5) ? 1 : -1) : 0;
+                } else {
+                    dx = (Math.random() < 0.3) ? ((Math.random() < 0.5) ? 1 : -1) : 0;
+                    dy = (Math.random() < 0.5) ? 1 : -1;
+                }
+                
+                x += dx;
+                y += dy;
+                
+                // Wrap horizontally for continuous world feel
+                if (x < 0) x = this.width + x;
+                if (x >= this.width) x = x - this.width;
+                // Clamp vertically
+                if (y < 5) y = 5;
+                if (y >= this.height - 8) y = this.height - 9;
+                
+                // Thickness varies along the vein
+                let thickness = baseThickness + Math.floor((Math.random() - 0.5) * 2);
+                if (thickness < 1) thickness = 1;
+                
+                this.paintVeinPoint(x, y, thickness, type);
+            }
+        }
+    }
+    
+    paintVeinPoint(cx, cy, radius, type) {
+        for (let dx = -radius; dx <= radius; dx++) {
+            for (let dy = -radius; dy <= radius; dy++) {
+                let x = cx + dx;
+                let y = cy + dy;
+                
+                // Wrap horizontally
+                if (x < 0) x = this.width + x;
+                if (x >= this.width) x = x - this.width;
+                if (y < 0 || y >= this.height) continue;
+                
+                // Only replace stone (not grass, dirt, bedrock, or already-ore)
+                if (this.tiles[x][y] !== this.TILE_STONE) continue;
+                
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist > radius) continue;
+                
+                // Falloff: center = 100% chance, edge = ~25% chance
+                // This creates soft edges and gaps within veins
+                let chance = 1.0 - (dist / radius) * 0.75;
+                if (Math.random() < chance) {
+                    this.tiles[x][y] = type;
                 }
             }
         }
