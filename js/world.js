@@ -89,8 +89,15 @@ class WorldGenerator {
         this.TILE_DIRT = 1;
         this.TILE_GRASS = 2;
         this.TILE_STONE = 3;
-        this.TILE_ORE = 4;
+        this.TILE_COPPER = 4;   // Cu
         this.TILE_BEDROCK = 5;
+        this.TILE_IRON = 6;     // Fe
+        this.TILE_GOLD = 7;     // Au
+        this.TILE_RUBY = 8;
+        this.TILE_SAPPHIRE = 9;
+        this.TILE_EMERALD = 10;
+        this.TILE_DIAMOND = 11;
+        this.TILE_AMETHYST = 12;
         
         this.generate();
     }
@@ -104,57 +111,95 @@ class WorldGenerator {
             }
         }
         
-        // Generate terrain using multiple octaves of noise
+        // Flat surface at ~20% down
+        const surfaceY = Math.floor(this.height * 0.2);
+        
         for (let x = 0; x < this.width; x++) {
-            // Surface height with multiple noise layers
-            let nx = x * 0.01;
-            let surfaceNoise = this.noise.noise2D(nx, 0) * 0.5 + 
-                              this.noise.noise2D(nx * 2, 100) * 0.25 +
-                              this.noise.noise2D(nx * 4, 200) * 0.125;
+            // Slight variation for visual texture, but flat overall
+            let variation = (this.noise.noise2D(x * 0.02, 0) * 2);
+            let localSurface = surfaceY + Math.floor(variation);
             
-            let surfaceY = Math.floor(this.height * 0.3 + surfaceNoise * 15);
-            
-            for (let y = surfaceY; y < this.height; y++) {
+            for (let y = localSurface; y < this.height; y++) {
                 let depth = y - surfaceY;
                 
-                if (y === surfaceY) {
+                if (y === localSurface) {
                     this.tiles[x][y] = this.TILE_GRASS;
-                } else if (depth < 5 + Math.random() * 3) {
+                } else if (depth < 4 + Math.random() * 3) {
                     this.tiles[x][y] = this.TILE_DIRT;
-                } else if (depth < 20) {
-                    this.tiles[x][y] = this.TILE_STONE;
-                    // Small chance for ore
-                    if (Math.random() < 0.05 && depth > 8) {
-                        this.tiles[x][y] = this.TILE_ORE;
-                    }
+                } else if (y >= this.height - 5) {
+                    this.tiles[x][y] = this.TILE_BEDROCK;
                 } else {
                     this.tiles[x][y] = this.TILE_STONE;
-                    // More ore deeper down
-                    if (Math.random() < 0.1) {
-                        this.tiles[x][y] = this.TILE_ORE;
+                    
+                    // Soft depth-based ore generation
+                    // Convert depth to 0-1 range (excluding bedrock zone)
+                    let depthRatio = depth / (this.height - surfaceY - 10);
+                    if (depthRatio > 1) depthRatio = 1;
+                    
+                    // Metals - soft zones with overlap
+                    // Copper: starts shallow, fades mid
+                    let copperChance = 0;
+                    if (depthRatio < 0.6) {
+                        copperChance = 0.03 * (1 - depthRatio);
                     }
-                }
-                
-                // Bedrock at bottom
-                if (y >= this.height - 3) {
-                    this.tiles[x][y] = this.TILE_BEDROCK;
+                    
+                    // Iron: peaks mid-depth
+                    let ironChance = 0;
+                    if (depthRatio > 0.15 && depthRatio < 0.75) {
+                        let ironPeak = Math.abs(depthRatio - 0.45);
+                        ironChance = 0.04 * (1 - ironPeak * 2);
+                    }
+                    
+                    // Gold: deep only
+                    let goldChance = 0;
+                    if (depthRatio > 0.4) {
+                        goldChance = 0.03 * depthRatio;
+                    }
+                    
+                    // Gems - rarer, any depth but deeper = more valuable
+                    let rubyChance = depthRatio > 0.1 ? 0.008 * depthRatio : 0;
+                    let sapphireChance = depthRatio > 0.2 ? 0.007 * Math.min(depthRatio * 1.2, 1) : 0;
+                    let emeraldChance = depthRatio > 0.3 ? 0.006 * Math.min(depthRatio * 1.3, 1) : 0;
+                    let diamondChance = depthRatio > 0.5 ? 0.005 * depthRatio : 0;
+                    let amethystChance = depthRatio > 0.4 ? 0.006 * (0.8 + depthRatio * 0.5) : 0;
+                    
+                    // Apply noise for natural clustering
+                    let oreNoise = this.noise.noise2D(x * 0.08, y * 0.08);
+                    let clusterMult = 1 + oreNoise * 0.5; // 0.5 to 1.5x multiplier
+                    
+                    // Pick one resource per block, metals prioritized over gems
+                    let rand = Math.random();
+                    
+                    if (rand < copperChance * clusterMult) {
+                        this.tiles[x][y] = this.TILE_COPPER;
+                    } else if (rand < (copperChance + ironChance) * clusterMult) {
+                        this.tiles[x][y] = this.TILE_IRON;
+                    } else if (rand < (copperChance + ironChance + goldChance) * clusterMult) {
+                        this.tiles[x][y] = this.TILE_GOLD;
+                    } else {
+                        // Gems compete separately (rarer)
+                        let gemRand = Math.random();
+                        if (gemRand < rubyChance * clusterMult * 2) {
+                            this.tiles[x][y] = this.TILE_RUBY;
+                        } else if (gemRand < (rubyChance + sapphireChance) * clusterMult * 2) {
+                            this.tiles[x][y] = this.TILE_SAPPHIRE;
+                        } else if (gemRand < (rubyChance + sapphireChance + emeraldChance) * clusterMult * 2) {
+                            this.tiles[x][y] = this.TILE_EMERALD;
+                        } else if (gemRand < (rubyChance + sapphireChance + emeraldChance + diamondChance) * clusterMult * 2) {
+                            this.tiles[x][y] = this.TILE_DIAMOND;
+                        } else if (gemRand < (rubyChance + sapphireChance + emeraldChance + diamondChance + amethystChance) * clusterMult * 2) {
+                            this.tiles[x][y] = this.TILE_AMETHYST;
+                        }
+                    }
                 }
             }
             
             // Add caves using noise
-            for (let y = surfaceY + 5; y < this.height - 5; y++) {
+            for (let y = surfaceY + 8; y < this.height - 8; y++) {
                 let caveNoise = this.noise.noise2D(x * 0.05, y * 0.05);
-                if (caveNoise > 0.3) {
+                if (caveNoise > 0.35) {
                     this.tiles[x][y] = this.TILE_AIR;
                 }
-            }
-        }
-        
-        // Add trees on surface
-        for (let x = 5; x < this.width - 5; x++) {
-            let surfaceY = this.getSurfaceY(x);
-            if (surfaceY && Math.random() < 0.08) {
-                this.placeTree(x, surfaceY - 1);
             }
         }
     }
@@ -166,26 +211,6 @@ class WorldGenerator {
             }
         }
         return null;
-    }
-    
-    placeTree(x, y) {
-        // Simple tree: trunk + leaves
-        let trunkHeight = 3 + Math.floor(Math.random() * 3);
-        for (let i = 0; i < trunkHeight && y - i >= 0; i++) {
-            this.tiles[x][y - i] = 6; // Wood
-        }
-        
-        // Leaves
-        let leafY = y - trunkHeight;
-        for (let lx = -2; lx <= 2; lx++) {
-            for (let ly = -2; ly <= 1; ly++) {
-                if (x + lx >= 0 && x + lx < this.width && leafY + ly >= 0) {
-                    if (Math.abs(lx) + Math.abs(ly) < 3 && this.tiles[x + lx][leafY + ly] === this.TILE_AIR) {
-                        this.tiles[x + lx][leafY + ly] = 7; // Leaves
-                    }
-                }
-            }
-        }
     }
     
     getTile(x, y) {
@@ -203,7 +228,7 @@ class WorldGenerator {
     
     isSolid(x, y) {
         let tile = this.getTile(x, y);
-        return tile !== this.TILE_AIR && tile !== 7; // Leaves are not solid
+        return tile !== this.TILE_AIR;
     }
 }
 
