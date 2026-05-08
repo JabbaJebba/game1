@@ -130,11 +130,10 @@ class GalaxyScene extends Phaser.Scene {
             this.launchBtn.text.destroy();
         }
         this.launchBtn = this.createButton(960, 500, 'LAUNCH', () => {
-            if (this.shipFuel < 5000) {
-                this.infoPanel.setText('Not enough fuel! Need 5000 units.\nReturn to ship to refuel.');
+            if (this.shipFuel < 1) {
+                this.infoPanel.setText('No fuel! Return to ship to buy fuel.');
                 return;
             }
-            this.shipFuel -= 5000;
             // Store composition for this rock type
             this.rockCompositions[rt.name] = { ...rt };
             this.scene.start('GameScene', {
