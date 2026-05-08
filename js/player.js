@@ -104,14 +104,15 @@ class Player {
 
         // --- A KEY: Mine left if movement was blocked ---
         if (keys.mineLeft.isDown && Math.abs(this.x - oldX) < 1 && now - this.lastMineTime >= this.mineCooldown) {
-            const { left, top, bottom } = this.getTileBounds();
-            const mineX = left - 1;
+            const centerTileX = Math.floor(this.x / 32);
+            const centerTileY = Math.floor((this.y - this.height / 2) / 32);
+            const mineX = centerTileX - 2; // one tile left of player's left edge
             let minedAny = false;
-            for (let y = top; y <= bottom; y++) {
+            for (let y = centerTileY - 1; y <= centerTileY + 1; y++) {
                 if (this.tryMine(mineX, y)) minedAny = true;
             }
             if (minedAny) {
-                this.showMineIndicator(mineX * 32 + 16, (top + bottom + 1) / 2 * 32, 32, (bottom - top + 1) * 32);
+                this.showMineIndicator(mineX * 32 + 16, centerTileY * 32, 32, 96);
                 this.lastMineTime = now;
                 this.isMining = true;
             }
@@ -119,14 +120,15 @@ class Player {
 
         // --- D KEY: Mine right if movement was blocked ---
         if (keys.mineRight.isDown && Math.abs(this.x - oldX) < 1 && now - this.lastMineTime >= this.mineCooldown) {
-            const { right, top, bottom } = this.getTileBounds();
-            const mineX = right + 1;
+            const centerTileX = Math.floor(this.x / 32);
+            const centerTileY = Math.floor((this.y - this.height / 2) / 32);
+            const mineX = centerTileX + 1; // one tile right of player's right edge
             let minedAny = false;
-            for (let y = top; y <= bottom; y++) {
+            for (let y = centerTileY - 1; y <= centerTileY + 1; y++) {
                 if (this.tryMine(mineX, y)) minedAny = true;
             }
             if (minedAny) {
-                this.showMineIndicator(mineX * 32 + 16, (top + bottom + 1) / 2 * 32, 32, (bottom - top + 1) * 32);
+                this.showMineIndicator(mineX * 32 + 16, centerTileY * 32, 32, 96);
                 this.lastMineTime = now;
                 this.isMining = true;
             }
@@ -134,14 +136,16 @@ class Player {
 
         // --- S KEY: Mine down if on ground ---
         if (keys.mineDown.isDown && this.onGround && now - this.lastMineTime >= this.mineCooldown) {
-            const { left, right, bottom } = this.getTileBounds();
-            const mineY = bottom + 1;
+            const centerTileX = Math.floor(this.x / 32);
+            const footRow = Math.floor((this.y - 1) / 32);
+            const mineY = footRow + 1;
             let minedAny = false;
-            for (let x = left; x <= right; x++) {
+            // Mine exactly 2 tiles wide, matching player width
+            for (let x = centerTileX - 1; x <= centerTileX; x++) {
                 if (this.tryMine(x, mineY)) minedAny = true;
             }
             if (minedAny) {
-                this.showMineIndicator((left + right + 1) / 2 * 32, mineY * 32 + 16, (right - left + 1) * 32, 32);
+                this.showMineIndicator(centerTileX * 32, mineY * 32 + 16, 64, 32);
                 this.lastMineTime = now;
                 this.isMining = true;
             }
