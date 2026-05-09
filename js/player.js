@@ -284,8 +284,39 @@ class Player {
         // Debris particles
         const tileColor = this.scene.tileColors[tile] || 0xffffff;
         this.scene.spawnDebris(tileX, tileY, tileColor);
+
+        // Floating loot text
+        const itemName = this.getItemName(tile);
+        const itemColor = this.getItemColor(tile);
+        this.scene.showFloatText(tileX * 32 + 16, tileY * 32 - 8, `+1 ${itemName}`, itemColor);
         
         return true;
+    }
+
+    getItemName(tile) {
+        if (tile === this.world.TILE_ROCK) return this.world.rockType?.name || 'Rock';
+        if (tile === this.world.TILE_COPPER) return 'Copper Ore';
+        if (tile === this.world.TILE_IRON) return 'Iron Ore';
+        if (tile === this.world.TILE_GOLD) return 'Gold Ore';
+        if (tile === this.world.TILE_RUBY) return 'Ruby';
+        if (tile === this.world.TILE_SAPPHIRE) return 'Sapphire';
+        if (tile === this.world.TILE_EMERALD) return 'Emerald';
+        if (tile === this.world.TILE_DIAMOND) return 'Diamond';
+        if (tile === this.world.TILE_AMETHYST) return 'Amethyst';
+        return 'Unknown';
+    }
+
+    getItemColor(tile) {
+        if (tile === this.world.TILE_ROCK) return '#aaaaaa';
+        if (tile === this.world.TILE_COPPER) return '#ffaa55';
+        if (tile === this.world.TILE_IRON) return '#cccccc';
+        if (tile === this.world.TILE_GOLD) return '#ffdd44';
+        if (tile === this.world.TILE_RUBY) return '#ff4444';
+        if (tile === this.world.TILE_SAPPHIRE) return '#4488ff';
+        if (tile === this.world.TILE_EMERALD) return '#44ff88';
+        if (tile === this.world.TILE_DIAMOND) return '#88eeff';
+        if (tile === this.world.TILE_AMETHYST) return '#cc88ff';
+        return '#ffffff';
     }
 
     showMineIndicator(x, y, w, h) {

@@ -337,6 +337,20 @@ class GameScene extends Phaser.Scene {
         }
     }
 
+    showFloatText(x, y, text, color = '#ffffff') {
+        const label = this.add.text(x, y, text, {
+            fontSize: '14px', fill: color, stroke: '#000000', strokeThickness: 2, fontFamily: 'monospace'
+        }).setOrigin(0.5).setDepth(10);
+        this.tweens.add({
+            targets: label,
+            y: y - 40,
+            alpha: 0,
+            duration: 900,
+            ease: 'Power1',
+            onComplete: () => label.destroy()
+        });
+    }
+
     getTileName(tile) {
         const names = {
             [this.world.TILE_AIR]: 'Air',
