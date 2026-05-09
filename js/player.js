@@ -277,6 +277,10 @@ class Player {
         this.world.setTile(tileX, tileY, this.world.TILE_AIR);
         this.addToInventory(tile);
         this.scene.updateTile(tileX, tileY);
+        
+        // Screen shake on successful mine
+        this.scene.cameras.main.shake(60, 0.004);
+        
         return true;
     }
 
@@ -286,6 +290,15 @@ class Player {
         this.mineIndicator.setSize(w, h);
         this.mineIndicator.setStrokeStyle(2, 0xff0000, 0.6);
         this.mineIndicator.setFillStyle(0xff0000, 0.15);
+        // Flash effect
+        this.scene.tweens.add({
+            targets: this.mineIndicator,
+            scaleX: 1.3,
+            scaleY: 1.3,
+            duration: 80,
+            yoyo: true,
+            ease: 'Quad.easeOut'
+        });
     }
 
     addToInventory(tile) {
