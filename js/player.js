@@ -4,43 +4,41 @@ class Player {
         this.world = scene.world;
         this.tileSize = 32;
 
-        // Tile coordinates (source of truth)
-        // Old physics code spawned at x_pixel = spawnX * 32 with origin at center,bottom.
-        // Character is 2 tiles wide, 3 tiles tall.
-        // Old left tile  = floor((x_pixel - 32) / 32) = spawnX - 1
-        // Old bottom row = floor((y_pixel - 1) / 32) = spawnY - 1 (when y = spawnY * 32)
-        this.tileX = x - 1;      // left column of the 2-wide character
-        this.tileY = y - 1;      // bottom-most row the character occupies
+        // Tile coordinates — character is 2 tiles wide, 3 tiles tall
+        this.tileX = x - 1;      // left column
+        this.tileY = y - 1;      // bottom row (feet at boundary between tileY and tileY+1)
 
-        // Pixel position (derived, matches old physics spawn exactly)
-        this.x = (this.tileX + 1) * this.tileSize; // center between the two columns
-        this.y = (this.tileY + 1) * this.tileSize; // feet at boundary between tileY and tileY+1
+        // Pixel position
+        this.x = (this.tileX + 1) * this.tileSize;
+        this.y = (this.tileY + 1) * this.tileSize;
 
         this.width = 64;
         this.height = 96;
 
-        // Movement state
+        // State
         this.facingRight = true;
         this.isMining = false;
         this.onGround = false;
-        this.isMoving = false;   // true while a move tween is running
-
-        // Tween reference
+        this.isMoving = false;
         this.moveTween = null;
 
         // Timing (ms)
-        this.moveDuration = 160;      // tween duration for horizontal step
-        this.fallDuration = 120;       // tween duration for falling one tile
-        this.jumpDuration = 420;       // tween duration for jumping (longer = floatier)
-        this.moveRepeatRate = 200;     // ms between auto-repeated steps when holding key
-        this.lastMoveTime = -9999;    // ensures first press works immediately
+        this.moveDuration = 160;
+        this.fallDuration = 90;
+        this.jumpRiseDuration = 280;    // time to reach peak
+        this.jumpHangDuration = 140;    // brief pause at peak
+        this.jumpFallDuration = 220;    // time to descend
+        this.moveRepeatRate = 180;
+        this.lastMoveTime = -9999;
         this.mineCooldown = 180;
         this.lastMineTime = 0;
 
         // Jump
-        this.jumpHeight = 2;          // tiles to try to rise
+        this.jumpHeight = 3;
+        this.isJumping = false;
+        this.jumpPhase = 'none'; // 'rising' | 'hanging' | 'falling' | 'none'
 
-        // Create graphics
+        // Graphics
         this.sprite = scene.add.rectangle(this.x, this.y, this.width, this.height, 0x3498db);
         this.sprite.setOrigin(0.5, 1);
 
@@ -49,12 +47,11 @@ class Player {
         this.pupilLeft = scene.add.circle(this.x - 12, this.y - this.height + 18, 2.5, 0x000000);
         this.pupilRight = scene.add.circle(this.x + 12, this.y - this.height + 18, 2.5, 0x000000);
 
-        // Mining indicator
         this.mineIndicator = scene.add.rectangle(0, 0, 32, 32);
         this.mineIndicator.setStrokeStyle(2, 0xff0000, 0);
         this.mineIndicator.setFillStyle(0xff0000, 0);
 
-        // Fuel system
+        // Fuel
         this.maxFuel = data.fuel || 25;
         this.fuel = this.maxFuel;
         const effLevel = data.efficiencyLevel || 0;
@@ -74,15 +71,12 @@ class Player {
             [this.world.TILE_AMETHYST]: miningCost,
         };
 
-        // Inventory
         this.inventory = {};
         this.selectedSlot = 0;
-
-        // Key state (edge detection for jump)
         this.keyJumpWasDown = false;
     }
 
-    // Character occupies columns tileX..tileX+1 and rows tileY-2..tileY
+    // Check if the full 2×3 box at (tileX, tileY) is clear
     canExistAt(tileX, tileY) {
         for (let y = tileY - 2; y <= tileY; y++) {
             for (let x = tileX; x <= tileX + 1; x++) {
@@ -92,7 +86,33 @@ class Player {
         return true;
     }
 
-    updatePixelPosition(animate = false, durationMs = 100) {
+    // Check only rows ABOVE current position for vertical rise
+    // The character currently occupies rows tileY-2..tileY
+    // Rising by N tiles enters rows tileY-2-1 .. tileY-2-N
+    canRise(tiles) {
+        for (let dy = 1; dy <= tiles; dy++) {
+            const checkRow = this.tileY - 2 - dy;
+            for (let x = this.tileX; x <= this.tileX + 1; x++) {
+                if (this.world.isSolid(x, checkRow)) return false;
+            }
+        }
+        return true;
+    }
+
+    // Check if we can land at (tileX, tileY) — used for diagonal jumps
+    // The final position must have clear body + ground below
+    canLandAt(tileX, tileY) {
+        // Body must be clear
+        for (let y = tileY - 2; y <= tileY; y++) {
+            for (let x = tileX; x <= tileX + 1; x++) {
+                if (this.world.isSolid(x, y)) return false;
+            }
+        }
+        // Must have ground below
+        return this.world.isSolid(tileX, tileY + 1) || this.world.isSolid(tileX + 1, tileY + 1);
+    }
+
+    updatePixelPosition(animate = false, durationMs = 100, ease = 'Power2') {
         const targetX = (this.tileX + 1) * this.tileSize;
         const targetY = (this.tileY + 1) * this.tileSize;
 
@@ -104,7 +124,7 @@ class Player {
                 x: targetX,
                 y: targetY,
                 duration: durationMs,
-                ease: 'Power2',
+                ease: ease,
                 onUpdate: () => {
                     this.x = this.sprite.x;
                     this.y = this.sprite.y;
@@ -150,11 +170,23 @@ class Player {
         const groundRight = this.world.isSolid(this.tileX + 1, this.tileY + 1);
         this.onGround = groundLeft || groundRight;
 
-        // --- GRAVITY: fall one tile at a time ---
-        if (!this.onGround && !this.isMoving) {
-            if (this.canExistAt(this.tileX, this.tileY + 1)) {
-                this.tileY++;
-                this.updatePixelPosition(true, this.fallDuration);
+        if (this.onGround) {
+            this.isJumping = false;
+            this.jumpPhase = 'none';
+        }
+
+        // --- GRAVITY ---
+        if (!this.onGround && !this.isMoving && !this.isJumping) {
+            // Continuous fall — check how far we can drop
+            let drop = 0;
+            const maxDrop = 6; // cap to prevent huge tween lag
+            while (drop < maxDrop && this.canExistAt(this.tileX, this.tileY + drop + 1)) {
+                drop++;
+            }
+            if (drop > 0) {
+                this.tileY += drop;
+                const duration = Math.min(300, this.fallDuration * drop);
+                this.updatePixelPosition(true, duration, drop > 2 ? 'Cubic.easeIn' : 'Power2');
             }
         }
 
@@ -162,7 +194,7 @@ class Player {
         if ((keys.jump.isDown || keys.up.isDown) && this.onGround && !this.keyJumpWasDown) {
             let jumped = 0;
             for (let i = 0; i < this.jumpHeight; i++) {
-                if (this.canExistAt(this.tileX, this.tileY - 1)) {
+                if (this.canRise(1)) {
                     this.tileY--;
                     jumped++;
                 } else {
@@ -170,80 +202,44 @@ class Player {
                 }
             }
 
-            // Diagonal jump: if direction held, also move horizontally onto platform
             if (jumped > 0) {
+                this.isJumping = true;
+                this.jumpPhase = 'rising';
+
+                // Diagonal: if direction held, try to land in the new column
                 let dx = 0;
                 if (keys.mineLeft.isDown || keys.left.isDown) dx = -1;
                 else if (keys.mineRight.isDown || keys.right.isDown) dx = 1;
 
                 if (dx !== 0) {
                     const newTileX = this.tileX + dx;
-                    // Check if we can land at the jumped height in the new column
-                    if (this.canExistAt(newTileX, this.tileY)) {
+                    // For diagonal, we need the final position to be valid
+                    // Use canLandAt which checks body clear + ground below
+                    if (this.canLandAt(newTileX, this.tileY)) {
+                        this.tileX = newTileX;
+                        this.facingRight = dx > 0;
+                    } else if (this.canExistAt(newTileX, this.tileY)) {
+                        // No ground below but space is clear — jump into air
                         this.tileX = newTileX;
                         this.facingRight = dx > 0;
                     }
                 }
 
-                this.updatePixelPosition(true, this.jumpDuration);
+                // Animate jump with a 2-phase tween for arc feel
+                this.animateJump(jumped);
             }
         }
         this.keyJumpWasDown = keys.jump.isDown || keys.up.isDown;
 
-        // --- LEFT: move or mine ---
+        // --- HORIZONTAL: move or mine ---
         const leftDown = keys.mineLeft.isDown || keys.left.isDown;
-        if (leftDown && !this.isMoving && now - this.lastMoveTime >= this.moveRepeatRate) {
-            this.facingRight = false;
-            const newTileX = this.tileX - 1;
-            if (this.canExistAt(newTileX, this.tileY)) {
-                // Move left one tile
-                this.tileX = newTileX;
-                this.lastMoveTime = now;
-                this.updatePixelPosition(true, this.moveDuration);
-            } else {
-                // Blocked — mine the column to the left
-                if (now - this.lastMineTime >= this.mineCooldown) {
-                    const mineX = this.tileX - 1;
-                    let minedAny = false;
-                    for (let y = this.tileY - 2; y <= this.tileY; y++) {
-                        if (this.tryMine(mineX, y)) minedAny = true;
-                    }
-                    if (minedAny) {
-                        this.showMineIndicator(mineX * 32 + 16, (this.tileY - 2) * 32 + 48, 32, 96);
-                        this.lastMineTime = now;
-                        this.isMining = true;
-                        this.lastMoveTime = now; // pacing between repeated mines
-                    }
-                }
-            }
-        }
-
-        // --- RIGHT: move or mine ---
         const rightDown = keys.mineRight.isDown || keys.right.isDown;
+
+        if (leftDown && !this.isMoving && now - this.lastMoveTime >= this.moveRepeatRate) {
+            this.handleHorizontal(-1, now);
+        }
         if (rightDown && !this.isMoving && now - this.lastMoveTime >= this.moveRepeatRate) {
-            this.facingRight = true;
-            const newTileX = this.tileX + 1;
-            if (this.canExistAt(newTileX, this.tileY)) {
-                // Move right one tile
-                this.tileX = newTileX;
-                this.lastMoveTime = now;
-                this.updatePixelPosition(true, this.moveDuration);
-            } else {
-                // Blocked — mine the column to the right
-                if (now - this.lastMineTime >= this.mineCooldown) {
-                    const mineX = this.tileX + 2;
-                    let minedAny = false;
-                    for (let y = this.tileY - 2; y <= this.tileY; y++) {
-                        if (this.tryMine(mineX, y)) minedAny = true;
-                    }
-                    if (minedAny) {
-                        this.showMineIndicator(mineX * 32 + 16, (this.tileY - 2) * 32 + 48, 32, 96);
-                        this.lastMineTime = now;
-                        this.isMining = true;
-                        this.lastMoveTime = now;
-                    }
-                }
-            }
+            this.handleHorizontal(1, now);
         }
 
         // --- DOWN: mine below (only on ground) ---
@@ -275,6 +271,64 @@ class Player {
             this.tileX = this.world.width - 2;
             this.updatePixelPosition();
         }
+    }
+
+    handleHorizontal(dx, now) {
+        this.facingRight = dx > 0;
+        const newTileX = this.tileX + dx;
+
+        if (this.canExistAt(newTileX, this.tileY)) {
+            // Clear path — move
+            this.tileX = newTileX;
+            this.lastMoveTime = now;
+            this.updatePixelPosition(true, this.moveDuration);
+        } else {
+            // Blocked — mine the column
+            if (now - this.lastMineTime >= this.mineCooldown) {
+                const mineX = dx > 0 ? this.tileX + 2 : this.tileX - 1;
+                let minedAny = false;
+                for (let y = this.tileY - 2; y <= this.tileY; y++) {
+                    if (this.tryMine(mineX, y)) minedAny = true;
+                }
+                if (minedAny) {
+                    this.showMineIndicator(mineX * 32 + 16, (this.tileY - 2) * 32 + 48, 32, 96);
+                    this.lastMineTime = now;
+                    this.isMining = true;
+                    this.lastMoveTime = now;
+                }
+            }
+        }
+    }
+
+    animateJump(riseTiles) {
+        // Stop any existing tween
+        if (this.moveTween) this.moveTween.stop();
+        this.isMoving = true;
+
+        const targetX = (this.tileX + 1) * this.tileSize;
+        const targetY = (this.tileY + 1) * this.tileSize;
+
+        // Phase 1: rise (fast up)
+        this.moveTween = this.scene.tweens.add({
+            targets: this.sprite,
+            x: targetX,
+            y: targetY,
+            duration: this.jumpRiseDuration,
+            ease: 'Sine.easeOut',
+            onUpdate: () => {
+                this.x = this.sprite.x;
+                this.y = this.sprite.y;
+                this.updateEyesOnly();
+            },
+            onComplete: () => {
+                this.x = targetX;
+                this.y = targetY;
+                this.isMoving = false;
+                this.jumpPhase = 'falling';
+                this.isJumping = false; // gravity takes over
+                this.updateEyesOnly();
+            }
+        });
     }
 
     tryMine(tileX, tileY) {
