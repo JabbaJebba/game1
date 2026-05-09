@@ -186,7 +186,7 @@ class GameScene extends Phaser.Scene {
             .join(' | ');
 
         this.infoText.setText(
-            `Controls: Arrows=Move, Space/W=Jump, A=Mine Left, D=Mine Right, S=Mine Down\n` +
+            `Controls: Arrows=Move, Space/W=Jump, A/D=Mine, S=Mine Down, Jump+A/D=Hop on platform\n` +
             `Time: ${dayProgress > 0.3 ? 'Day' : 'Night'} | ` +
             `Pos: ${Math.floor(this.player.x)}, ${Math.floor(this.player.y)}\n` +
             `Fuel: ${this.player.fuel.toFixed(2)}L / ${this.player.maxFuel.toFixed(2)}L | ` +

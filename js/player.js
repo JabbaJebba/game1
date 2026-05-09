@@ -29,10 +29,10 @@ class Player {
         this.moveTween = null;
 
         // Timing (ms)
-        this.moveDuration = 100;      // tween duration for horizontal step
-        this.fallDuration = 60;       // tween duration for falling one tile
-        this.jumpDuration = 120;      // tween duration for jumping
-        this.moveRepeatRate = 140;    // ms between auto-repeated steps when holding key
+        this.moveDuration = 160;      // tween duration for horizontal step
+        this.fallDuration = 120;       // tween duration for falling one tile
+        this.jumpDuration = 420;       // tween duration for jumping (longer = floatier)
+        this.moveRepeatRate = 200;     // ms between auto-repeated steps when holding key
         this.lastMoveTime = -9999;    // ensures first press works immediately
         this.mineCooldown = 180;
         this.lastMineTime = 0;
@@ -169,13 +169,28 @@ class Player {
                     break;
                 }
             }
+
+            // Diagonal jump: if direction held, also move horizontally onto platform
             if (jumped > 0) {
+                let dx = 0;
+                if (keys.mineLeft.isDown || keys.left.isDown) dx = -1;
+                else if (keys.mineRight.isDown || keys.right.isDown) dx = 1;
+
+                if (dx !== 0) {
+                    const newTileX = this.tileX + dx;
+                    // Check if we can land at the jumped height in the new column
+                    if (this.canExistAt(newTileX, this.tileY)) {
+                        this.tileX = newTileX;
+                        this.facingRight = dx > 0;
+                    }
+                }
+
                 this.updatePixelPosition(true, this.jumpDuration);
             }
         }
         this.keyJumpWasDown = keys.jump.isDown || keys.up.isDown;
 
-        // --- LEFT: move, step-up, or mine ---
+        // --- LEFT: move or mine ---
         const leftDown = keys.mineLeft.isDown || keys.left.isDown;
         if (leftDown && !this.isMoving && now - this.lastMoveTime >= this.moveRepeatRate) {
             this.facingRight = false;
@@ -185,37 +200,8 @@ class Player {
                 this.tileX = newTileX;
                 this.lastMoveTime = now;
                 this.updatePixelPosition(true, this.moveDuration);
-            } else if (this.onGround) {
-                // Try step-up: jump onto a platform to the left
-                let stepped = false;
-                for (let dy = 1; dy <= this.jumpHeight; dy++) {
-                    if (this.canExistAt(newTileX, this.tileY - dy)) {
-                        this.tileX = newTileX;
-                        this.tileY -= dy;
-                        this.lastMoveTime = now;
-                        this.updatePixelPosition(true, this.jumpDuration);
-                        stepped = true;
-                        break;
-                    }
-                }
-                if (!stepped) {
-                    // Blocked — mine the column to the left
-                    if (now - this.lastMineTime >= this.mineCooldown) {
-                        const mineX = this.tileX - 1;
-                        let minedAny = false;
-                        for (let y = this.tileY - 2; y <= this.tileY; y++) {
-                            if (this.tryMine(mineX, y)) minedAny = true;
-                        }
-                        if (minedAny) {
-                            this.showMineIndicator(mineX * 32 + 16, (this.tileY - 2) * 32 + 48, 32, 96);
-                            this.lastMineTime = now;
-                            this.isMining = true;
-                            this.lastMoveTime = now;
-                        }
-                    }
-                }
             } else {
-                // Blocked and not on ground — mine
+                // Blocked — mine the column to the left
                 if (now - this.lastMineTime >= this.mineCooldown) {
                     const mineX = this.tileX - 1;
                     let minedAny = false;
@@ -226,13 +212,13 @@ class Player {
                         this.showMineIndicator(mineX * 32 + 16, (this.tileY - 2) * 32 + 48, 32, 96);
                         this.lastMineTime = now;
                         this.isMining = true;
-                        this.lastMoveTime = now;
+                        this.lastMoveTime = now; // pacing between repeated mines
                     }
                 }
             }
         }
 
-        // --- RIGHT: move, step-up, or mine ---
+        // --- RIGHT: move or mine ---
         const rightDown = keys.mineRight.isDown || keys.right.isDown;
         if (rightDown && !this.isMoving && now - this.lastMoveTime >= this.moveRepeatRate) {
             this.facingRight = true;
@@ -242,37 +228,8 @@ class Player {
                 this.tileX = newTileX;
                 this.lastMoveTime = now;
                 this.updatePixelPosition(true, this.moveDuration);
-            } else if (this.onGround) {
-                // Try step-up: jump onto a platform to the right
-                let stepped = false;
-                for (let dy = 1; dy <= this.jumpHeight; dy++) {
-                    if (this.canExistAt(newTileX, this.tileY - dy)) {
-                        this.tileX = newTileX;
-                        this.tileY -= dy;
-                        this.lastMoveTime = now;
-                        this.updatePixelPosition(true, this.jumpDuration);
-                        stepped = true;
-                        break;
-                    }
-                }
-                if (!stepped) {
-                    // Blocked — mine the column to the right
-                    if (now - this.lastMineTime >= this.mineCooldown) {
-                        const mineX = this.tileX + 2;
-                        let minedAny = false;
-                        for (let y = this.tileY - 2; y <= this.tileY; y++) {
-                            if (this.tryMine(mineX, y)) minedAny = true;
-                        }
-                        if (minedAny) {
-                            this.showMineIndicator(mineX * 32 + 16, (this.tileY - 2) * 32 + 48, 32, 96);
-                            this.lastMineTime = now;
-                            this.isMining = true;
-                            this.lastMoveTime = now;
-                        }
-                    }
-                }
             } else {
-                // Blocked and not on ground — mine
+                // Blocked — mine the column to the right
                 if (now - this.lastMineTime >= this.mineCooldown) {
                     const mineX = this.tileX + 2;
                     let minedAny = false;
