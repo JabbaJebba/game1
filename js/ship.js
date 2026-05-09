@@ -4,6 +4,14 @@ class ShipScene extends Phaser.Scene {
     }
 
     init(data) {
+        // Auto-load from localStorage on first boot
+        const isFirstBoot = !data || Object.keys(data).length === 0;
+        if (isFirstBoot) {
+            const save = localStorage.getItem('miners_save');
+            if (save) {
+                try { data = JSON.parse(save); } catch (e) {}
+            }
+        }
         this.shipGrid = data.shipGrid || this.createEmptyGrid(4, 6);
         this.shipInventory = data.shipInventory || {};
         this.credits = data.credits || 0;
@@ -104,6 +112,7 @@ class ShipScene extends Phaser.Scene {
         this.createGhostGraphics();
 
         this.createButton(640, 640, 'LAUNCH TO GALAXY', () => {
+            this.saveGame();
             this.scene.start('GalaxyScene', {
                 shipGrid: this.shipGrid, shipInventory: this.shipInventory,
                 credits: this.credits, shipFuel: this.shipFuel, shipFuelCapacity: this.shipFuelCapacity,
@@ -121,6 +130,19 @@ class ShipScene extends Phaser.Scene {
     createGhostGraphics() {
         if (this.ghostGraphics) this.ghostGraphics.destroy();
         this.ghostGraphics = this.add.graphics();
+    }
+
+    saveGame() {
+        const saveData = {
+            shipGrid: this.shipGrid,
+            shipInventory: this.shipInventory,
+            credits: this.credits,
+            shipFuel: this.shipFuel,
+            shipFuelCapacity: this.shipFuelCapacity,
+            rockCompositions: this.rockCompositions,
+            techState: this.techState,
+        };
+        localStorage.setItem('miners_save', JSON.stringify(saveData));
     }
 
     placeStarterRooms() {

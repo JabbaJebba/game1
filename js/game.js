@@ -147,6 +147,18 @@ class GameScene extends Phaser.Scene {
             this.rockCompositions[this.rockType.name] = { ...this.rockType };
         }
 
+        // Auto-save before returning to ship
+        const saveData = {
+            shipGrid: this.shipGrid,
+            shipInventory: this.shipInventory,
+            credits: this.credits,
+            shipFuel: this.shipFuel,
+            shipFuelCapacity: this.shipFuelCapacity,
+            rockCompositions: this.rockCompositions,
+            techState: this.techState,
+        };
+        localStorage.setItem('miners_save', JSON.stringify(saveData));
+
         // Return to ship scene
         this.scene.start('ShipScene', {
             shipGrid: this.shipGrid,
