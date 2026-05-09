@@ -31,7 +31,7 @@
 9. **Quality of life** - Auto-collect radius, better teleport mechanics
 
 ## Completed
-- [x] Auto-save/load via localStorage (auto-save on ship departure & return, auto-load on boot)
+- [x] Auto-save/load via localStorage (auto-save on ship departure & return, auto-load on boot) — Commit: d920612
 - [x] Restore original physics-based movement
 - [x] Fix mining to use actual tile bounds
 - [x] Fix fuel costs (liter-based system)
