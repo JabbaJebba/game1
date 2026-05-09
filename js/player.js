@@ -231,11 +231,15 @@ class Player {
         }
 
         // --- DOWN: mine below (only on ground) ---
-        // Mine only the center-left tile (this.tileX), not both feet
+        // Character is 2 tiles wide, so mine both tiles under the feet
         if (keys.mineDown.isDown && this.onGround && !this.isMoving && now - this.lastMineTime >= this.mineCooldown) {
             const mineY = this.tileY + 1;
-            if (this.tryMine(this.tileX, mineY)) {
-                this.showMineIndicator(this.tileX * 32 + 16, mineY * 32 + 16, 32, 32);
+            let minedAny = false;
+            for (let x = this.tileX; x <= this.tileX + 1; x++) {
+                if (this.tryMine(x, mineY)) minedAny = true;
+            }
+            if (minedAny) {
+                this.showMineIndicator((this.tileX + 1) * 32, mineY * 32 + 16, 64, 32);
                 this.lastMineTime = now;
                 this.isMining = true;
             }
@@ -284,12 +288,15 @@ class Player {
             this.lastMoveTime = now;
             this.updatePixelPosition(true, this.moveDuration);
         } else {
-            // Blocked — mine the facing column at center height (torso)
+            // Blocked — mine the full column matching character height (3 tiles)
             if (now - this.lastMineTime >= this.mineCooldown) {
                 const mineX = dx > 0 ? this.tileX + 2 : this.tileX - 1;
-                const mineY = this.tileY - 1; // center of 3-tall body
-                if (this.tryMine(mineX, mineY)) {
-                    this.showMineIndicator(mineX * 32 + 16, mineY * 32 + 16, 32, 32);
+                let minedAny = false;
+                for (let y = this.tileY - 2; y <= this.tileY; y++) {
+                    if (this.tryMine(mineX, y)) minedAny = true;
+                }
+                if (minedAny) {
+                    this.showMineIndicator(mineX * 32 + 16, (this.tileY - 2) * 32 + 48, 32, 96);
                     this.lastMineTime = now;
                     this.isMining = true;
                     this.lastMoveTime = now;
