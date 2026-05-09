@@ -77,11 +77,11 @@ class Player {
         this.keyJumpWasDown = false;
     }
 
-    // Check if the upper 2×2 body at (tileX, tileY) is clear
-    // Hitbox is 2 tiles tall: rows tileY-2 and tileY-1
-    // Row tileY is the "feet zone" where the character stands on solid tiles
+    // Check if the full 2×3 body at (tileX, tileY) is clear
+    // Character is 3 tiles tall: rows tileY-2 (head), tileY-1 (torso), tileY (legs)
+    // The character stands on row tileY+1 (ground below feet)
     canExistAt(tileX, tileY) {
-        for (let y = tileY - 2; y <= tileY - 1; y++) {
+        for (let y = tileY - 2; y <= tileY; y++) {
             for (let x = tileX; x <= tileX + 1; x++) {
                 if (this.world.isSolid(x, y)) return false;
             }
