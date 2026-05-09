@@ -2,148 +2,157 @@ class Player {
     constructor(scene, x, y, data = {}) {
         this.scene = scene;
         this.world = scene.world;
-        this.tileSize = 32;
 
-        // Tile coordinates — character is 2 tiles wide, 3 tiles tall visually
-        // Hitbox is 2 tiles tall (upper body). Bottom row is the "feet zone".
-        this.tileX = x - 1;      // left column
-        this.tileY = y - 1;      // bottom row (feet at boundary between tileY and tileY+1)
+        // Position (in pixels)
+        this.x = x * 32;
+        this.y = y * 32;
 
-        // Pixel position
-        this.x = (this.tileX + 1) * this.tileSize;
-        this.y = (this.tileY + 1) * this.tileSize;
-
+        // Size: 2 tiles wide, 3 tiles tall
         this.width = 64;
         this.height = 96;
 
+        // Velocity
+        this.vx = 0;
+        this.vy = 0;
+
+        // Movement constants
+        this.speed = 180;
+        this.jumpPower = 420;
+        this.gravity = 1100;
+        this.friction = 0.82;
+
         // State
+        this.onGround = false;
         this.facingRight = true;
         this.isMining = false;
-        this.onGround = false;
-        this.isMoving = false;
-        this.moveTween = null;
 
-        // Timing (ms)
-        this.moveDuration = 220;
-        this.fallDuration = 120;
-        this.jumpRiseDuration = 350;
-        this.jumpHangDuration = 200;
-        this.jumpFallDuration = 280;
-        this.moveRepeatRate = 180;
-        this.lastMoveTime = -9999;
+        // Mining cooldown (ms)
         this.mineCooldown = 180;
         this.lastMineTime = 0;
 
-        // Jump
-        this.jumpHeight = 3;
-        this.isJumping = false;
-        this.jumpPhase = 'none'; // 'rising' | 'hanging' | 'falling' | 'none'
-
-        // Graphics
+        // Create graphics
         this.sprite = scene.add.rectangle(this.x, this.y, this.width, this.height, 0x3498db);
         this.sprite.setOrigin(0.5, 1);
 
+        // Eyes to show direction
         this.eyeLeft = scene.add.circle(this.x - 12, this.y - this.height + 18, 5, 0xffffff);
         this.eyeRight = scene.add.circle(this.x + 12, this.y - this.height + 18, 5, 0xffffff);
         this.pupilLeft = scene.add.circle(this.x - 12, this.y - this.height + 18, 2.5, 0x000000);
         this.pupilRight = scene.add.circle(this.x + 12, this.y - this.height + 18, 2.5, 0x000000);
 
+        // Mining indicator
         this.mineIndicator = scene.add.rectangle(0, 0, 32, 32);
         this.mineIndicator.setStrokeStyle(2, 0xff0000, 0);
         this.mineIndicator.setFillStyle(0xff0000, 0);
 
-        // Fuel
-        this.maxFuel = data.fuel || 25;
+        // Fuel system
+        this.maxFuel = data.fuel || 5000;
         this.fuel = this.maxFuel;
-        const effLevel = data.efficiencyLevel || 0;
-        const baseCost = 0.05;
-        const effReduction = effLevel * 0.001;
-        const miningCost = Math.max(0.04, baseCost - effReduction);
         this.fuelCosts = {
-            [this.world.TILE_GRASS]: miningCost,
-            [this.world.TILE_ROCK]: miningCost,
-            [this.world.TILE_COPPER]: miningCost,
-            [this.world.TILE_IRON]: miningCost,
-            [this.world.TILE_GOLD]: miningCost,
-            [this.world.TILE_RUBY]: miningCost,
-            [this.world.TILE_SAPPHIRE]: miningCost,
-            [this.world.TILE_EMERALD]: miningCost,
-            [this.world.TILE_DIAMOND]: miningCost,
-            [this.world.TILE_AMETHYST]: miningCost,
+            [this.world.TILE_GRASS]: 10,
+            [this.world.TILE_ROCK]: 10,
+            [this.world.TILE_COPPER]: 10,
+            [this.world.TILE_IRON]: 10,
+            [this.world.TILE_GOLD]: 10,
+            [this.world.TILE_RUBY]: 10,
+            [this.world.TILE_SAPPHIRE]: 10,
+            [this.world.TILE_EMERALD]: 10,
+            [this.world.TILE_DIAMOND]: 10,
+            [this.world.TILE_AMETHYST]: 10,
         };
 
+        // Inventory
         this.inventory = {};
         this.selectedSlot = 0;
-        this.keyJumpWasDown = false;
     }
 
-    // Check if the full 2×3 body at (tileX, tileY) is clear
-    // Character is 3 tiles tall: rows tileY-2 (head), tileY-1 (torso), tileY (legs/feet)
-    // The character stands on row tileY+1 (ground below feet)
-    canExistAt(tileX, tileY) {
-        for (let y = tileY - 2; y <= tileY; y++) {
-            for (let x = tileX; x <= tileX + 1; x++) {
-                if (this.world.isSolid(x, y)) return false;
-            }
-        }
-        return true;
-    }
+    update(delta) {
+        const dt = delta / 1000;
+        const keys = this.scene.keys;
+        const now = this.scene.time.now;
 
-    // Check only rows ABOVE current head for vertical rise
-    // Head is at row tileY-2. Rising by N tiles enters rows tileY-2-1 .. tileY-2-N
-    canRise(tiles) {
-        for (let dy = 1; dy <= tiles; dy++) {
-            const checkRow = this.tileY - 2 - dy;
-            for (let x = this.tileX; x <= this.tileX + 1; x++) {
-                if (this.world.isSolid(x, checkRow)) return false;
-            }
-        }
-        return true;
-    }
+        this.isMining = false;
 
-    // Check if we can land at (tileX, tileY) — body clear + ground below
-    canLandAt(tileX, tileY) {
-        if (!this.canExistAt(tileX, tileY)) return false;
-        // Need ground below at least one foot
-        return this.world.isSolid(tileX, tileY + 1) || this.world.isSolid(tileX + 1, tileY + 1);
-    }
+        // Remember position before movement
+        const oldX = this.x;
+        const oldY = this.y;
 
-    updatePixelPosition(animate = false, durationMs = 100, ease = 'Power2') {
-        const targetX = (this.tileX + 1) * this.tileSize;
-        const targetY = (this.tileY + 1) * this.tileSize;
-
-        if (animate && this.scene.tweens) {
-            if (this.moveTween) this.moveTween.stop();
-            this.isMoving = true;
-            this.moveTween = this.scene.tweens.add({
-                targets: this.sprite,
-                x: targetX,
-                y: targetY,
-                duration: durationMs,
-                ease: ease,
-                onUpdate: () => {
-                    this.x = this.sprite.x;
-                    this.y = this.sprite.y;
-                    this.updateEyesOnly();
-                },
-                onComplete: () => {
-                    this.x = targetX;
-                    this.y = targetY;
-                    this.isMoving = false;
-                    this.updateEyesOnly();
-                }
-            });
+        // Horizontal movement - A/D and Arrow keys
+        if (keys.mineLeft.isDown || keys.left.isDown) {
+            this.vx = -this.speed;
+            this.facingRight = false;
+        } else if (keys.mineRight.isDown || keys.right.isDown) {
+            this.vx = this.speed;
+            this.facingRight = true;
         } else {
-            this.x = targetX;
-            this.y = targetY;
-            this.sprite.x = targetX;
-            this.sprite.y = targetY;
-            this.isMoving = false;
-            this.updateEyesOnly();
+            this.vx *= this.friction;
+            if (Math.abs(this.vx) < 10) this.vx = 0;
         }
-    }
 
-    updateEyesOnly() {
+        // Jump
+        if ((keys.jump.isDown || keys.up.isDown) && this.onGround) {
+            this.vy = -this.jumpPower;
+            this.onGround = false;
+        }
+
+        // Apply gravity
+        this.vy += this.gravity * dt;
+
+        // Apply movement
+        this.moveX(this.vx * dt);
+        this.moveY(this.vy * dt);
+
+        // --- A KEY: Mine left if movement was blocked ---
+        if (keys.mineLeft.isDown && Math.abs(this.x - oldX) < 1 && now - this.lastMineTime >= this.mineCooldown) {
+            const { left, top, bottom } = this.getTileBounds();
+            const mineX = left - 1; // one tile left of player's left edge
+            let minedAny = false;
+            for (let y = top; y <= bottom; y++) {
+                if (this.tryMine(mineX, y)) minedAny = true;
+            }
+            if (minedAny) {
+                this.showMineIndicator(mineX * 32 + 16, (top + bottom) / 2 * 32 + 16, 32, 96);
+                this.lastMineTime = now;
+                this.isMining = true;
+            }
+        }
+
+        // --- D KEY: Mine right if movement was blocked ---
+        if (keys.mineRight.isDown && Math.abs(this.x - oldX) < 1 && now - this.lastMineTime >= this.mineCooldown) {
+            const { right, top, bottom } = this.getTileBounds();
+            const mineX = right + 1; // one tile right of player's right edge
+            let minedAny = false;
+            for (let y = top; y <= bottom; y++) {
+                if (this.tryMine(mineX, y)) minedAny = true;
+            }
+            if (minedAny) {
+                this.showMineIndicator(mineX * 32 + 16, (top + bottom) / 2 * 32 + 16, 32, 96);
+                this.lastMineTime = now;
+                this.isMining = true;
+            }
+        }
+
+        // --- S KEY: Mine down if on ground ---
+        if (keys.mineDown.isDown && this.onGround && now - this.lastMineTime >= this.mineCooldown) {
+            const { left, right, bottom } = this.getTileBounds();
+            const mineY = bottom + 1;
+            let minedAny = false;
+            // Mine exactly the tiles under the character's width
+            for (let x = left; x <= right; x++) {
+                if (this.tryMine(x, mineY)) minedAny = true;
+            }
+            if (minedAny) {
+                this.showMineIndicator((left + right) / 2 * 32 + 16, mineY * 32 + 16, 64, 32);
+                this.lastMineTime = now;
+                this.isMining = true;
+            }
+        }
+
+        // Update sprite position
+        this.sprite.x = this.x;
+        this.sprite.y = this.y;
+
+        // Update eyes
         const eyeOffsetX = this.facingRight ? 3 : -3;
         this.eyeLeft.x = this.x - 12 + eyeOffsetX;
         this.eyeLeft.y = this.y - this.height + 18;
@@ -153,188 +162,100 @@ class Player {
         this.pupilLeft.y = this.y - this.height + 18;
         this.pupilRight.x = this.x + 12 + eyeOffsetX * 1.5;
         this.pupilRight.y = this.y - this.height + 18;
-    }
 
-    update(delta) {
-        const keys = this.scene.keys;
-        const now = this.scene.time.now;
-
-        this.isMining = false;
-
-        // --- GROUND CHECK ---
-        const groundLeft = this.world.isSolid(this.tileX, this.tileY + 1);
-        const groundRight = this.world.isSolid(this.tileX + 1, this.tileY + 1);
-        this.onGround = groundLeft || groundRight;
-
-        if (this.onGround) {
-            this.isJumping = false;
-            this.jumpPhase = 'none';
-        }
-
-        // --- GRAVITY ---
-        if (!this.onGround && !this.isMoving && !this.isJumping) {
-            let drop = 0;
-            const maxDrop = 6;
-            while (drop < maxDrop && this.canExistAt(this.tileX, this.tileY + drop + 1)) {
-                drop++;
-            }
-            if (drop > 0) {
-                this.tileY += drop;
-                const duration = Math.min(300, this.fallDuration * drop);
-                this.updatePixelPosition(true, duration, drop > 2 ? 'Cubic.easeIn' : 'Power2');
-            }
-        }
-
-        // --- JUMP (edge-triggered, only on ground) ---
-        if ((keys.jump.isDown || keys.up.isDown) && this.onGround && !this.keyJumpWasDown) {
-            let dx = 0;
-            if (keys.mineLeft.isDown || keys.left.isDown) dx = -1;
-            else if (keys.mineRight.isDown || keys.right.isDown) dx = 1;
-
-            if (dx !== 0) {
-                // DIAGONAL JUMP: find the smallest rise that gives a valid landing
-                const targetX = this.tileX + dx;
-                let diagonalSuccess = false;
-                for (let rise = 1; rise <= this.jumpHeight; rise++) {
-                    const targetY = this.tileY - rise;
-                    if (this.canRise(rise) && this.canLandAt(targetX, targetY)) {
-                        this.tileY = targetY;
-                        this.tileX = targetX;
-                        this.facingRight = dx > 0;
-                        this.isJumping = true;
-                        this.jumpPhase = 'rising';
-                        this.animateJump(rise);
-                        diagonalSuccess = true;
-                        break;
-                    }
-                }
-                if (!diagonalSuccess) {
-                    // Fallback: pure vertical jump
-                    this.doVerticalJump();
-                }
-            } else {
-                // PURE VERTICAL JUMP
-                this.doVerticalJump();
-            }
-        }
-        this.keyJumpWasDown = keys.jump.isDown || keys.up.isDown;
-
-        // --- HORIZONTAL: move or mine ---
-        const leftDown = keys.mineLeft.isDown || keys.left.isDown;
-        const rightDown = keys.mineRight.isDown || keys.right.isDown;
-
-        if (leftDown && !this.isMoving && now - this.lastMoveTime >= this.moveRepeatRate) {
-            this.handleHorizontal(-1, now);
-        }
-        if (rightDown && !this.isMoving && now - this.lastMoveTime >= this.moveRepeatRate) {
-            this.handleHorizontal(1, now);
-        }
-
-        // --- DOWN: mine below (only on ground) ---
-        // Character is 2 tiles wide, so mine both tiles under the feet
-        if (keys.mineDown.isDown && this.onGround && !this.isMoving && now - this.lastMineTime >= this.mineCooldown) {
-            const mineY = this.tileY + 1;
-            let minedAny = false;
-            for (let x = this.tileX; x <= this.tileX + 1; x++) {
-                if (this.tryMine(x, mineY)) minedAny = true;
-            }
-            if (minedAny) {
-                this.showMineIndicator((this.tileX + 1) * 32, mineY * 32 + 16, 64, 32);
-                this.lastMineTime = now;
-                this.isMining = true;
-            }
-        }
-
-        // Hide mine indicator when not mining
+        // Hide mine indicator if not mining
         if (!this.isMining) {
             this.mineIndicator.setStrokeStyle(2, 0xff0000, 0);
             this.mineIndicator.setFillStyle(0xff0000, 0);
         }
 
-        // --- WORLD BOUNDS ---
-        if (this.tileX < 0) {
-            this.tileX = 0;
-            this.updatePixelPosition();
+        // --- SNAP TO TILE GRID ---
+        // Only snap when on ground, nearly stopped, and not holding movement keys
+        const holdingMoveKey = keys.mineLeft.isDown || keys.left.isDown || keys.mineRight.isDown || keys.right.isDown;
+        if (this.onGround && !holdingMoveKey && Math.abs(this.vx) < 5) {
+            const snapX = Math.round(this.x / 32) * 32;
+            if (Math.abs(snapX - this.x) > 0.5) {
+                const oldX = this.x;
+                this.x = snapX;
+                const { left, right, top, bottom } = this.getTileBounds();
+                let blocked = false;
+                for (let ty = top; ty <= bottom; ty++) {
+                    if (this.world.isSolid(left, ty) || this.world.isSolid(right, ty)) {
+                        blocked = true;
+                        break;
+                    }
+                }
+                if (blocked) {
+                    this.x = oldX;
+                } else {
+                    this.sprite.x = this.x;
+                    const eyeOffsetX = this.facingRight ? 3 : -3;
+                    this.eyeLeft.x = this.x - 12 + eyeOffsetX;
+                    this.eyeRight.x = this.x + 12 + eyeOffsetX;
+                    this.pupilLeft.x = this.x - 12 + eyeOffsetX * 1.5;
+                    this.pupilRight.x = this.x + 12 + eyeOffsetX * 1.5;
+                }
+            }
         }
-        if (this.tileX > this.world.width - 2) {
-            this.tileX = this.world.width - 2;
-            this.updatePixelPosition();
-        }
+
+        // Keep in world bounds
+        const worldWidthPx = this.world.width * 32;
+        if (this.x < this.width / 2) { this.x = this.width / 2; this.vx = 0; }
+        if (this.x > worldWidthPx - this.width / 2) { this.x = worldWidthPx - this.width / 2; this.vx = 0; }
     }
 
-    doVerticalJump() {
-        let jumped = 0;
-        for (let i = 0; i < this.jumpHeight; i++) {
-            if (this.canRise(1)) {
-                this.tileY--;
-                jumped++;
-            } else {
+    getTileBounds() {
+        const left = Math.floor((this.x - this.width / 2) / 32);
+        const right = Math.floor((this.x + this.width / 2 - 1) / 32);
+        const top = Math.floor((this.y - this.height) / 32);
+        const bottom = Math.floor((this.y - 1) / 32);
+        return { left, right, top, bottom };
+    }
+
+    moveX(amount) {
+        this.x += amount;
+
+        const { left, right, top, bottom } = this.getTileBounds();
+
+        for (let ty = top; ty <= bottom; ty++) {
+            if (this.world.isSolid(left, ty)) {
+                this.x = (left + 1) * 32 + this.width / 2;
+                this.vx = 0;
+                break;
+            }
+            if (this.world.isSolid(right, ty)) {
+                this.x = right * 32 - this.width / 2;
+                this.vx = 0;
                 break;
             }
         }
-        if (jumped > 0) {
-            this.isJumping = true;
-            this.jumpPhase = 'rising';
-            this.animateJump(jumped);
-        }
     }
 
-    handleHorizontal(dx, now) {
-        this.facingRight = dx > 0;
-        const newTileX = this.tileX + dx;
+    moveY(amount) {
+        this.y += amount;
+        this.onGround = false;
 
-        if (this.canExistAt(newTileX, this.tileY)) {
-            this.tileX = newTileX;
-            this.lastMoveTime = now;
-            this.updatePixelPosition(true, this.moveDuration);
-        } else {
-            // Blocked — mine the full column matching character height (3 tiles)
-            if (now - this.lastMineTime >= this.mineCooldown) {
-                const mineX = dx > 0 ? this.tileX + 2 : this.tileX - 1;
-                let minedAny = false;
-                for (let y = this.tileY - 2; y <= this.tileY; y++) {
-                    if (this.tryMine(mineX, y)) minedAny = true;
+        const { left, right, top, bottom } = this.getTileBounds();
+        const feetRow = Math.floor(this.y / 32);
+
+        if (this.vy > 0) {
+            for (let tx = left; tx <= right; tx++) {
+                if (this.world.isSolid(tx, feetRow)) {
+                    this.y = feetRow * 32;
+                    this.vy = 0;
+                    this.onGround = true;
+                    break;
                 }
-                if (minedAny) {
-                    this.showMineIndicator(mineX * 32 + 16, (this.tileY - 2) * 32 + 48, 32, 96);
-                    this.lastMineTime = now;
-                    this.isMining = true;
-                    this.lastMoveTime = now;
+            }
+        } else if (this.vy < 0) {
+            for (let tx = left; tx <= right; tx++) {
+                if (this.world.isSolid(tx, top)) {
+                    this.y = (top + 1) * 32 + this.height;
+                    this.vy = 0;
+                    break;
                 }
             }
         }
-    }
-
-    animateJump(riseTiles) {
-        if (this.moveTween) this.moveTween.stop();
-        this.isMoving = true;
-
-        const targetX = (this.tileX + 1) * this.tileSize;
-        const targetY = (this.tileY + 1) * this.tileSize;
-
-        // Scale duration by how many tiles we're actually jumping
-        const duration = Math.max(120, this.jumpRiseDuration * riseTiles / this.jumpHeight);
-
-        this.moveTween = this.scene.tweens.add({
-            targets: this.sprite,
-            x: targetX,
-            y: targetY,
-            duration: duration,
-            ease: 'Sine.easeOut',
-            onUpdate: () => {
-                this.x = this.sprite.x;
-                this.y = this.sprite.y;
-                this.updateEyesOnly();
-            },
-            onComplete: () => {
-                this.x = targetX;
-                this.y = targetY;
-                this.isMoving = false;
-                this.jumpPhase = 'falling';
-                this.isJumping = false;
-                this.updateEyesOnly();
-            }
-        });
     }
 
     tryMine(tileX, tileY) {
@@ -342,12 +263,12 @@ class Player {
         if (tile === this.world.TILE_AIR || tile === this.world.TILE_BEDROCK) {
             return false;
         }
-
-        const cost = this.fuelCosts[tile] || 0.05;
+        
+        const cost = this.fuelCosts[tile] || 10;
         if (this.fuel < cost) {
-            return false;
+            return false; // not enough fuel
         }
-
+        
         this.fuel -= cost;
         this.world.setTile(tileX, tileY, this.world.TILE_AIR);
         this.addToInventory(tile);
