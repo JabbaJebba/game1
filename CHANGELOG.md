@@ -4,7 +4,7 @@
 - Added "NO FUEL" floating text when attempting to mine with insufficient fuel (red, above the tile)
 - Added critical low fuel warning: fuel bar border pulses red when below 2L
 - Fuel bar text turns red when critically low, returns to white when refueled
-- Status: Commit: TBD | 🔄 Pushing...
+- Status: ✅ Pushed. Commit: a0f545e
 
 ## 2026-05-10 — Floating Loot Text
 - Added floating text feedback when mining tiles (`+1 Copper Ore`, `+1 Ruby`, etc.)
