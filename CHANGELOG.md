@@ -1,5 +1,11 @@
 # Game Improvement Log
 
+## 2026-05-10 — Low Fuel Warning
+- Added "NO FUEL" floating text when attempting to mine with insufficient fuel (red, above the tile)
+- Added critical low fuel warning: fuel bar border pulses red when below 2L
+- Fuel bar text turns red when critically low, returns to white when refueled
+- Status: Commit: TBD | 🔄 Pushing...
+
 ## 2026-05-10 — Floating Loot Text
 - Added floating text feedback when mining tiles (`+1 Copper Ore`, `+1 Ruby`, etc.)
 - Text rises 40px and fades over 900ms, color-coded by resource type
@@ -20,15 +26,14 @@
 - Status: Mining now has visual feedback. Next: debris particles, sound effects, or save system.
 
 ## TODO Queue (prioritized)
-1. **Save/Load system** - localStorage persistence for ship, inventory, credits ✅ IN PROGRESS
-2. **Better UI** - Cleaner inventory display, stats panel
-3. **More content** - Additional gem types, planet variety
-4. **Audio** - Mining sounds, ambient music
-5. **Graphics** - Tile sprites instead of colored rectangles
-6. **Character sprite** - Replace blue rectangle with animated character
-7. **Day/Night impact** - Visibility reduction at night, torch system
-8. **Hazards** - Falling rocks, lava, enemies
-9. **Quality of life** - Auto-collect radius, better teleport mechanics
+1. **Better UI** - Cleaner inventory display, stats panel
+2. **More content** - Additional gem types, planet variety
+3. **Audio** - Mining sounds, ambient music
+4. **Graphics** - Tile sprites instead of colored rectangles
+5. **Character sprite** - Replace blue rectangle with animated character
+6. **Day/Night impact** - Visibility reduction at night, torch system
+7. **Hazards** - Falling rocks, lava, enemies
+8. **Quality of life** - Auto-collect radius, better teleport mechanics
 
 ## Completed
 - [x] Auto-save/load via localStorage (auto-save on ship departure & return, auto-load on boot) — Commit: d920612
@@ -39,3 +44,4 @@
 - [x] Add mine indicator flash
 - [x] Add debris particles on mining
 - [x] Add floating loot text
+- [x] Low fuel warning: "NO FUEL" float text when mining empty + red pulsing fuel bar border below 2L

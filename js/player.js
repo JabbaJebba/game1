@@ -270,7 +270,8 @@ class Player {
         
         const cost = this.fuelCosts[tile] || 0.05;
         if (this.fuel < cost) {
-            return false; // not enough fuel
+            this.scene.showFloatText(tileX * 32 + 16, tileY * 32 - 24, 'NO FUEL', '#ff3333');
+            return false;
         }
         
         this.fuel -= cost;

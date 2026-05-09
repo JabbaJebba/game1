@@ -212,6 +212,16 @@ class GameScene extends Phaser.Scene {
         const fillColor = Phaser.Display.Color.GetColor(255, Math.floor(140 * fuelPct), 0);
         this.fuelBarFill.setFillStyle(fillColor);
         this.fuelBarText.setText(`FUEL: ${this.player.fuel.toFixed(2)}L / ${this.player.maxFuel.toFixed(2)}L`);
+
+        // Critical low fuel warning pulse
+        if (this.player.fuel < 2) {
+            const pulse = Math.abs(Math.sin(time * 0.01));
+            this.fuelBarBg.setStrokeStyle(2 + Math.floor(pulse * 4), 0xff0000, 0.6 + pulse * 0.4);
+            this.fuelBarText.setColor('#ff4444');
+        } else {
+            this.fuelBarBg.setStrokeStyle(2, 0x444466);
+            this.fuelBarText.setColor('#ffffff');
+        }
     }
 
     getVisibleTileRange() {
