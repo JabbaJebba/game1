@@ -24,11 +24,11 @@ class Player {
         this.moveTween = null;
 
         // Timing (ms)
-        this.moveDuration = 160;
-        this.fallDuration = 90;
-        this.jumpRiseDuration = 280;    // base time for full jumpHeight
-        this.jumpHangDuration = 140;    // brief pause at peak
-        this.jumpFallDuration = 220;    // time to descend
+        this.moveDuration = 220;
+        this.fallDuration = 120;
+        this.jumpRiseDuration = 350;
+        this.jumpHangDuration = 200;
+        this.jumpFallDuration = 280;
         this.moveRepeatRate = 180;
         this.lastMoveTime = -9999;
         this.mineCooldown = 180;
@@ -78,7 +78,7 @@ class Player {
     }
 
     // Check if the full 2×3 body at (tileX, tileY) is clear
-    // Character is 3 tiles tall: rows tileY-2 (head), tileY-1 (torso), tileY (legs)
+    // Character is 3 tiles tall: rows tileY-2 (head), tileY-1 (torso), tileY (legs/feet)
     // The character stands on row tileY+1 (ground below feet)
     canExistAt(tileX, tileY) {
         for (let y = tileY - 2; y <= tileY; y++) {
@@ -231,14 +231,11 @@ class Player {
         }
 
         // --- DOWN: mine below (only on ground) ---
+        // Mine only the center-left tile (this.tileX), not both feet
         if (keys.mineDown.isDown && this.onGround && !this.isMoving && now - this.lastMineTime >= this.mineCooldown) {
             const mineY = this.tileY + 1;
-            let minedAny = false;
-            for (let x = this.tileX; x <= this.tileX + 1; x++) {
-                if (this.tryMine(x, mineY)) minedAny = true;
-            }
-            if (minedAny) {
-                this.showMineIndicator((this.tileX + 1) * 32, mineY * 32 + 16, 64, 32);
+            if (this.tryMine(this.tileX, mineY)) {
+                this.showMineIndicator(this.tileX * 32 + 16, mineY * 32 + 16, 32, 32);
                 this.lastMineTime = now;
                 this.isMining = true;
             }
@@ -287,15 +284,12 @@ class Player {
             this.lastMoveTime = now;
             this.updatePixelPosition(true, this.moveDuration);
         } else {
-            // Blocked — mine the column
+            // Blocked — mine the facing column at center height (torso)
             if (now - this.lastMineTime >= this.mineCooldown) {
                 const mineX = dx > 0 ? this.tileX + 2 : this.tileX - 1;
-                let minedAny = false;
-                for (let y = this.tileY - 2; y <= this.tileY; y++) {
-                    if (this.tryMine(mineX, y)) minedAny = true;
-                }
-                if (minedAny) {
-                    this.showMineIndicator(mineX * 32 + 16, (this.tileY - 2) * 32 + 48, 32, 96);
+                const mineY = this.tileY - 1; // center of 3-tall body
+                if (this.tryMine(mineX, mineY)) {
+                    this.showMineIndicator(mineX * 32 + 16, mineY * 32 + 16, 32, 32);
                     this.lastMineTime = now;
                     this.isMining = true;
                     this.lastMoveTime = now;
