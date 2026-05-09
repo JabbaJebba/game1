@@ -4,7 +4,8 @@ class Player {
         this.world = scene.world;
         this.tileSize = 32;
 
-        // Tile coordinates — character is 2 tiles wide, 3 tiles tall
+        // Tile coordinates — character is 2 tiles wide, 3 tiles tall visually
+        // Hitbox is 2 tiles tall (upper body). Bottom row is the "feet zone".
         this.tileX = x - 1;      // left column
         this.tileY = y - 1;      // bottom row (feet at boundary between tileY and tileY+1)
 
@@ -25,7 +26,7 @@ class Player {
         // Timing (ms)
         this.moveDuration = 160;
         this.fallDuration = 90;
-        this.jumpRiseDuration = 280;    // time to reach peak
+        this.jumpRiseDuration = 280;    // base time for full jumpHeight
         this.jumpHangDuration = 140;    // brief pause at peak
         this.jumpFallDuration = 220;    // time to descend
         this.moveRepeatRate = 180;
@@ -76,9 +77,11 @@ class Player {
         this.keyJumpWasDown = false;
     }
 
-    // Check if the full 2×3 box at (tileX, tileY) is clear
+    // Check if the upper 2×2 body at (tileX, tileY) is clear
+    // Hitbox is 2 tiles tall: rows tileY-2 and tileY-1
+    // Row tileY is the "feet zone" where the character stands on solid tiles
     canExistAt(tileX, tileY) {
-        for (let y = tileY - 2; y <= tileY; y++) {
+        for (let y = tileY - 2; y <= tileY - 1; y++) {
             for (let x = tileX; x <= tileX + 1; x++) {
                 if (this.world.isSolid(x, y)) return false;
             }
@@ -86,9 +89,8 @@ class Player {
         return true;
     }
 
-    // Check only rows ABOVE current position for vertical rise
-    // The character currently occupies rows tileY-2..tileY
-    // Rising by N tiles enters rows tileY-2-1 .. tileY-2-N
+    // Check only rows ABOVE current head for vertical rise
+    // Head is at row tileY-2. Rising by N tiles enters rows tileY-2-1 .. tileY-2-N
     canRise(tiles) {
         for (let dy = 1; dy <= tiles; dy++) {
             const checkRow = this.tileY - 2 - dy;
@@ -99,16 +101,10 @@ class Player {
         return true;
     }
 
-    // Check if we can land at (tileX, tileY) — used for diagonal jumps
-    // The final position must have clear body + ground below
+    // Check if we can land at (tileX, tileY) — body clear + ground below
     canLandAt(tileX, tileY) {
-        // Body must be clear
-        for (let y = tileY - 2; y <= tileY; y++) {
-            for (let x = tileX; x <= tileX + 1; x++) {
-                if (this.world.isSolid(x, y)) return false;
-            }
-        }
-        // Must have ground below
+        if (!this.canExistAt(tileX, tileY)) return false;
+        // Need ground below at least one foot
         return this.world.isSolid(tileX, tileY + 1) || this.world.isSolid(tileX + 1, tileY + 1);
     }
 
@@ -177,9 +173,8 @@ class Player {
 
         // --- GRAVITY ---
         if (!this.onGround && !this.isMoving && !this.isJumping) {
-            // Continuous fall — check how far we can drop
             let drop = 0;
-            const maxDrop = 6; // cap to prevent huge tween lag
+            const maxDrop = 6;
             while (drop < maxDrop && this.canExistAt(this.tileX, this.tileY + drop + 1)) {
                 drop++;
             }
@@ -192,41 +187,34 @@ class Player {
 
         // --- JUMP (edge-triggered, only on ground) ---
         if ((keys.jump.isDown || keys.up.isDown) && this.onGround && !this.keyJumpWasDown) {
-            let jumped = 0;
-            for (let i = 0; i < this.jumpHeight; i++) {
-                if (this.canRise(1)) {
-                    this.tileY--;
-                    jumped++;
-                } else {
-                    break;
-                }
-            }
+            let dx = 0;
+            if (keys.mineLeft.isDown || keys.left.isDown) dx = -1;
+            else if (keys.mineRight.isDown || keys.right.isDown) dx = 1;
 
-            if (jumped > 0) {
-                this.isJumping = true;
-                this.jumpPhase = 'rising';
-
-                // Diagonal: if direction held, try to land in the new column
-                let dx = 0;
-                if (keys.mineLeft.isDown || keys.left.isDown) dx = -1;
-                else if (keys.mineRight.isDown || keys.right.isDown) dx = 1;
-
-                if (dx !== 0) {
-                    const newTileX = this.tileX + dx;
-                    // For diagonal, we need the final position to be valid
-                    // Use canLandAt which checks body clear + ground below
-                    if (this.canLandAt(newTileX, this.tileY)) {
-                        this.tileX = newTileX;
+            if (dx !== 0) {
+                // DIAGONAL JUMP: find the smallest rise that gives a valid landing
+                const targetX = this.tileX + dx;
+                let diagonalSuccess = false;
+                for (let rise = 1; rise <= this.jumpHeight; rise++) {
+                    const targetY = this.tileY - rise;
+                    if (this.canRise(rise) && this.canLandAt(targetX, targetY)) {
+                        this.tileY = targetY;
+                        this.tileX = targetX;
                         this.facingRight = dx > 0;
-                    } else if (this.canExistAt(newTileX, this.tileY)) {
-                        // No ground below but space is clear — jump into air
-                        this.tileX = newTileX;
-                        this.facingRight = dx > 0;
+                        this.isJumping = true;
+                        this.jumpPhase = 'rising';
+                        this.animateJump(rise);
+                        diagonalSuccess = true;
+                        break;
                     }
                 }
-
-                // Animate jump with a 2-phase tween for arc feel
-                this.animateJump(jumped);
+                if (!diagonalSuccess) {
+                    // Fallback: pure vertical jump
+                    this.doVerticalJump();
+                }
+            } else {
+                // PURE VERTICAL JUMP
+                this.doVerticalJump();
             }
         }
         this.keyJumpWasDown = keys.jump.isDown || keys.up.isDown;
@@ -273,12 +261,28 @@ class Player {
         }
     }
 
+    doVerticalJump() {
+        let jumped = 0;
+        for (let i = 0; i < this.jumpHeight; i++) {
+            if (this.canRise(1)) {
+                this.tileY--;
+                jumped++;
+            } else {
+                break;
+            }
+        }
+        if (jumped > 0) {
+            this.isJumping = true;
+            this.jumpPhase = 'rising';
+            this.animateJump(jumped);
+        }
+    }
+
     handleHorizontal(dx, now) {
         this.facingRight = dx > 0;
         const newTileX = this.tileX + dx;
 
         if (this.canExistAt(newTileX, this.tileY)) {
-            // Clear path — move
             this.tileX = newTileX;
             this.lastMoveTime = now;
             this.updatePixelPosition(true, this.moveDuration);
@@ -301,19 +305,20 @@ class Player {
     }
 
     animateJump(riseTiles) {
-        // Stop any existing tween
         if (this.moveTween) this.moveTween.stop();
         this.isMoving = true;
 
         const targetX = (this.tileX + 1) * this.tileSize;
         const targetY = (this.tileY + 1) * this.tileSize;
 
-        // Phase 1: rise (fast up)
+        // Scale duration by how many tiles we're actually jumping
+        const duration = Math.max(120, this.jumpRiseDuration * riseTiles / this.jumpHeight);
+
         this.moveTween = this.scene.tweens.add({
             targets: this.sprite,
             x: targetX,
             y: targetY,
-            duration: this.jumpRiseDuration,
+            duration: duration,
             ease: 'Sine.easeOut',
             onUpdate: () => {
                 this.x = this.sprite.x;
@@ -325,7 +330,7 @@ class Player {
                 this.y = targetY;
                 this.isMoving = false;
                 this.jumpPhase = 'falling';
-                this.isJumping = false; // gravity takes over
+                this.isJumping = false;
                 this.updateEyesOnly();
             }
         });
