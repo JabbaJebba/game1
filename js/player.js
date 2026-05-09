@@ -45,20 +45,24 @@ class Player {
         this.mineIndicator.setStrokeStyle(2, 0xff0000, 0);
         this.mineIndicator.setFillStyle(0xff0000, 0);
 
-        // Fuel system
-        this.maxFuel = data.fuel || 5000;
+        // Fuel system (liters, 1 unit = 5ml)
+        this.maxFuel = data.fuel || 25;
         this.fuel = this.maxFuel;
+        const effLevel = data.efficiencyLevel || 0;
+        const baseCost = 0.05;
+        const effReduction = effLevel * 0.001;
+        const miningCost = Math.max(0.04, baseCost - effReduction);
         this.fuelCosts = {
-            [this.world.TILE_GRASS]: 10,
-            [this.world.TILE_ROCK]: 10,
-            [this.world.TILE_COPPER]: 10,
-            [this.world.TILE_IRON]: 10,
-            [this.world.TILE_GOLD]: 10,
-            [this.world.TILE_RUBY]: 10,
-            [this.world.TILE_SAPPHIRE]: 10,
-            [this.world.TILE_EMERALD]: 10,
-            [this.world.TILE_DIAMOND]: 10,
-            [this.world.TILE_AMETHYST]: 10,
+            [this.world.TILE_GRASS]: miningCost,
+            [this.world.TILE_ROCK]: miningCost,
+            [this.world.TILE_COPPER]: miningCost,
+            [this.world.TILE_IRON]: miningCost,
+            [this.world.TILE_GOLD]: miningCost,
+            [this.world.TILE_RUBY]: miningCost,
+            [this.world.TILE_SAPPHIRE]: miningCost,
+            [this.world.TILE_EMERALD]: miningCost,
+            [this.world.TILE_DIAMOND]: miningCost,
+            [this.world.TILE_AMETHYST]: miningCost,
         };
 
         // Inventory
@@ -264,7 +268,7 @@ class Player {
             return false;
         }
         
-        const cost = this.fuelCosts[tile] || 10;
+        const cost = this.fuelCosts[tile] || 0.05;
         if (this.fuel < cost) {
             return false; // not enough fuel
         }
