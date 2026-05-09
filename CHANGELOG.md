@@ -1,5 +1,12 @@
 # Game Improvement Log
 
+## 2026-05-10 — Depth Indicator
+- Replaced useless raw pixel position with depth readout (meters below surface)
+- Depth calculated from surface Y at current X, clamped to world bounds
+- Color-coded depth: green (0-20m), yellow (21-80m), orange (81-150m), red (150m+)
+- Cleaned up infoText layout: shorter controls line, cost abbreviated
+- Status: ⏳ Committing...
+
 ## 2026-05-10 — Low Fuel Warning
 - Added "NO FUEL" floating text when attempting to mine with insufficient fuel (red, above the tile)
 - Added critical low fuel warning: fuel bar border pulses red when below 2L
@@ -26,7 +33,7 @@
 - Status: Mining now has visual feedback. Next: debris particles, sound effects, or save system.
 
 ## TODO Queue (prioritized)
-1. **Better UI** - Cleaner inventory display, stats panel
+1. **Better UI** - Cleaner inventory display, stats panel, depth colors
 2. **More content** - Additional gem types, planet variety
 3. **Audio** - Mining sounds, ambient music
 4. **Graphics** - Tile sprites instead of colored rectangles

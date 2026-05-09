@@ -197,12 +197,17 @@ class GameScene extends Phaser.Scene {
             .map(([k, v]) => `${this.getTileName(parseInt(k))}: ${v}`)
             .join(' | ');
 
+        const tileX = Math.max(0, Math.min(this.worldWidth - 1, Math.floor(this.player.x / 32)));
+        const surfaceY = this.world.getSurfaceY(tileX) || 0;
+        const depth = Math.max(0, Math.floor(this.player.y / 32) - surfaceY);
+        const depthColor = depth < 20 ? '#88ff88' : depth < 80 ? '#ffff44' : depth < 150 ? '#ffaa44' : '#ff4444';
+
         this.infoText.setText(
-            `Controls: Arrows=Move, Space/W=Jump (hold A/D for diagonal), A/D=Mine, S=Mine Down\n` +
+            `Controls: Arrows=Move, Space/W=Jump, A/D=Mine, S=Mine Down\n` +
             `Time: ${dayProgress > 0.3 ? 'Day' : 'Night'} | ` +
-            `Pos: ${Math.floor(this.player.x)}, ${Math.floor(this.player.y)}\n` +
+            `Depth: ${depth}m | ` +
             `Fuel: ${this.player.fuel.toFixed(2)}L / ${this.player.maxFuel.toFixed(2)}L | ` +
-            `Mine Cost: ${((this.player.fuelCosts[this.world.TILE_ROCK] || 0.05) * 1000).toFixed(0)}ml | ` +
+            `Cost: ${((this.player.fuelCosts[this.world.TILE_ROCK] || 0.05) * 1000).toFixed(0)}ml\n` +
             `Inventory: ${inventoryText || 'Empty'}`
         );
 
