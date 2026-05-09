@@ -5,7 +5,7 @@
 - Depth calculated from surface Y at current X, clamped to world bounds
 - Color-coded depth: green (0-20m), yellow (21-80m), orange (81-150m), red (150m+)
 - Cleaned up infoText layout: shorter controls line, cost abbreviated
-- Status: ⏳ Committing...
+- Status: ✅ Pushed. Commit: 5066880
 
 ## 2026-05-10 — Low Fuel Warning
 - Added "NO FUEL" floating text when attempting to mine with insufficient fuel (red, above the tile)
