@@ -12,6 +12,7 @@ class GameScene extends Phaser.Scene {
         this.shipFuelCapacity = data.shipFuelCapacity !== undefined ? data.shipFuelCapacity : 100;
         this.rockType = data.rockType || { name: 'Stone' };
         this.rockCompositions = data.rockCompositions || {};
+        this.techState = data.techState || { fuelTankLevel: 0 };
     }
 
     create() {
@@ -63,7 +64,9 @@ class GameScene extends Phaser.Scene {
         let spawnX = Math.floor(this.worldWidth / 2);
         let spawnY = this.world.getSurfaceY(spawnX) - 5;
 
-        let fuelForRun = Math.min(25, this.shipFuel);
+        const baseFuel = 25;
+        const maxPlayerFuel = baseFuel + (this.techState.fuelTankLevel || 0);
+        let fuelForRun = Math.min(maxPlayerFuel, this.shipFuel);
         this.shipFuel -= fuelForRun; // Deduct from ship tank
         this.player = new Player(this, spawnX, spawnY, { fuel: fuelForRun });
 
@@ -152,6 +155,7 @@ class GameScene extends Phaser.Scene {
             shipFuel: this.shipFuel,
             shipFuelCapacity: this.shipFuelCapacity,
             rockCompositions: this.rockCompositions,
+            techState: this.techState,
         });
     }
 
