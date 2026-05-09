@@ -7,8 +7,8 @@ class ShipScene extends Phaser.Scene {
         this.shipGrid = data.shipGrid || this.createEmptyGrid(4, 6);
         this.shipInventory = data.shipInventory || {};
         this.credits = data.credits || 0;
-        this.shipFuel = data.shipFuel !== undefined ? data.shipFuel : 20000;
-        this.shipFuelCapacity = data.shipFuelCapacity !== undefined ? data.shipFuelCapacity : 20000;
+        this.shipFuel = data.shipFuel !== undefined ? data.shipFuel : 100;
+        this.shipFuelCapacity = data.shipFuelCapacity !== undefined ? data.shipFuelCapacity : 100;
         this.rockCompositions = data.rockCompositions || {};
         this.powerGen = 0;
         this.powerUse = 0;
@@ -53,7 +53,7 @@ class ShipScene extends Phaser.Scene {
         this.roomTypes = {
             solar: { name: 'Solar Panel', size: 1, power: 0, cost: 0, color: 0xFFD700, icon: 'S' },
             battery: { name: 'Battery', size: 1, powerCap: 50, cost: 100, color: 0x4169E1, icon: 'B' },
-            fuelTank: { name: 'Fuel Tank', size: 1, fuelCap: 10000, cost: 200, color: 0xFF4500, icon: 'F' },
+            fuelTank: { name: 'Fuel Tank', size: 1, fuelCap: 50, cost: 200, color: 0xFF4500, icon: 'F' },
             refinery: { name: 'Refinery', size: 2, power: 0, cost: 500, color: 0x8B4513, icon: 'R' },
             trade: { name: 'Trade Terminal', size: 1, power: 0, cost: 300, color: 0x00FF00, icon: 'T' },
             drill: { name: 'Drill Workshop', size: 2, power: 0, cost: 400, color: 0xA9A9A9, icon: 'D' },
@@ -67,7 +67,7 @@ class ShipScene extends Phaser.Scene {
             'Ruby': 50, 'Sapphire': 75, 'Emerald': 100, 'Diamond': 200, 'Amethyst': 80,
         };
 
-        this.fuelPrices = { 1000: 400, 5000: 2000 };
+        this.fuelPrices = { 5: 400, 25: 2000 };
 
         this.placeStarterRooms();
         this.drawShipGrid();
@@ -320,7 +320,7 @@ class ShipScene extends Phaser.Scene {
 
             y += 6;
             Object.entries(this.fuelPrices).forEach(([amount, cost]) => {
-                const fuelBtn = this.createControlButton(10, y, `BUY ${amount} FUEL — ${cost}cr`, () => {
+                const fuelBtn = this.createControlButton(10, y, `BUY ${amount}L FUEL — ${cost}cr`, () => {
                     if (this.credits >= cost && this.shipFuel + parseInt(amount) <= this.shipFuelCapacity) {
                         this.credits -= cost;
                         this.shipFuel = Math.min(this.shipFuelCapacity, this.shipFuel + parseInt(amount));
@@ -333,7 +333,7 @@ class ShipScene extends Phaser.Scene {
             });
 
         } else if (room.type === 'fuelTank') {
-            content += `Fuel: ${this.shipFuel}/${this.shipFuelCapacity}\nCapacity: +${def.fuelCap}\n`;
+            content += `Fuel: ${this.shipFuel.toFixed(1)}L / ${this.shipFuelCapacity.toFixed(1)}L\nCapacity: +${def.fuelCap}L\n`;
             this.controlsContent.setText(content);
 
         } else if (room.type === 'crusher') {
@@ -712,8 +712,8 @@ class ShipScene extends Phaser.Scene {
         );
 
         this.fuelText.setText(
-            `Fuel: ${this.shipFuel}/${this.shipFuelCapacity}\n` +
-            `Runs: ~${Math.floor(this.shipFuel / 5000)}`
+            `Fuel: ${this.shipFuel.toFixed(1)}L / ${this.shipFuelCapacity.toFixed(1)}L\n` +
+            `Runs: ~${Math.floor(this.shipFuel / 25)}`
         );
         this.creditsText.setText(`Credits: ${this.credits}`);
     }
@@ -722,7 +722,7 @@ class ShipScene extends Phaser.Scene {
         this.powerGen = 0;
         this.powerUse = 0;
         this.powerCapacity = 0;
-        this.shipFuelCapacity = 20000;
+        this.shipFuelCapacity = 100;
 
         for (let x = 0; x < this.gridW; x++) {
             for (let y = 0; y < this.gridH; y++) {

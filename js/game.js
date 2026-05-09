@@ -8,8 +8,8 @@ class GameScene extends Phaser.Scene {
         this.shipGrid = data.shipGrid || [];
         this.shipInventory = data.shipInventory || {};
         this.credits = data.credits || 0;
-        this.shipFuel = data.shipFuel !== undefined ? data.shipFuel : 20000;
-        this.shipFuelCapacity = data.shipFuelCapacity !== undefined ? data.shipFuelCapacity : 20000;
+        this.shipFuel = data.shipFuel !== undefined ? data.shipFuel : 100;
+        this.shipFuelCapacity = data.shipFuelCapacity !== undefined ? data.shipFuelCapacity : 100;
         this.rockType = data.rockType || { name: 'Stone' };
         this.rockCompositions = data.rockCompositions || {};
     }
@@ -63,13 +63,27 @@ class GameScene extends Phaser.Scene {
         let spawnX = Math.floor(this.worldWidth / 2);
         let spawnY = this.world.getSurfaceY(spawnX) - 5;
 
-        let fuelForRun = Math.min(5000, this.shipFuel);
+        let fuelForRun = Math.min(25, this.shipFuel);
         this.shipFuel -= fuelForRun; // Deduct from ship tank
         this.player = new Player(this, spawnX, spawnY, { fuel: fuelForRun });
 
         this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1);
         this.cameras.main.setBounds(0, 0, this.worldWidth * this.tileSize, this.worldHeight * this.tileSize);
         this.cameras.main.setBackgroundColor('#87CEEB');
+
+        // FUEL BAR UI
+        const barX = 640;
+        const barY = 690;
+        const barW = 320;
+        const barH = 20;
+        this.fuelBarX = barX - barW / 2 + 2;
+        this.fuelBarMaxW = barW - 4;
+        this.fuelBarBg = this.add.rectangle(barX, barY, barW, barH, 0x1a1a2e).setScrollFactor(0);
+        this.fuelBarBg.setStrokeStyle(2, 0x444466);
+        this.fuelBarFill = this.add.rectangle(this.fuelBarX, barY, this.fuelBarMaxW, barH - 4, 0xFF8C00).setOrigin(0, 0.5).setScrollFactor(0);
+        this.fuelBarText = this.add.text(barX, barY, 'FUEL: 25.00L / 25.00L', {
+            fontSize: '13px', fill: '#ffffff', fontFamily: 'monospace', stroke: '#000000', strokeThickness: 2
+        }).setOrigin(0.5).setScrollFactor(0);
 
         this.input.on('pointerdown', (pointer) => {
             if (pointer.button === 0) {}
@@ -171,9 +185,16 @@ class GameScene extends Phaser.Scene {
             `Controls: Arrows=Move, Space/W=Jump, A=Mine Left, D=Mine Right, S=Mine Down\n` +
             `Time: ${dayProgress > 0.3 ? 'Day' : 'Night'} | ` +
             `Pos: ${Math.floor(this.player.x)}, ${Math.floor(this.player.y)}\n` +
-            `Fuel: ${this.player.fuel}/${this.player.maxFuel} | ` +
+            `Fuel: ${this.player.fuel.toFixed(2)}L / ${this.player.maxFuel.toFixed(2)}L | ` +
             `Inventory: ${inventoryText || 'Empty'}`
         );
+
+        // Update fuel bar
+        const fuelPct = Math.max(0, this.player.fuel / this.player.maxFuel);
+        this.fuelBarFill.width = this.fuelBarMaxW * fuelPct;
+        const fillColor = Phaser.Display.Color.GetColor(255, Math.floor(140 * fuelPct), 0);
+        this.fuelBarFill.setFillStyle(fillColor);
+        this.fuelBarText.setText(`FUEL: ${this.player.fuel.toFixed(2)}L / ${this.player.maxFuel.toFixed(2)}L`);
     }
 
     getVisibleTileRange() {

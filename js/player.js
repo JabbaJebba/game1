@@ -55,19 +55,19 @@ class Player {
         this.mineIndicator.setFillStyle(0xff0000, 0);
 
         // Fuel system
-        this.maxFuel = data.fuel || 5000;
+        this.maxFuel = data.fuel || 25;
         this.fuel = this.maxFuel;
         this.fuelCosts = {
-            [this.world.TILE_GRASS]: 10,
-            [this.world.TILE_ROCK]: 10,
-            [this.world.TILE_COPPER]: 10,
-            [this.world.TILE_IRON]: 10,
-            [this.world.TILE_GOLD]: 10,
-            [this.world.TILE_RUBY]: 10,
-            [this.world.TILE_SAPPHIRE]: 10,
-            [this.world.TILE_EMERALD]: 10,
-            [this.world.TILE_DIAMOND]: 10,
-            [this.world.TILE_AMETHYST]: 10,
+            [this.world.TILE_GRASS]: 0.05,
+            [this.world.TILE_ROCK]: 0.05,
+            [this.world.TILE_COPPER]: 0.05,
+            [this.world.TILE_IRON]: 0.05,
+            [this.world.TILE_GOLD]: 0.05,
+            [this.world.TILE_RUBY]: 0.05,
+            [this.world.TILE_SAPPHIRE]: 0.05,
+            [this.world.TILE_EMERALD]: 0.05,
+            [this.world.TILE_DIAMOND]: 0.05,
+            [this.world.TILE_AMETHYST]: 0.05,
         };
 
         // Inventory
@@ -264,7 +264,7 @@ class Player {
             return false;
         }
 
-        const cost = this.fuelCosts[tile] || 10;
+        const cost = this.fuelCosts[tile] || 0.05;
         if (this.fuel < cost) {
             return false;
         }

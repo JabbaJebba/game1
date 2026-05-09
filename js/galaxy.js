@@ -7,8 +7,8 @@ class GalaxyScene extends Phaser.Scene {
         this.shipGrid = data.shipGrid || [];
         this.shipInventory = data.shipInventory || {};
         this.credits = data.credits || 0;
-        this.shipFuel = data.shipFuel !== undefined ? data.shipFuel : 20000;
-        this.shipFuelCapacity = data.shipFuelCapacity !== undefined ? data.shipFuelCapacity : 20000;
+        this.shipFuel = data.shipFuel !== undefined ? data.shipFuel : 100;
+        this.shipFuelCapacity = data.shipFuelCapacity !== undefined ? data.shipFuelCapacity : 100;
         this.engineLevel = this.calculateEngineLevel();
         this.rockCompositions = data.rockCompositions || {};
     }
@@ -104,7 +104,7 @@ class GalaxyScene extends Phaser.Scene {
 
         this.add.text(860, 120, 'SHIP STATUS', { fontSize: '18px', fill: '#00FF00' });
         this.add.text(860, 150, `Engine Level: ${this.engineLevel}`, { fontSize: '14px', fill: '#ffffff' });
-        this.add.text(860, 180, `Fuel: ${this.shipFuel}`, { fontSize: '14px', fill: '#ffffff' });
+        this.add.text(860, 180, `Fuel: ${this.shipFuel.toFixed(1)}L / ${this.shipFuelCapacity.toFixed(1)}L`, { fontSize: '14px', fill: '#ffffff' });
         this.add.text(860, 210, `Credits: ${this.credits}`, { fontSize: '14px', fill: '#ffffff' });
 
         this.infoPanel = this.add.text(860, 280, 'Select a planet', {
@@ -130,8 +130,8 @@ class GalaxyScene extends Phaser.Scene {
             this.launchBtn.text.destroy();
         }
         this.launchBtn = this.createButton(960, 500, 'LAUNCH', () => {
-            if (this.shipFuel < 1) {
-                this.infoPanel.setText('No fuel! Return to ship to buy fuel.');
+            if (this.shipFuel < 25) {
+                this.infoPanel.setText('Not enough fuel! Need 25L to launch. Return to ship to buy fuel.');
                 return;
             }
             // Store composition for this rock type
