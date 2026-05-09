@@ -12,7 +12,7 @@ class GameScene extends Phaser.Scene {
         this.shipFuelCapacity = data.shipFuelCapacity !== undefined ? data.shipFuelCapacity : 100;
         this.rockType = data.rockType || { name: 'Stone' };
         this.rockCompositions = data.rockCompositions || {};
-        this.techState = data.techState || { fuelTankLevel: 0 };
+        this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0 };
     }
 
     create() {
@@ -68,7 +68,7 @@ class GameScene extends Phaser.Scene {
         const maxPlayerFuel = baseFuel + (this.techState.fuelTankLevel || 0);
         let fuelForRun = Math.min(maxPlayerFuel, this.shipFuel);
         this.shipFuel -= fuelForRun; // Deduct from ship tank
-        this.player = new Player(this, spawnX, spawnY, { fuel: fuelForRun });
+        this.player = new Player(this, spawnX, spawnY, { fuel: fuelForRun, efficiencyLevel: this.techState.efficiencyLevel || 0 });
 
         this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1);
         this.cameras.main.setBounds(0, 0, this.worldWidth * this.tileSize, this.worldHeight * this.tileSize);
@@ -190,6 +190,7 @@ class GameScene extends Phaser.Scene {
             `Time: ${dayProgress > 0.3 ? 'Day' : 'Night'} | ` +
             `Pos: ${Math.floor(this.player.x)}, ${Math.floor(this.player.y)}\n` +
             `Fuel: ${this.player.fuel.toFixed(2)}L / ${this.player.maxFuel.toFixed(2)}L | ` +
+            `Mine Cost: ${((this.player.fuelCosts[this.world.TILE_ROCK] || 0.05) * 1000).toFixed(0)}ml | ` +
             `Inventory: ${inventoryText || 'Empty'}`
         );
 

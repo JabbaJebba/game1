@@ -57,17 +57,21 @@ class Player {
         // Fuel system
         this.maxFuel = data.fuel || 25;
         this.fuel = this.maxFuel;
+        const effLevel = data.efficiencyLevel || 0;
+        const baseCost = 0.05;
+        const effReduction = effLevel * 0.001;
+        const miningCost = Math.max(0.04, baseCost - effReduction);
         this.fuelCosts = {
-            [this.world.TILE_GRASS]: 0.05,
-            [this.world.TILE_ROCK]: 0.05,
-            [this.world.TILE_COPPER]: 0.05,
-            [this.world.TILE_IRON]: 0.05,
-            [this.world.TILE_GOLD]: 0.05,
-            [this.world.TILE_RUBY]: 0.05,
-            [this.world.TILE_SAPPHIRE]: 0.05,
-            [this.world.TILE_EMERALD]: 0.05,
-            [this.world.TILE_DIAMOND]: 0.05,
-            [this.world.TILE_AMETHYST]: 0.05,
+            [this.world.TILE_GRASS]: miningCost,
+            [this.world.TILE_ROCK]: miningCost,
+            [this.world.TILE_COPPER]: miningCost,
+            [this.world.TILE_IRON]: miningCost,
+            [this.world.TILE_GOLD]: miningCost,
+            [this.world.TILE_RUBY]: miningCost,
+            [this.world.TILE_SAPPHIRE]: miningCost,
+            [this.world.TILE_EMERALD]: miningCost,
+            [this.world.TILE_DIAMOND]: miningCost,
+            [this.world.TILE_AMETHYST]: miningCost,
         };
 
         // Inventory
@@ -171,7 +175,7 @@ class Player {
         }
         this.keyJumpWasDown = keys.jump.isDown || keys.up.isDown;
 
-        // --- LEFT: move or mine ---
+        // --- LEFT: move, step-up, or mine ---
         const leftDown = keys.mineLeft.isDown || keys.left.isDown;
         if (leftDown && !this.isMoving && now - this.lastMoveTime >= this.moveRepeatRate) {
             this.facingRight = false;
@@ -181,8 +185,37 @@ class Player {
                 this.tileX = newTileX;
                 this.lastMoveTime = now;
                 this.updatePixelPosition(true, this.moveDuration);
+            } else if (this.onGround) {
+                // Try step-up: jump onto a platform to the left
+                let stepped = false;
+                for (let dy = 1; dy <= this.jumpHeight; dy++) {
+                    if (this.canExistAt(newTileX, this.tileY - dy)) {
+                        this.tileX = newTileX;
+                        this.tileY -= dy;
+                        this.lastMoveTime = now;
+                        this.updatePixelPosition(true, this.jumpDuration);
+                        stepped = true;
+                        break;
+                    }
+                }
+                if (!stepped) {
+                    // Blocked — mine the column to the left
+                    if (now - this.lastMineTime >= this.mineCooldown) {
+                        const mineX = this.tileX - 1;
+                        let minedAny = false;
+                        for (let y = this.tileY - 2; y <= this.tileY; y++) {
+                            if (this.tryMine(mineX, y)) minedAny = true;
+                        }
+                        if (minedAny) {
+                            this.showMineIndicator(mineX * 32 + 16, (this.tileY - 2) * 32 + 48, 32, 96);
+                            this.lastMineTime = now;
+                            this.isMining = true;
+                            this.lastMoveTime = now;
+                        }
+                    }
+                }
             } else {
-                // Blocked — mine the column to the left
+                // Blocked and not on ground — mine
                 if (now - this.lastMineTime >= this.mineCooldown) {
                     const mineX = this.tileX - 1;
                     let minedAny = false;
@@ -193,13 +226,13 @@ class Player {
                         this.showMineIndicator(mineX * 32 + 16, (this.tileY - 2) * 32 + 48, 32, 96);
                         this.lastMineTime = now;
                         this.isMining = true;
-                        this.lastMoveTime = now; // pacing between repeated mines
+                        this.lastMoveTime = now;
                     }
                 }
             }
         }
 
-        // --- RIGHT: move or mine ---
+        // --- RIGHT: move, step-up, or mine ---
         const rightDown = keys.mineRight.isDown || keys.right.isDown;
         if (rightDown && !this.isMoving && now - this.lastMoveTime >= this.moveRepeatRate) {
             this.facingRight = true;
@@ -209,8 +242,37 @@ class Player {
                 this.tileX = newTileX;
                 this.lastMoveTime = now;
                 this.updatePixelPosition(true, this.moveDuration);
+            } else if (this.onGround) {
+                // Try step-up: jump onto a platform to the right
+                let stepped = false;
+                for (let dy = 1; dy <= this.jumpHeight; dy++) {
+                    if (this.canExistAt(newTileX, this.tileY - dy)) {
+                        this.tileX = newTileX;
+                        this.tileY -= dy;
+                        this.lastMoveTime = now;
+                        this.updatePixelPosition(true, this.jumpDuration);
+                        stepped = true;
+                        break;
+                    }
+                }
+                if (!stepped) {
+                    // Blocked — mine the column to the right
+                    if (now - this.lastMineTime >= this.mineCooldown) {
+                        const mineX = this.tileX + 2;
+                        let minedAny = false;
+                        for (let y = this.tileY - 2; y <= this.tileY; y++) {
+                            if (this.tryMine(mineX, y)) minedAny = true;
+                        }
+                        if (minedAny) {
+                            this.showMineIndicator(mineX * 32 + 16, (this.tileY - 2) * 32 + 48, 32, 96);
+                            this.lastMineTime = now;
+                            this.isMining = true;
+                            this.lastMoveTime = now;
+                        }
+                    }
+                }
             } else {
-                // Blocked — mine the column to the right
+                // Blocked and not on ground — mine
                 if (now - this.lastMineTime >= this.mineCooldown) {
                     const mineX = this.tileX + 2;
                     let minedAny = false;

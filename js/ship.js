@@ -10,7 +10,7 @@ class ShipScene extends Phaser.Scene {
         this.shipFuel = data.shipFuel !== undefined ? data.shipFuel : 100;
         this.shipFuelCapacity = data.shipFuelCapacity !== undefined ? data.shipFuelCapacity : 100;
         this.rockCompositions = data.rockCompositions || {};
-        this.techState = data.techState || { fuelTankLevel: 0 };
+        this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0 };
         this.powerGen = 0;
         this.powerUse = 0;
         this.powerStored = 0;
@@ -79,6 +79,18 @@ class ShipScene extends Phaser.Scene {
                 { level: 4, cost: { 'Copper Ingot': 200, 'Iron Ingot': 100 }, bonus: 1 },
                 { level: 5, cost: { 'Copper Ingot': 250, 'Iron Ingot': 150, 'Gold Ingot': 50 }, bonus: 1 },
                 { level: 6, cost: { 'Copper Ingot': 300, 'Iron Ingot': 200, 'Gold Ingot': 100 }, bonus: 1 },
+            ],
+            efficiency: [
+                { level: 1, cost: { credits: 1000 }, bonus: 1 },
+                { level: 2, cost: { credits: 2000 }, bonus: 1 },
+                { level: 3, cost: { credits: 4000 }, bonus: 1 },
+                { level: 4, cost: { credits: 8000 }, bonus: 1 },
+                { level: 5, cost: { credits: 16000 }, bonus: 1 },
+                { level: 6, cost: { credits: 32000 }, bonus: 1 },
+                { level: 7, cost: { credits: 64000 }, bonus: 1 },
+                { level: 8, cost: { credits: 128000 }, bonus: 1 },
+                { level: 9, cost: { credits: 256000 }, bonus: 1 },
+                { level: 10, cost: { credits: 512000 }, bonus: 1 },
             ]
         };
 
@@ -438,7 +450,7 @@ class ShipScene extends Phaser.Scene {
             this.controlsContent.setText(content);
 
         } else if (room.type === 'drill') {
-            content += `Mech Workshop active.\nFuel Tank Level: ${this.techState.fuelTankLevel}/6\n`;
+            content += `Mech Workshop active.\nFuel Tank: Lv${this.techState.fuelTankLevel || 0}/6  |  Efficiency: Lv${this.techState.efficiencyLevel || 0}/10\n`;
             this.controlsContent.setText(content);
 
             const upgradeBtn = this.createControlButton(10, 95, 'OPEN TECH TREE', () => {
@@ -642,70 +654,107 @@ class ShipScene extends Phaser.Scene {
         this.techPopup.setVisible(false);
         this.techPopup.setDepth(10);
 
-        this.techBg = this.add.rectangle(0, 0, 480, 420, 0x111122, 0.98).setOrigin(0.5);
+        this.techBg = this.add.rectangle(0, 0, 480, 460, 0x111122, 0.98).setOrigin(0.5);
         this.techBg.setStrokeStyle(2, 0x444466);
-        this.techTitle = this.add.text(0, -190, 'TECH TREE', {
+        this.techTitle = this.add.text(0, -220, 'TECH TREE', {
             fontSize: '22px', fill: '#00FFFF', fontStyle: 'bold', fontFamily: 'monospace'
         }).setOrigin(0.5);
-        this.techSubtitle = this.add.text(0, -165, 'Fuel Tank Capacity', {
-            fontSize: '14px', fill: '#FFD700', fontFamily: 'monospace'
+
+        // Tab buttons
+        this.techFuelTab = this.add.rectangle(-100, -190, 180, 28, 0x444466).setInteractive();
+        this.techFuelTabText = this.add.text(-100, -190, 'FUEL TANK', {
+            fontSize: '12px', fill: '#ffffff', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+        this.techEffTab = this.add.rectangle(100, -190, 180, 28, 0x222233).setInteractive();
+        this.techEffTabText = this.add.text(100, -190, 'EFFICIENCY', {
+            fontSize: '12px', fill: '#aaaaaa', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+
+        this.techFuelTab.on('pointerdown', () => this.switchTechTab('fuelTank'));
+        this.techEffTab.on('pointerdown', () => this.switchTechTab('efficiency'));
+
+        this.techSubtitle = this.add.text(0, -160, '', {
+            fontSize: '13px', fill: '#FFD700', fontFamily: 'monospace'
         }).setOrigin(0.5);
         this.techContent = this.add.container(0, 0);
 
-        const closeBtn = this.add.rectangle(0, 190, 140, 30, 0x882222).setInteractive();
-        const closeTxt = this.add.text(0, 190, 'CLOSE', {
+        const closeBtn = this.add.rectangle(0, 220, 140, 30, 0x882222).setInteractive();
+        const closeTxt = this.add.text(0, 220, 'CLOSE', {
             fontSize: '14px', fill: '#ffffff', fontFamily: 'monospace'
         }).setOrigin(0.5);
         closeBtn.on('pointerover', () => closeBtn.setFillStyle(0xaa4444));
         closeBtn.on('pointerout', () => closeBtn.setFillStyle(0x882222));
         closeBtn.on('pointerdown', () => this.closeTechTreePopup());
 
-        this.techPopup.add([this.techBg, this.techTitle, this.techSubtitle, this.techContent, closeBtn, closeTxt]);
+        this.techPopup.add([
+            this.techBg, this.techTitle, this.techSubtitle, this.techContent,
+            this.techFuelTab, this.techFuelTabText, this.techEffTab, this.techEffTabText,
+            closeBtn, closeTxt
+        ]);
+        this.techTab = 'fuelTank';
+    }
+
+    switchTechTab(tab) {
+        this.techTab = tab;
+        if (tab === 'fuelTank') {
+            this.techFuelTab.setFillStyle(0x444466);
+            this.techFuelTabText.setFill('#ffffff');
+            this.techEffTab.setFillStyle(0x222233);
+            this.techEffTabText.setFill('#aaaaaa');
+        } else {
+            this.techFuelTab.setFillStyle(0x222233);
+            this.techFuelTabText.setFill('#aaaaaa');
+            this.techEffTab.setFillStyle(0x444466);
+            this.techEffTabText.setFill('#ffffff');
+        }
+        this.openTechTreePopup();
     }
 
     openTechTreePopup() {
         this.techContent.removeAll(true);
 
-        const currentLevel = this.techState.fuelTankLevel;
-        const baseFuel = 25;
-        const currentMax = baseFuel + currentLevel;
+        const branch = this.techTab;
+        const currentLevel = this.techState[branch + 'Level'] || 0;
+        const levels = this.techTree[branch];
 
-        this.techSubtitle.setText(`Fuel Tank Capacity — Current: ${currentMax}L (Base ${baseFuel}L + ${currentLevel} upgrades)`);
+        if (branch === 'fuelTank') {
+            const baseFuel = 25;
+            const currentMax = baseFuel + currentLevel;
+            this.techSubtitle.setText(`Fuel Tank Capacity — Current: ${currentMax}L (Base ${baseFuel}L + ${currentLevel} upgrades)`);
+        } else {
+            const baseCost = 50;
+            const currentCost = Math.max(40, baseCost - currentLevel);
+            this.techSubtitle.setText(`Mining Efficiency — Current: ${currentCost}ml/tile (Base ${baseCost}ml − ${currentLevel} upgrades)`);
+        }
 
-        const levels = this.techTree.fuelTank;
         let y = -135;
-
         levels.forEach((lvl, i) => {
             const isUnlocked = i < currentLevel;
             const isNext = i === currentLevel;
 
             let costText = Object.entries(lvl.cost)
-                .map(([mat, qty]) => `${mat}: ${qty}`)
+                .map(([mat, qty]) => `${mat}: ${qty.toLocaleString()}`)
                 .join(', ');
 
             const statusText = isUnlocked ? '✓ UNLOCKED' : (isNext ? 'AVAILABLE' : 'LOCKED');
-            const rowColor = isUnlocked ? 0x228822 : (isNext ? 0x444466 : 0x222233);
             const textColor = isUnlocked ? '#44ff44' : (isNext ? '#ffffff' : '#666666');
+            const bonusLabel = branch === 'fuelTank' ? `+${lvl.bonus}L` : `−${lvl.bonus}ml`;
 
-            // Level label
-            const label = this.add.text(-220, y, `Lv${lvl.level}: +${lvl.bonus}L`, {
+            const label = this.add.text(-220, y, `Lv${lvl.level}: ${bonusLabel}`, {
                 fontSize: '13px', fill: textColor, fontFamily: 'monospace'
             }).setOrigin(0, 0.5);
 
-            // Cost text
             const cost = this.add.text(-140, y, costText, {
                 fontSize: '11px', fill: isUnlocked ? '#44ff44' : '#aaaaaa', fontFamily: 'monospace'
             }).setOrigin(0, 0.5);
 
-            // Status / button
-            let btn;
             if (isNext) {
-                const canAfford = this.canAfford(lvl.cost);
+                const canAfford = this.canAffordTech(lvl.cost);
                 const btnColor = canAfford ? 0x228822 : 0x333333;
                 const btnText = canAfford ? 'UPGRADE' : 'INSUFFICIENT';
                 const btnTxtColor = canAfford ? '#ffffff' : '#666666';
 
-                btn = this.add.rectangle(180, y, 100, 24, btnColor).setInteractive();
+                const btn = this.add.rectangle(180, y, 100, 24, btnColor).setInteractive();
                 const btnLabel = this.add.text(180, y, btnText, {
                     fontSize: '11px', fill: btnTxtColor, fontFamily: 'monospace'
                 }).setOrigin(0.5);
@@ -713,7 +762,7 @@ class ShipScene extends Phaser.Scene {
                 if (canAfford) {
                     btn.on('pointerover', () => btn.setFillStyle(0x44aa44));
                     btn.on('pointerout', () => btn.setFillStyle(0x228822));
-                    btn.on('pointerdown', () => this.doUpgrade(lvl));
+                    btn.on('pointerdown', () => this.doUpgrade(branch, lvl));
                 }
 
                 this.techContent.add([label, cost, btn, btnLabel]);
@@ -734,22 +783,30 @@ class ShipScene extends Phaser.Scene {
         this.techPopup.setVisible(false);
     }
 
-    canAfford(cost) {
+    canAffordTech(cost) {
         for (const [mat, qty] of Object.entries(cost)) {
-            if ((this.shipInventory[mat] || 0) < qty) return false;
+            if (mat === 'credits') {
+                if (this.credits < qty) return false;
+            } else {
+                if ((this.shipInventory[mat] || 0) < qty) return false;
+            }
         }
         return true;
     }
 
-    doUpgrade(level) {
-        if (!this.canAfford(level.cost)) return;
+    doUpgrade(branch, level) {
+        if (!this.canAffordTech(level.cost)) return;
 
         for (const [mat, qty] of Object.entries(level.cost)) {
-            this.shipInventory[mat] -= qty;
-            if (this.shipInventory[mat] <= 0) delete this.shipInventory[mat];
+            if (mat === 'credits') {
+                this.credits -= qty;
+            } else {
+                this.shipInventory[mat] -= qty;
+                if (this.shipInventory[mat] <= 0) delete this.shipInventory[mat];
+            }
         }
 
-        this.techState.fuelTankLevel = level.level;
+        this.techState[branch + 'Level'] = level.level;
         this.updateUI();
         this.openTechTreePopup();
     }
