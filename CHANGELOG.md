@@ -4,8 +4,8 @@
 - Added floating text feedback when mining tiles (`+1 Copper Ore`, `+1 Ruby`, etc.)
 - Text rises 40px and fades over 900ms, color-coded by resource type
 - Rocks: gray, Copper: orange, Iron: silver, Gold: yellow, Gems: their respective colors
-- Commit: TBD
-- Status: 🔄 Ready to push. Mining now tells you exactly what you got.
+- Commit: 02cd75e
+- Status: ✅ Pushed. Mining now tells you exactly what you got. Next: save/load system, sound, or auto-collect radius.
 
 ## 2026-05-10 — Debris Particles
 - Added debris particles when mining tiles (4-6 colored squares fly outward and fade)
