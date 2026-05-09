@@ -1,5 +1,11 @@
 # Game Improvement Log
 
+## 2026-05-10 — Debris Particles
+- Added debris particles when mining tiles (4-6 colored squares fly outward and fade)
+- Particles match the tile color (rock, metal, gem)
+- 350-600ms lifetime with random trajectory and rotation
+- Status: Mining now has tactile visual feedback. Next: save/load system, sound, or auto-collect radius.
+
 ## 2026-05-09 — First Automated Update
 - Added screen shake on mining (60ms, intensity 0.004)
 - Added mine indicator flash animation (scale up/down on hit)

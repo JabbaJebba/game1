@@ -307,6 +307,36 @@ class GameScene extends Phaser.Scene {
         }
     }
 
+    spawnDebris(tileX, tileY, color) {
+        const px = tileX * 32 + 16;
+        const py = tileY * 32 + 16;
+        const count = 4 + Math.floor(Math.random() * 3);
+
+        for (let i = 0; i < count; i++) {
+            const size = 3 + Math.floor(Math.random() * 4);
+            const particle = this.add.rectangle(px, py, size, size, color);
+            particle.setDepth(5);
+
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 60 + Math.random() * 100;
+            const vx = Math.cos(angle) * speed;
+            const vy = Math.sin(angle) * speed - 50;
+
+            this.tweens.add({
+                targets: particle,
+                x: px + vx * 0.5,
+                y: py + vy * 0.5,
+                alpha: 0,
+                scaleX: 0.2,
+                scaleY: 0.2,
+                angle: Math.random() * 180 - 90,
+                duration: 350 + Math.random() * 250,
+                ease: 'Power2',
+                onComplete: () => particle.destroy()
+            });
+        }
+    }
+
     getTileName(tile) {
         const names = {
             [this.world.TILE_AIR]: 'Air',

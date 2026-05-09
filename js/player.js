@@ -280,6 +280,10 @@ class Player {
         
         // Screen shake on successful mine
         this.scene.cameras.main.shake(60, 0.004);
+
+        // Debris particles
+        const tileColor = this.scene.tileColors[tile] || 0xffffff;
+        this.scene.spawnDebris(tileX, tileY, tileColor);
         
         return true;
     }
