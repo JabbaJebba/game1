@@ -248,7 +248,7 @@
   - At 200m+ depth: sky fades to near-black (~8% brightness), making deep mining feel genuinely subterranean
   - Multiplies existing day/n cycle darkness so both depth and time of day stack naturally
   - No gameplay impact — purely atmospheric depth cue that makes the world feel more dimensional
-- Status: ⏳ Commit pending
+- Status: ✅ Pushed. Commit: `bf20833`
 1. **Better UI** - Cleaner inventory display, stats panel, depth colors
 2. **More content** - Additional gem types, planet variety
 3. **Audio** - Mining sounds, ambient music
