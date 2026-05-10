@@ -8,7 +8,7 @@
   - Fade + drift outward over 180–300ms, giving a sense of wind rushing past
   - Purely visual, purely additive — no gameplay or collision changes
   - Pairs with existing landing dust to complete the jump arc: takeoff dust → fall trail → landing dust
-- Status: ✅ Pushed. Commit: TBD
+- Status: ✅ Pushed. Commit: 17b784b
 
 ## 2026-05-10 — Mining Recoil Animation
 - **QoL/Game Feel:** Added body recoil when mining — the character's entire sprite (body + eyes) briefly kicks in the opposite direction of the mine swing
