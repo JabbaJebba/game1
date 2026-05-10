@@ -1,5 +1,15 @@
 # Game Improvement Log
 
+## 2026-05-11 — Metal Ore Spark Particles
+- **QoL/Game Feel:** Added bright metallic spark particles when mining copper, iron, or gold ore tiles
+  - 3–5 tiny white/yellow sparks spawn at the mined tile and shoot outward in random directions
+  - Very short lifetime (150–250ms) with fast fade — a brief, satisfying flash
+  - Layered at depth 6, above regular debris but below gem sparkles
+  - Only triggers on metal ores (Cu, Fe, Au) — rock mining is unchanged, gem mining keeps its colored sparkles
+  - Creates clear visual hierarchy: rock = debris, metal = sparks + debris, gem = colored sparkles + debris
+  - Pairs with existing screen shake + debris + recoil to make metal hits feel more valuable than rock
+- Status: ✅ Pushed.
+
 ## 2026-05-11 — Ship Scene Ambient Starfield
 - **QoL/Atmosphere:** Added a slow-drifting ambient starfield to the ship command screen
   - 50 tiny white particles (0.5–2px) with randomized drift speed (0.05–0.3 px/frame) and subtle vertical sine wobble

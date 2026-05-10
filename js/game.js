@@ -569,6 +569,31 @@ class GameScene extends Phaser.Scene {
         });
     }
 
+    spawnMetalSparks(tileX, tileY) {
+        // Bright metallic sparks when mining copper, iron, or gold
+        const px = tileX * 32 + 16;
+        const py = tileY * 32 + 16;
+        const count = 3 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < count; i++) {
+            const size = 2 + Math.floor(Math.random() * 2);
+            const p = this.add.rectangle(px, py, size, size, 0xffffee);
+            p.setDepth(6);
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 80 + Math.random() * 100;
+            this.tweens.add({
+                targets: p,
+                x: px + Math.cos(angle) * speed * 0.3,
+                y: py + Math.sin(angle) * speed * 0.3 - 10,
+                alpha: 0,
+                scaleX: 0.1,
+                scaleY: 0.1,
+                duration: 150 + Math.random() * 100,
+                ease: 'Power1',
+                onComplete: () => p.destroy()
+            });
+        }
+    }
+
     showFloatText(x, y, text, color = '#ffffff') {
         const label = this.add.text(x, y, text, {
             fontSize: '14px', fill: color, stroke: '#000000', strokeThickness: 2, fontFamily: 'monospace'

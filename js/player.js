@@ -461,6 +461,12 @@ class Player {
         if (isGem) {
             this.scene.spawnGemSparkle(this.x, this.y - this.height * 0.6, tileColor);
         }
+
+        // Metal sparks — bright white flash on copper/iron/gold hits
+        const isMetal = tile === this.world.TILE_COPPER || tile === this.world.TILE_IRON || tile === this.world.TILE_GOLD;
+        if (isMetal) {
+            this.scene.spawnMetalSparks(tileX, tileY);
+        }
         
         return true;
     }
