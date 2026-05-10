@@ -6,7 +6,7 @@
   - Gem pulse alpha multiplies with the night factor (gems still shimmer, just dimmer)
   - Makes the day/night cycle visually cohesive — sky darkens AND the world darkens
   - No gameplay impact, purely atmospheric; mining and movement unchanged
-- Status: ✅ Pushed. Commit: TBD
+- Status: ✅ Pushed. Commit: `62283fa`
 
 ## 2026-05-10 — Inline Sell Mode + Modal Click Guard
 - **Bugfix:** Eliminated sell popup jumping to wrong room — root cause was scene-level `pointerdown` leaking through popup buttons to the grid, selecting a different room tile
