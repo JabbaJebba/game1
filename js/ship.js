@@ -360,6 +360,17 @@ class ShipScene extends Phaser.Scene {
                 this.processJobTick(room, now);
             }
         }
+
+        // Refresh processing modal UI periodically so progress bar animates
+        if (this.roomModal.visible && this.selectedRoomCell) {
+            const room = this.shipGrid[this.selectedRoomCell.x][this.selectedRoomCell.y];
+            if (room && this.recipes[room.type]) {
+                if (!this.lastModalRefresh || now - this.lastModalRefresh > 150) {
+                    this.lastModalRefresh = now;
+                    this.openRoomControlsModal(room);
+                }
+            }
+        }
     }
 
     saveGame() {
@@ -635,7 +646,7 @@ class ShipScene extends Phaser.Scene {
         this.roomModal.setVisible(false);
         this.roomModal.setDepth(10);
 
-        this.roomModalBg = this.add.rectangle(0, 0, 420, 520, 0x0c0c18, 0.98).setOrigin(0.5);
+        this.roomModalBg = this.add.rectangle(0, 0, 420, 620, 0x0c0c18, 0.98).setOrigin(0.5);
         this.roomModalBg.setStrokeStyle(1, 0x222233);
         this.roomModalTitle = this.add.text(0, -240, '', {
             fontSize: '18px', fill: '#00d4aa', fontFamily: 'monospace', letterSpacing: 2
@@ -648,8 +659,8 @@ class ShipScene extends Phaser.Scene {
         }).setOrigin(0.5, 0);
         this.roomModalButtons = this.add.container(0, 0);
 
-        const closeBtn = this.add.rectangle(0, 240, 120, 28, 0x1a1a28).setInteractive();
-        const closeTxt = this.add.text(0, 240, 'CLOSE', {
+        const closeBtn = this.add.rectangle(0, 280, 120, 28, 0x1a1a28).setInteractive();
+        const closeTxt = this.add.text(0, 280, 'CLOSE', {
             fontSize: '12px', fill: '#888888', fontFamily: 'monospace'
         }).setOrigin(0.5);
         closeBtn.on('pointerover', () => closeBtn.setFillStyle(0x252535));
@@ -744,7 +755,7 @@ class ShipScene extends Phaser.Scene {
 
         if (def.cost > 0) {
             const refund = Math.floor(def.cost * 0.5);
-            const btn = this.createModalButton(0, 200, `DESTROY (+${refund}cr)`, () => {
+            const btn = this.createModalButton(0, 260, `DESTROY (+${refund}cr)`, () => {
                 this.destroyRoom(room);
                 this.closeRoomControlsModal();
             }, 200, 28, 0x2a1515, '#aa5555');
@@ -777,225 +788,224 @@ class ShipScene extends Phaser.Scene {
         const queue = this.getQueue(room);
         const now = Date.now();
 
-        // Active job display
+        // ── Active job status ──
         let contentLines = [];
         if (queue.currentJob) {
             const job = queue.currentJob;
             const recipe = job.recipe || recipes.find(r => r.id === job.recipeId);
             const elapsed = now - job.startTime;
             const pct = Math.min(1, elapsed / recipe.time);
-            const remaining = Math.ceil((recipe.time - elapsed) / 1000);
-            contentLines.push(`🔥 ${recipe.name}  ${job.done + 1}/${job.amount}`);
-            contentLines.push(`  ${Math.floor(pct * 100)}%  ~${remaining}s`);
+            const remaining = Math.ceil(Math.max(0, recipe.time - elapsed) / 1000);
+            contentLines.push(`${recipe.name}  —  unit ${job.done + 1} / ${job.amount}`);
+            contentLines.push(`${Math.floor(pct * 100)}%  ·  ${remaining}s remaining`);
         } else {
             contentLines.push('IDLE');
         }
         if (queue.pending.length > 0) {
             const totalPending = queue.pending.reduce((s, j) => s + j.amount, 0);
-            contentLines.push(`Queue: ${totalPending} job${totalPending > 1 ? 's' : ''}`);
+            contentLines.push(`Queue: ${totalPending} pending`);
         }
         this.roomModalContent.setText(contentLines.join('\n'));
 
-        // Progress bar for active job
+        // ── Progress bar ──
         if (queue.currentJob) {
             const job = queue.currentJob;
             const recipe = job.recipe || recipes.find(r => r.id === job.recipeId);
             const elapsed = now - job.startTime;
             const pct = Math.min(1, elapsed / recipe.time);
-            const barW = 240;
-            const barH = 8;
-            const barY = -130;
-            // Background
-            const barBg = this.add.rectangle(0, barY, barW, barH, 0x111118).setOrigin(0.5);
-            // Fill
-            const barFill = this.add.rectangle(-barW / 2 + (barW * pct) / 2, barY, barW * pct, barH, 0xcc8844).setOrigin(0.5);
-            this.roomModalButtons.add([barBg, barFill]);
+            const barW = 260;
+            const barH = 10;
+            const barY = -155;
+            const barX = -barW / 2;
+            // Border / background
+            const barBg = this.add.rectangle(0, barY, barW + 4, barH + 4, 0x111118).setOrigin(0.5);
+            barBg.setStrokeStyle(1, 0x333344);
+            // Dark fill (unfilled portion background)
+            const barDark = this.add.rectangle(0, barY, barW, barH, 0x1a1a28).setOrigin(0.5);
+            // Bright fill
+            const fillColor = machineType === 'smelter' ? 0xcc8844 : machineType === 'crusher' ? 0xaa8866 : 0x6688aa;
+            const barFill = this.add.rectangle(barX + (barW * pct) / 2, barY, barW * pct, barH, fillColor).setOrigin(0.5);
+            // Percentage label centered on bar
+            const barLabel = this.add.text(0, barY, `${Math.floor(pct * 100)}%`, {
+                fontSize: '9px', fill: '#ffffff', fontFamily: 'monospace'
+            }).setOrigin(0.5);
+            this.roomModalButtons.add([barBg, barDark, barFill, barLabel]);
         }
 
-        let y = -80;
+        let y = -115;
+        const rowHeight = 34;
+        const maxRows = 7;
+        let rowCount = 0;
 
-        // Initialize amount selectors if not present
         if (!this.modalAmounts) this.modalAmounts = {};
 
         recipes.forEach(recipe => {
-            // Determine available count for this recipe
-            let canMake = Infinity;
-            let availableText = '';
-            let dynamicInput = null;
-
             if (machineType === 'crusher') {
-                // Dynamic: list each rock type as a separate row
                 const rockTypes = Object.keys(this.shipInventory).filter(k =>
                     this.rockCompositions[k] && !k.startsWith('Crushed')
                 );
                 rockTypes.forEach(rockName => {
+                    if (rowCount >= maxRows) return;
                     const count = this.shipInventory[rockName] || 0;
                     if (count <= 0) return;
+                    rowCount++;
                     const rowKey = `${recipe.id}_${rockName}`;
                     if (this.modalAmounts[rowKey] === undefined) this.modalAmounts[rowKey] = 1;
-                    const amt = this.modalAmounts[rowKey];
-                    canMake = count;
+                    const amt = Math.min(this.modalAmounts[rowKey], count);
 
-                    // Row label
-                    const label = this.add.text(-100, y, `${rockName}`, {
+                    const label = this.add.text(-110, y, rockName, {
                         fontSize: '11px', fill: '#aaaaaa', fontFamily: 'monospace'
                     }).setOrigin(0, 0.5);
-                    const have = this.add.text(40, y, `${count}`, {
+                    const have = this.add.text(30, y, `×${count}`, {
                         fontSize: '10px', fill: '#555555', fontFamily: 'monospace'
                     }).setOrigin(0.5);
 
-                    // Amount selector
-                    const minBtn = this.add.rectangle(80, y, 20, 20, 0x1a1a28).setInteractive();
-                    const minTxt = this.add.text(80, y, '-', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
-                    const amtTxt = this.add.text(105, y, String(amt), {
+                    const minBtn = this.add.rectangle(70, y, 22, 22, 0x1a1a28).setInteractive();
+                    const minTxt = this.add.text(70, y, '-', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
+                    const amtTxt = this.add.text(95, y, String(amt), {
                         fontSize: '11px', fill: '#cccccc', fontFamily: 'monospace'
                     }).setOrigin(0.5);
-                    const plBtn = this.add.rectangle(130, y, 20, 20, 0x1a1a28).setInteractive();
-                    const plTxt = this.add.text(130, y, '+', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
+                    const plBtn = this.add.rectangle(120, y, 22, 22, 0x1a1a28).setInteractive();
+                    const plTxt = this.add.text(120, y, '+', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
 
                     minBtn.on('pointerdown', () => {
-                        if (this.modalAmounts[rowKey] > 1) {
-                            this.modalAmounts[rowKey]--;
-                            this.openRoomControlsModal(room);
-                        }
+                        if (this.modalAmounts[rowKey] > 1) { this.modalAmounts[rowKey]--; this.openRoomControlsModal(room); }
                     });
                     plBtn.on('pointerdown', () => {
-                        if (this.modalAmounts[rowKey] < canMake) {
-                            this.modalAmounts[rowKey]++;
-                            this.openRoomControlsModal(room);
-                        }
+                        if (this.modalAmounts[rowKey] < count) { this.modalAmounts[rowKey]++; this.openRoomControlsModal(room); }
                     });
 
-                    const qBtn = this.createModalButton(170, y, 'QUEUE', () => {
+                    const qBtn = this.createModalButton(165, y, 'QUEUE', () => {
                         const qAmt = this.modalAmounts[rowKey];
                         if (qAmt > 0 && qAmt <= count) {
-                            const din = { [rockName]: 1 };
-                            if (this.queueJob(room, recipe, qAmt, din)) {
+                            if (this.queueJob(room, recipe, qAmt, { [rockName]: 1 })) {
                                 this.modalAmounts[rowKey] = 1;
                                 this.openRoomControlsModal(room);
                             }
                         }
-                    }, 60, 22, 0x224422, '#88cc88');
+                    }, 55, 22, 0x224422, '#88cc88');
 
                     this.roomModalButtons.add([label, have, minBtn, minTxt, amtTxt, plBtn, plTxt]);
                     this.roomModalControlBtns.push(qBtn);
-                    y += 32;
+                    y += rowHeight;
                 });
-                return; // skip normal recipe row for crusher
+                if (rockTypes.length > maxRows) {
+                    const more = this.add.text(0, y, `... ${rockTypes.length - maxRows} more types ...`, {
+                        fontSize: '10px', fill: '#444444', fontFamily: 'monospace'
+                    }).setOrigin(0.5);
+                    this.roomModalButtons.add(more);
+                }
+                return;
             }
 
             if (machineType === 'refinery') {
                 const crushedList = Object.keys(this.shipInventory).filter(k => k.startsWith('Crushed '));
                 crushedList.forEach(crushedName => {
+                    if (rowCount >= maxRows) return;
                     const count = this.shipInventory[crushedName] || 0;
                     const rockName = crushedName.replace('Crushed ', '');
                     const comp = this.rockCompositions[rockName];
                     if (!comp || count < 5) return;
+                    rowCount++;
+                    const canMake = Math.floor(count / 5);
                     const rowKey = `${recipe.id}_${crushedName}`;
                     if (this.modalAmounts[rowKey] === undefined) this.modalAmounts[rowKey] = 1;
-                    const amt = this.modalAmounts[rowKey];
-                    canMake = Math.floor(count / 5);
+                    const amt = Math.min(this.modalAmounts[rowKey], canMake);
 
-                    const label = this.add.text(-100, y, `${crushedName}`, {
+                    const label = this.add.text(-110, y, crushedName, {
                         fontSize: '11px', fill: '#aaaaaa', fontFamily: 'monospace'
                     }).setOrigin(0, 0.5);
-                    const have = this.add.text(40, y, `${count}`, {
+                    const have = this.add.text(30, y, `×${count}`, {
                         fontSize: '10px', fill: '#555555', fontFamily: 'monospace'
                     }).setOrigin(0.5);
 
-                    const minBtn = this.add.rectangle(80, y, 20, 20, 0x1a1a28).setInteractive();
-                    const minTxt = this.add.text(80, y, '-', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
-                    const amtTxt = this.add.text(105, y, String(amt), {
+                    const minBtn = this.add.rectangle(70, y, 22, 22, 0x1a1a28).setInteractive();
+                    const minTxt = this.add.text(70, y, '-', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
+                    const amtTxt = this.add.text(95, y, String(amt), {
                         fontSize: '11px', fill: '#cccccc', fontFamily: 'monospace'
                     }).setOrigin(0.5);
-                    const plBtn = this.add.rectangle(130, y, 20, 20, 0x1a1a28).setInteractive();
-                    const plTxt = this.add.text(130, y, '+', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
+                    const plBtn = this.add.rectangle(120, y, 22, 22, 0x1a1a28).setInteractive();
+                    const plTxt = this.add.text(120, y, '+', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
 
                     minBtn.on('pointerdown', () => {
-                        if (this.modalAmounts[rowKey] > 1) {
-                            this.modalAmounts[rowKey]--;
-                            this.openRoomControlsModal(room);
-                        }
+                        if (this.modalAmounts[rowKey] > 1) { this.modalAmounts[rowKey]--; this.openRoomControlsModal(room); }
                     });
                     plBtn.on('pointerdown', () => {
-                        if (this.modalAmounts[rowKey] < canMake) {
-                            this.modalAmounts[rowKey]++;
-                            this.openRoomControlsModal(room);
-                        }
+                        if (this.modalAmounts[rowKey] < canMake) { this.modalAmounts[rowKey]++; this.openRoomControlsModal(room); }
                     });
 
-                    const qBtn = this.createModalButton(170, y, 'QUEUE', () => {
+                    const qBtn = this.createModalButton(165, y, 'QUEUE', () => {
                         const qAmt = this.modalAmounts[rowKey];
                         if (qAmt > 0 && qAmt <= canMake) {
-                            const din = { [crushedName]: 5 };
-                            if (this.queueJob(room, recipe, qAmt, din)) {
+                            if (this.queueJob(room, recipe, qAmt, { [crushedName]: 5 })) {
                                 this.modalAmounts[rowKey] = 1;
                                 this.openRoomControlsModal(room);
                             }
                         }
-                    }, 60, 22, 0x224422, '#88cc88');
+                    }, 55, 22, 0x224422, '#88cc88');
 
                     this.roomModalButtons.add([label, have, minBtn, minTxt, amtTxt, plBtn, plTxt]);
                     this.roomModalControlBtns.push(qBtn);
-                    y += 32;
+                    y += rowHeight;
                 });
+                if (crushedList.length > maxRows) {
+                    const more = this.add.text(0, y, `... ${crushedList.length - maxRows} more types ...`, {
+                        fontSize: '10px', fill: '#444444', fontFamily: 'monospace'
+                    }).setOrigin(0.5);
+                    this.roomModalButtons.add(more);
+                }
                 return;
             }
 
-            // Normal recipes (smelter)
+            // ── Smelter (normal recipes) ──
+            let canMake = Infinity;
             for (const [mat, qty] of Object.entries(recipe.input)) {
                 const have = this.shipInventory[mat] || 0;
                 canMake = Math.min(canMake, Math.floor(have / qty));
             }
             if (canMake === Infinity) canMake = 0;
+            if (canMake <= 0) return;
 
+            rowCount++;
             const rowKey = recipe.id;
             if (this.modalAmounts[rowKey] === undefined) this.modalAmounts[rowKey] = 1;
-            const amt = this.modalAmounts[rowKey];
+            const amt = Math.min(this.modalAmounts[rowKey], canMake);
 
-            const label = this.add.text(-100, y, `${recipe.name}`, {
+            const label = this.add.text(-110, y, recipe.name, {
                 fontSize: '11px', fill: '#aaaaaa', fontFamily: 'monospace'
             }).setOrigin(0, 0.5);
 
-            // Input info
-            const inputTxt = Object.entries(recipe.input).map(([m, q]) => `${m}:${this.shipInventory[m] || 0}`).join(' ');
-            const info = this.add.text(-100, y + 12, inputTxt, {
+            const inputTxt = Object.entries(recipe.input).map(([m, q]) => `${this.shipInventory[m] || 0}/${q} ${m}`).join('  ');
+            const info = this.add.text(-110, y + 12, inputTxt, {
                 fontSize: '9px', fill: '#444444', fontFamily: 'monospace'
             }).setOrigin(0, 0.5);
 
-            // Amount selector
-            const minBtn = this.add.rectangle(80, y, 20, 20, 0x1a1a28).setInteractive();
-            const minTxt = this.add.text(80, y, '-', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
-            const amtTxt = this.add.text(105, y, String(Math.min(amt, canMake)), {
+            const minBtn = this.add.rectangle(70, y, 22, 22, 0x1a1a28).setInteractive();
+            const minTxt = this.add.text(70, y, '-', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
+            const amtTxt = this.add.text(95, y, String(amt), {
                 fontSize: '11px', fill: '#cccccc', fontFamily: 'monospace'
             }).setOrigin(0.5);
-            const plBtn = this.add.rectangle(130, y, 20, 20, 0x1a1a28).setInteractive();
-            const plTxt = this.add.text(130, y, '+', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
+            const plBtn = this.add.rectangle(120, y, 22, 22, 0x1a1a28).setInteractive();
+            const plTxt = this.add.text(120, y, '+', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
 
             minBtn.on('pointerdown', () => {
-                if (this.modalAmounts[rowKey] > 1) {
-                    this.modalAmounts[rowKey]--;
-                    this.openRoomControlsModal(room);
-                }
+                if (this.modalAmounts[rowKey] > 1) { this.modalAmounts[rowKey]--; this.openRoomControlsModal(room); }
             });
             plBtn.on('pointerdown', () => {
-                if (this.modalAmounts[rowKey] < canMake) {
-                    this.modalAmounts[rowKey]++;
-                    this.openRoomControlsModal(room);
-                }
+                if (this.modalAmounts[rowKey] < canMake) { this.modalAmounts[rowKey]++; this.openRoomControlsModal(room); }
             });
 
-            const qBtn = this.createModalButton(170, y, 'QUEUE', () => {
+            const qBtn = this.createModalButton(165, y, 'QUEUE', () => {
                 const qAmt = Math.min(this.modalAmounts[rowKey], canMake);
                 if (qAmt > 0 && this.queueJob(room, recipe, qAmt)) {
                     this.modalAmounts[rowKey] = 1;
                     this.openRoomControlsModal(room);
                 }
-            }, 60, 22, canMake > 0 ? 0x224422 : 0x151515, canMake > 0 ? '#88cc88' : '#444444');
+            }, 55, 22, canMake > 0 ? 0x224422 : 0x151515, canMake > 0 ? '#88cc88' : '#444444');
 
             this.roomModalButtons.add([label, info, minBtn, minTxt, amtTxt, plBtn, plTxt]);
             this.roomModalControlBtns.push(qBtn);
-            y += 36;
+            y += rowHeight;
         });
     }
 
