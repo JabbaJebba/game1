@@ -1,5 +1,15 @@
 # Game Improvement Log
 
+## 2026-05-10 — Player Torch / Night Lighting
+- **QoL/Atmosphere:** Added a player-carried torch that brightens tiles near the character at night
+  - Circular light radius of ~180px (≈5–6 tiles) around the player
+  - Brightness boost falls off linearly from center (55% max boost at player's feet → 0% at edge)
+  - Applies to both batch tile rendering (`renderWorld`) and single-tile redraws (`updateTile`)
+  - Only active when `tileAlpha < 1` (night/dusk), so daytime is unchanged
+  - Makes night mining feel intimate and atmospheric — the world is dark, but your immediate workspace is lit
+  - Pairs with existing nighttime tile dimming to complete the day/night cycle
+- Status: ⏳ Pending push
+
 ## 2026-05-10 — Falling Wind Trail
 - **QoL/Game Feel:** Added thin white streaks that spawn behind the player when falling fast (vy > 250)
   - Particles drift opposite to the player's facing direction (falling right → streaks trail left)

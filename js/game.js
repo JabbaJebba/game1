@@ -269,12 +269,21 @@ class GameScene extends Phaser.Scene {
                     const isGem = tile === this.world.TILE_RUBY || tile === this.world.TILE_SAPPHIRE ||
                                   tile === this.world.TILE_EMERALD || tile === this.world.TILE_DIAMOND ||
                                   tile === this.world.TILE_AMETHYST;
-                    if (isGem) {
-                        const pulse = Math.sin((this.currentTime || 0) * 0.003 + x * 0.3 + y * 0.3) * 0.12 + 0.88;
-                        this.tileGraphics.fillStyle(color, pulse * this.tileAlpha);
-                    } else {
-                        this.tileGraphics.fillStyle(color, this.tileAlpha);
+                    const pulse = isGem ? Math.sin((this.currentTime || 0) * 0.003 + x * 0.3 + y * 0.3) * 0.12 + 0.88 : 1;
+                    let alpha = isGem ? pulse * this.tileAlpha : this.tileAlpha;
+                    // Player torch — brighten tiles near player at night
+                    if (this.tileAlpha < 1) {
+                        const dx = x * 32 + 16 - this.player.x;
+                        const dy = y * 32 + 16 - this.player.y;
+                        const distSq = dx * dx + dy * dy;
+                        const torchRadius = 180;
+                        if (distSq < torchRadius * torchRadius) {
+                            const dist = Math.sqrt(distSq);
+                            const boost = (1 - dist / torchRadius) * 0.55;
+                            alpha = Math.min(1, alpha + boost);
+                        }
                     }
+                    this.tileGraphics.fillStyle(color, alpha);
                     this.tileGraphics.fillRect(px, py, 32, 32);
                     this.tileGraphics.lineStyle(1, 0x000000, 0.1);
                     this.tileGraphics.strokeRect(px, py, 32, 32);
@@ -321,12 +330,20 @@ class GameScene extends Phaser.Scene {
             const isGem = tile === this.world.TILE_RUBY || tile === this.world.TILE_SAPPHIRE ||
                           tile === this.world.TILE_EMERALD || tile === this.world.TILE_DIAMOND ||
                           tile === this.world.TILE_AMETHYST;
-            if (isGem) {
-                const pulse = Math.sin((this.currentTime || 0) * 0.003 + x * 0.3 + y * 0.3) * 0.12 + 0.88;
-                this.tileGraphics.fillStyle(color, pulse * this.tileAlpha);
-            } else {
-                this.tileGraphics.fillStyle(color, this.tileAlpha);
+            let alpha = isGem ? (Math.sin((this.currentTime || 0) * 0.003 + x * 0.3 + y * 0.3) * 0.12 + 0.88) * this.tileAlpha : this.tileAlpha;
+            // Player torch — brighten tiles near player at night
+            if (this.tileAlpha < 1) {
+                const dx = x * 32 + 16 - this.player.x;
+                const dy = y * 32 + 16 - this.player.y;
+                const distSq = dx * dx + dy * dy;
+                const torchRadius = 180;
+                if (distSq < torchRadius * torchRadius) {
+                    const dist = Math.sqrt(distSq);
+                    const boost = (1 - dist / torchRadius) * 0.55;
+                    alpha = Math.min(1, alpha + boost);
+                }
             }
+            this.tileGraphics.fillStyle(color, alpha);
             this.tileGraphics.fillRect(px, py, 32, 32);
             this.tileGraphics.lineStyle(1, 0x000000, 0.1);
             this.tileGraphics.strokeRect(px, py, 32, 32);
