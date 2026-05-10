@@ -156,7 +156,7 @@ class ShipScene extends Phaser.Scene {
         this.createSellPopup();
         this.createTechTreePopup();
         this.createBuildModal();
-        this.createRoomControlsModal();
+        this.createRoomControlsPanel();
         this.createInventoryModal();
         this.createGhostGraphics();
         this.createResetConfirmPopup();
@@ -176,7 +176,7 @@ class ShipScene extends Phaser.Scene {
             }
             // Also close any open modals
             this.closeBuildModal();
-            this.closeRoomControlsModal();
+            this.closeRoomControlsPanel();
             this.closeSellPopup();
             this.closeTechTreePopup();
             this.closeResetPopup();
@@ -273,7 +273,7 @@ class ShipScene extends Phaser.Scene {
             if (this.selectedRoomCell) {
                 const selRoom = this.shipGrid[this.selectedRoomCell.x][this.selectedRoomCell.y];
                 if (selRoom && selRoom.masterX === room.masterX && selRoom.masterY === room.masterY) {
-                    this.openRoomControlsModal(selRoom);
+                    this.openRoomControlsPanel(selRoom);
                 }
             }
         }
@@ -362,12 +362,12 @@ class ShipScene extends Phaser.Scene {
         }
 
         // Refresh processing modal UI periodically so progress bar animates
-        if (this.roomModal.visible && this.selectedRoomCell) {
+        if (this.roomPanel.visible && this.selectedRoomCell) {
             const room = this.shipGrid[this.selectedRoomCell.x][this.selectedRoomCell.y];
             if (room && this.recipes[room.type]) {
                 if (!this.lastModalRefresh || now - this.lastModalRefresh > 150) {
                     this.lastModalRefresh = now;
-                    this.openRoomControlsModal(room);
+                    this.openRoomControlsPanel(room);
                 }
             }
         }
@@ -539,7 +539,7 @@ class ShipScene extends Phaser.Scene {
         if (room) {
             this.selectedRoomCell = { x: gx, y: gy };
             this.drawShipGrid();
-            this.openRoomControlsModal(room);
+            this.openRoomControlsPanel(room);
         } else {
             this.selectedRoomCell = null;
             this.drawShipGrid();
@@ -647,131 +647,143 @@ class ShipScene extends Phaser.Scene {
         this.invModal.setVisible(false);
     }
 
-    createRoomControlsModal() {
-        this.roomModal = this.add.container(640, 360);
-        this.roomModal.setVisible(false);
-        this.roomModal.setDepth(10);
+    createRoomControlsPanel() {
+        const pw = 280;
+        const ph = 560;
+        const px = 1280 - pw / 2 - 20; // right side, 20px margin
+        const py = 360;
 
-        this.roomModalBg = this.add.rectangle(0, 0, 420, 620, 0x0c0c18, 0.98).setOrigin(0.5);
-        this.roomModalBg.setStrokeStyle(1, 0x222233);
-        this.roomModalTitle = this.add.text(0, -240, '', {
-            fontSize: '18px', fill: '#00d4aa', fontFamily: 'monospace', letterSpacing: 2
+        this.roomPanel = this.add.container(px, py);
+        this.roomPanel.setVisible(false);
+        this.roomPanel.setDepth(10);
+
+        this.roomPanelBg = this.add.rectangle(0, 0, pw, ph, 0x0c0c18, 0.98).setOrigin(0.5);
+        this.roomPanelBg.setStrokeStyle(1, 0x222233);
+
+        this.roomPanelTitle = this.add.text(0, -ph / 2 + 24, '', {
+            fontSize: '16px', fill: '#00d4aa', fontFamily: 'monospace', letterSpacing: 2
         }).setOrigin(0.5);
-        this.roomModalSubtitle = this.add.text(0, -210, '', {
-            fontSize: '11px', fill: '#555555', fontFamily: 'monospace'
+
+        this.roomPanelSubtitle = this.add.text(0, -ph / 2 + 50, '', {
+            fontSize: '10px', fill: '#555555', fontFamily: 'monospace'
         }).setOrigin(0.5);
-        this.roomModalContent = this.add.text(0, -170, '', {
-            fontSize: '12px', fill: '#aaaaaa', fontFamily: 'monospace', lineSpacing: 4, align: 'center'
+
+        this.roomPanelContent = this.add.text(0, -ph / 2 + 80, '', {
+            fontSize: '11px', fill: '#aaaaaa', fontFamily: 'monospace', lineSpacing: 3, align: 'left'
         }).setOrigin(0.5, 0);
-        this.roomModalButtons = this.add.container(0, 0);
 
-        const closeBtn = this.add.rectangle(0, 280, 120, 28, 0x1a1a28).setInteractive();
-        const closeTxt = this.add.text(0, 280, 'CLOSE', {
-            fontSize: '12px', fill: '#888888', fontFamily: 'monospace'
+        this.roomPanelButtons = this.add.container(0, 0);
+
+        const closeBtn = this.add.rectangle(pw / 2 - 28, -ph / 2 + 18, 40, 20, 0x1a1a28).setInteractive();
+        const closeTxt = this.add.text(pw / 2 - 28, -ph / 2 + 18, '✕', {
+            fontSize: '12px', fill: '#666666', fontFamily: 'monospace'
         }).setOrigin(0.5);
-        closeBtn.on('pointerover', () => closeBtn.setFillStyle(0x252535));
+        closeBtn.on('pointerover', () => closeBtn.setFillStyle(0x333344));
         closeBtn.on('pointerout', () => closeBtn.setFillStyle(0x1a1a28));
-        closeBtn.on('pointerdown', () => this.closeRoomControlsModal());
+        closeBtn.on('pointerdown', () => this.closeRoomControlsPanel());
 
-        this.roomModal.add([
-            this.roomModalBg, this.roomModalTitle, this.roomModalSubtitle,
-            this.roomModalContent, this.roomModalButtons, closeBtn, closeTxt
+        this.roomPanel.add([
+            this.roomPanelBg, this.roomPanelTitle, this.roomPanelSubtitle,
+            this.roomPanelContent, this.roomPanelButtons, closeBtn, closeTxt
         ]);
-        this.roomModalControlBtns = [];
+        this.roomPanelControlBtns = [];
     }
 
-    openRoomControlsModal(room) {
+    openRoomControlsPanel(room) {
+        const ph = 560;
         const def = this.roomTypes[room.type];
-        this.roomModalButtons.removeAll(true);
-        this.roomModalControlBtns = [];
+        this.roomPanelButtons.removeAll(true);
+        this.roomPanelControlBtns = [];
 
-        this.roomModalTitle.setText(`${def.icon}  ${def.name.toUpperCase()}`);
-        this.roomModalSubtitle.setText(`${def.size}×${def.size}  |  ${def.cost > 0 ? def.cost + 'cr' : 'Free'}  |  ${def.power > 0 ? '+' + def.power + ' power' : def.powerCap ? '+' + def.powerCap + ' storage' : def.fuelCap ? '+' + def.fuelCap + 'L fuel' : ''}`);
-        this.roomModalContent.setText('');
+        this.roomPanelTitle.setText(`${def.icon}  ${def.name.toUpperCase()}`);
+        this.roomPanelSubtitle.setText(
+            `${def.size}×${def.size}  |  ${def.cost > 0 ? def.cost + 'cr' : 'Free'}` +
+            `  |  ${def.power > 0 ? '+' + def.power + ' power' : def.powerCap ? '+' + def.powerCap + ' storage' : def.fuelCap ? '+' + def.fuelCap + 'L fuel' : ''}`
+        );
+        this.roomPanelContent.setText('');
+
+        let y = -ph / 2 + 130;
 
         if (room.type === 'trade') {
-            let lines = ['─ GEMS ─'];
-            const gemNames = ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst'];
-            gemNames.forEach(gemName => {
-                const count = this.shipInventory[gemName] || 0;
-                const price = this.gemPrices[gemName];
-                lines.push(`  ${gemName}: ${count}  @${price}cr`);
-            });
-            lines.push('');
-            lines.push('─ FUEL ─');
-            Object.entries(this.fuelPrices).forEach(([amount, cost]) => {
-                lines.push(`  +${amount}L  —  ${cost}cr`);
-            });
-            this.roomModalContent.setText(lines.join('\n'));
+            this.roomPanelContent.setText(
+                '─ GEMS ─\n' +
+                ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst'].map(g => {
+                    const c = this.shipInventory[g] || 0;
+                    return `  ${g}: ${c}  @${this.gemPrices[g]}cr`;
+                }).join('\n') + '\n\n─ FUEL ─\n' +
+                Object.entries(this.fuelPrices).map(([amt, cost]) => `  +${amt}L  —  ${cost}cr`).join('\n')
+            );
 
-            let y = 40;
-            gemNames.forEach(gemName => {
+            y = -ph / 2 + 230;
+            ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst'].forEach(gemName => {
                 const count = this.shipInventory[gemName] || 0;
                 if (count > 0) {
-                    const price = this.gemPrices[gemName];
-                    const btn = this.createModalButton(0, y, `SELL ${gemName}`, () => this.openSellPopup(gemName, count, price), 200, 28, 0x224422, '#88cc88');
-                    this.roomModalControlBtns.push(btn);
-                    y += 36;
+                    const btn = this.createPanelButton(0, y, `SELL ${gemName}`, () => this.openSellPopup(gemName, count, this.gemPrices[gemName]), 220, 26, 0x224422, '#88cc88');
+                    this.roomPanelControlBtns.push(btn);
+                    y += 32;
                 }
             });
 
             y += 8;
             Object.entries(this.fuelPrices).forEach(([amount, cost]) => {
-                const btn = this.createModalButton(0, y, `BUY ${amount}L FUEL — ${cost}cr`, () => {
+                const btn = this.createPanelButton(0, y, `BUY ${amount}L — ${cost}cr`, () => {
                     if (this.credits >= cost && this.shipFuel + parseInt(amount) <= this.shipFuelCapacity) {
                         this.credits -= cost;
                         this.shipFuel = Math.min(this.shipFuelCapacity, this.shipFuel + parseInt(amount));
                         this.updateUI();
-                        this.openRoomControlsModal(room);
+                        this.openRoomControlsPanel(room);
                     }
-                }, 200, 28, 0x222244, '#8888cc');
-                this.roomModalControlBtns.push(btn);
-                y += 36;
+                }, 220, 26, 0x222244, '#8888cc');
+                this.roomPanelControlBtns.push(btn);
+                y += 32;
             });
 
         } else if (room.type === 'fuelTank') {
-            this.roomModalContent.setText(
+            this.roomPanelContent.setText(
                 `Stored: ${this.shipFuel.toFixed(1)} / ${this.shipFuelCapacity.toFixed(1)}L\n` +
                 `Bonus capacity: +${def.fuelCap}L`
             );
 
         } else if (room.type === 'crusher') {
-            this.renderProcessingModal(room, 'crusher');
+            this.renderProcessingPanel(room, 'crusher', y);
+            return;
 
         } else if (room.type === 'smelter') {
-            this.renderProcessingModal(room, 'smelter');
+            this.renderProcessingPanel(room, 'smelter', y);
+            return;
 
         } else if (room.type === 'refinery') {
-            this.renderProcessingModal(room, 'refinery');
+            this.renderProcessingPanel(room, 'refinery', y);
+            return;
 
         } else if (room.type === 'drill') {
-            this.roomModalContent.setText(
+            this.roomPanelContent.setText(
                 `Fuel Tank Level: ${this.techState.fuelTankLevel || 0} / 6\n` +
                 `Efficiency Level: ${this.techState.efficiencyLevel || 0} / 10`
             );
-            const btn = this.createModalButton(0, 40, 'OPEN TECH TREE', () => {
-                this.closeRoomControlsModal();
+            const btn = this.createPanelButton(0, -ph / 2 + 190, 'OPEN TECH TREE', () => {
+                this.closeRoomControlsPanel();
                 this.openTechTreePopup();
-            }, 200, 28, 0x152525, '#44aa88');
-            this.roomModalControlBtns.push(btn);
+            }, 220, 26, 0x152525, '#44aa88');
+            this.roomPanelControlBtns.push(btn);
 
         } else {
-            this.roomModalContent.setText('No controls available.');
+            this.roomPanelContent.setText('No controls available.');
         }
 
         if (def.cost > 0) {
             const refund = Math.floor(def.cost * 0.5);
-            const btn = this.createModalButton(0, 260, `DESTROY (+${refund}cr)`, () => {
+            const btn = this.createPanelButton(0, ph / 2 - 34, `DESTROY (+${refund}cr)`, () => {
                 this.destroyRoom(room);
-                this.closeRoomControlsModal();
-            }, 200, 28, 0x2a1515, '#aa5555');
-            this.roomModalControlBtns.push(btn);
+                this.closeRoomControlsPanel();
+            }, 220, 26, 0x2a1515, '#aa5555');
+            this.roomPanelControlBtns.push(btn);
         }
 
-        this.roomModal.setVisible(true);
+        this.roomPanel.setVisible(true);
     }
 
-    createModalButton(x, y, text, callback, w, h, color, textColor) {
+    createPanelButton(x, y, text, callback, w, h, color, textColor) {
         const rect = this.add.rectangle(x, y, w, h, color).setInteractive();
         const label = this.add.text(x, y, text, {
             fontSize: '11px', fill: textColor, fontFamily: 'monospace'
@@ -779,22 +791,23 @@ class ShipScene extends Phaser.Scene {
         rect.on('pointerover', () => { rect.setFillStyle(color + 0x111111); label.setFill('#ffffff'); });
         rect.on('pointerout', () => { rect.setFillStyle(color); label.setFill(textColor); });
         rect.on('pointerdown', callback);
-        this.roomModalButtons.add([rect, label]);
+        this.roomPanelButtons.add([rect, label]);
         return { rect, text: label };
     }
 
-    closeRoomControlsModal() {
-        this.roomModal.setVisible(false);
+    closeRoomControlsPanel() {
+        this.roomPanel.setVisible(false);
         this.selectedRoomCell = null;
         this.drawShipGrid();
     }
 
-    renderProcessingModal(room, machineType) {
+    renderProcessingPanel(room, machineType, startY) {
         const recipes = this.recipes[machineType];
         const queue = this.getQueue(room);
         const now = Date.now();
+        const ph = 560;
 
-        // ── Active job status ──
+        // Active job status text
         let contentLines = [];
         if (queue.currentJob) {
             const job = queue.currentJob;
@@ -802,8 +815,8 @@ class ShipScene extends Phaser.Scene {
             const elapsed = now - job.startTime;
             const pct = Math.min(1, elapsed / recipe.time);
             const remaining = Math.ceil(Math.max(0, recipe.time - elapsed) / 1000);
-            contentLines.push(`${recipe.name}  —  unit ${job.done + 1} / ${job.amount}`);
-            contentLines.push(`${Math.floor(pct * 100)}%  ·  ${remaining}s remaining`);
+            contentLines.push(`${recipe.name}  —  ${job.done + 1}/${job.amount}`);
+            contentLines.push(`${Math.floor(pct * 100)}%  ·  ${remaining}s`);
         } else {
             contentLines.push('IDLE');
         }
@@ -811,36 +824,33 @@ class ShipScene extends Phaser.Scene {
             const totalPending = queue.pending.reduce((s, j) => s + j.amount, 0);
             contentLines.push(`Queue: ${totalPending} pending`);
         }
-        this.roomModalContent.setText(contentLines.join('\n'));
+        this.roomPanelContent.setText(contentLines.join('\n'));
 
-        // ── Progress bar ──
+        // Progress bar
         if (queue.currentJob) {
             const job = queue.currentJob;
             const recipe = job.recipe || recipes.find(r => r.id === job.recipeId);
             const elapsed = now - job.startTime;
             const pct = Math.min(1, elapsed / recipe.time);
-            const barW = 260;
-            const barH = 10;
-            const barY = -155;
+            const barW = 230;
+            const barH = 8;
+            const barY = -ph / 2 + 112;
             const barX = -barW / 2;
-            // Border / background
+            const fillColor = machineType === 'smelter' ? 0xcc8844 : machineType === 'crusher' ? 0xaa8866 : 0x6688aa;
+
             const barBg = this.add.rectangle(0, barY, barW + 4, barH + 4, 0x111118).setOrigin(0.5);
             barBg.setStrokeStyle(1, 0x333344);
-            // Dark fill (unfilled portion background)
             const barDark = this.add.rectangle(0, barY, barW, barH, 0x1a1a28).setOrigin(0.5);
-            // Bright fill
-            const fillColor = machineType === 'smelter' ? 0xcc8844 : machineType === 'crusher' ? 0xaa8866 : 0x6688aa;
             const barFill = this.add.rectangle(barX + (barW * pct) / 2, barY, barW * pct, barH, fillColor).setOrigin(0.5);
-            // Percentage label centered on bar
             const barLabel = this.add.text(0, barY, `${Math.floor(pct * 100)}%`, {
-                fontSize: '9px', fill: '#ffffff', fontFamily: 'monospace'
+                fontSize: '8px', fill: '#ffffff', fontFamily: 'monospace'
             }).setOrigin(0.5);
-            this.roomModalButtons.add([barBg, barDark, barFill, barLabel]);
+            this.roomPanelButtons.add([barBg, barDark, barFill, barLabel]);
         }
 
-        let y = -115;
-        const rowHeight = 34;
-        const maxRows = 7;
+        let y = startY;
+        const rowHeight = 32;
+        const maxRows = 6;
         let rowCount = 0;
 
         if (!this.modalAmounts) this.modalAmounts = {};
@@ -859,47 +869,47 @@ class ShipScene extends Phaser.Scene {
                     if (this.modalAmounts[rowKey] === undefined) this.modalAmounts[rowKey] = 1;
                     const amt = Math.min(this.modalAmounts[rowKey], count);
 
-                    const label = this.add.text(-110, y, rockName, {
-                        fontSize: '11px', fill: '#aaaaaa', fontFamily: 'monospace'
+                    const label = this.add.text(-90, y, rockName, {
+                        fontSize: '10px', fill: '#aaaaaa', fontFamily: 'monospace'
                     }).setOrigin(0, 0.5);
-                    const have = this.add.text(30, y, `×${count}`, {
-                        fontSize: '10px', fill: '#555555', fontFamily: 'monospace'
+                    const have = this.add.text(28, y, `×${count}`, {
+                        fontSize: '9px', fill: '#555555', fontFamily: 'monospace'
                     }).setOrigin(0.5);
 
-                    const minBtn = this.add.rectangle(70, y, 22, 22, 0x1a1a28).setInteractive();
-                    const minTxt = this.add.text(70, y, '-', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
-                    const amtTxt = this.add.text(95, y, String(amt), {
-                        fontSize: '11px', fill: '#cccccc', fontFamily: 'monospace'
+                    const minBtn = this.add.rectangle(62, y, 20, 20, 0x1a1a28).setInteractive();
+                    const minTxt = this.add.text(62, y, '-', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5);
+                    const amtTxt = this.add.text(84, y, String(amt), {
+                        fontSize: '10px', fill: '#cccccc', fontFamily: 'monospace'
                     }).setOrigin(0.5);
-                    const plBtn = this.add.rectangle(120, y, 22, 22, 0x1a1a28).setInteractive();
-                    const plTxt = this.add.text(120, y, '+', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
+                    const plBtn = this.add.rectangle(106, y, 20, 20, 0x1a1a28).setInteractive();
+                    const plTxt = this.add.text(106, y, '+', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5);
 
                     minBtn.on('pointerdown', () => {
-                        if (this.modalAmounts[rowKey] > 1) { this.modalAmounts[rowKey]--; this.openRoomControlsModal(room); }
+                        if (this.modalAmounts[rowKey] > 1) { this.modalAmounts[rowKey]--; this.openRoomControlsPanel(room); }
                     });
                     plBtn.on('pointerdown', () => {
-                        if (this.modalAmounts[rowKey] < count) { this.modalAmounts[rowKey]++; this.openRoomControlsModal(room); }
+                        if (this.modalAmounts[rowKey] < count) { this.modalAmounts[rowKey]++; this.openRoomControlsPanel(room); }
                     });
 
-                    const qBtn = this.createModalButton(165, y, 'QUEUE', () => {
+                    const qBtn = this.createPanelButton(145, y, 'QUEUE', () => {
                         const qAmt = this.modalAmounts[rowKey];
                         if (qAmt > 0 && qAmt <= count) {
                             if (this.queueJob(room, recipe, qAmt, { [rockName]: 1 })) {
                                 this.modalAmounts[rowKey] = 1;
-                                this.openRoomControlsModal(room);
+                                this.openRoomControlsPanel(room);
                             }
                         }
-                    }, 55, 22, 0x224422, '#88cc88');
+                    }, 50, 20, 0x224422, '#88cc88');
 
-                    this.roomModalButtons.add([label, have, minBtn, minTxt, amtTxt, plBtn, plTxt]);
-                    this.roomModalControlBtns.push(qBtn);
+                    this.roomPanelButtons.add([label, have, minBtn, minTxt, amtTxt, plBtn, plTxt]);
+                    this.roomPanelControlBtns.push(qBtn);
                     y += rowHeight;
                 });
                 if (rockTypes.length > maxRows) {
-                    const more = this.add.text(0, y, `... ${rockTypes.length - maxRows} more types ...`, {
-                        fontSize: '10px', fill: '#444444', fontFamily: 'monospace'
+                    const more = this.add.text(0, y, `... ${rockTypes.length - maxRows} more ...`, {
+                        fontSize: '9px', fill: '#444444', fontFamily: 'monospace'
                     }).setOrigin(0.5);
-                    this.roomModalButtons.add(more);
+                    this.roomPanelButtons.add(more);
                 }
                 return;
             }
@@ -918,52 +928,52 @@ class ShipScene extends Phaser.Scene {
                     if (this.modalAmounts[rowKey] === undefined) this.modalAmounts[rowKey] = 1;
                     const amt = Math.min(this.modalAmounts[rowKey], canMake);
 
-                    const label = this.add.text(-110, y, crushedName, {
-                        fontSize: '11px', fill: '#aaaaaa', fontFamily: 'monospace'
+                    const label = this.add.text(-90, y, crushedName, {
+                        fontSize: '10px', fill: '#aaaaaa', fontFamily: 'monospace'
                     }).setOrigin(0, 0.5);
-                    const have = this.add.text(30, y, `×${count}`, {
-                        fontSize: '10px', fill: '#555555', fontFamily: 'monospace'
+                    const have = this.add.text(28, y, `×${count}`, {
+                        fontSize: '9px', fill: '#555555', fontFamily: 'monospace'
                     }).setOrigin(0.5);
 
-                    const minBtn = this.add.rectangle(70, y, 22, 22, 0x1a1a28).setInteractive();
-                    const minTxt = this.add.text(70, y, '-', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
-                    const amtTxt = this.add.text(95, y, String(amt), {
-                        fontSize: '11px', fill: '#cccccc', fontFamily: 'monospace'
+                    const minBtn = this.add.rectangle(62, y, 20, 20, 0x1a1a28).setInteractive();
+                    const minTxt = this.add.text(62, y, '-', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5);
+                    const amtTxt = this.add.text(84, y, String(amt), {
+                        fontSize: '10px', fill: '#cccccc', fontFamily: 'monospace'
                     }).setOrigin(0.5);
-                    const plBtn = this.add.rectangle(120, y, 22, 22, 0x1a1a28).setInteractive();
-                    const plTxt = this.add.text(120, y, '+', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
+                    const plBtn = this.add.rectangle(106, y, 20, 20, 0x1a1a28).setInteractive();
+                    const plTxt = this.add.text(106, y, '+', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5);
 
                     minBtn.on('pointerdown', () => {
-                        if (this.modalAmounts[rowKey] > 1) { this.modalAmounts[rowKey]--; this.openRoomControlsModal(room); }
+                        if (this.modalAmounts[rowKey] > 1) { this.modalAmounts[rowKey]--; this.openRoomControlsPanel(room); }
                     });
                     plBtn.on('pointerdown', () => {
-                        if (this.modalAmounts[rowKey] < canMake) { this.modalAmounts[rowKey]++; this.openRoomControlsModal(room); }
+                        if (this.modalAmounts[rowKey] < canMake) { this.modalAmounts[rowKey]++; this.openRoomControlsPanel(room); }
                     });
 
-                    const qBtn = this.createModalButton(165, y, 'QUEUE', () => {
+                    const qBtn = this.createPanelButton(145, y, 'QUEUE', () => {
                         const qAmt = this.modalAmounts[rowKey];
                         if (qAmt > 0 && qAmt <= canMake) {
                             if (this.queueJob(room, recipe, qAmt, { [crushedName]: 5 })) {
                                 this.modalAmounts[rowKey] = 1;
-                                this.openRoomControlsModal(room);
+                                this.openRoomControlsPanel(room);
                             }
                         }
-                    }, 55, 22, 0x224422, '#88cc88');
+                    }, 50, 20, 0x224422, '#88cc88');
 
-                    this.roomModalButtons.add([label, have, minBtn, minTxt, amtTxt, plBtn, plTxt]);
-                    this.roomModalControlBtns.push(qBtn);
+                    this.roomPanelButtons.add([label, have, minBtn, minTxt, amtTxt, plBtn, plTxt]);
+                    this.roomPanelControlBtns.push(qBtn);
                     y += rowHeight;
                 });
                 if (crushedList.length > maxRows) {
-                    const more = this.add.text(0, y, `... ${crushedList.length - maxRows} more types ...`, {
-                        fontSize: '10px', fill: '#444444', fontFamily: 'monospace'
+                    const more = this.add.text(0, y, `... ${crushedList.length - maxRows} more ...`, {
+                        fontSize: '9px', fill: '#444444', fontFamily: 'monospace'
                     }).setOrigin(0.5);
-                    this.roomModalButtons.add(more);
+                    this.roomPanelButtons.add(more);
                 }
                 return;
             }
 
-            // ── Smelter (normal recipes) ──
+            // Smelter
             let canMake = Infinity;
             for (const [mat, qty] of Object.entries(recipe.input)) {
                 const have = this.shipInventory[mat] || 0;
@@ -977,42 +987,53 @@ class ShipScene extends Phaser.Scene {
             if (this.modalAmounts[rowKey] === undefined) this.modalAmounts[rowKey] = 1;
             const amt = Math.min(this.modalAmounts[rowKey], canMake);
 
-            const label = this.add.text(-110, y, recipe.name, {
-                fontSize: '11px', fill: '#aaaaaa', fontFamily: 'monospace'
+            const label = this.add.text(-90, y, recipe.name, {
+                fontSize: '10px', fill: '#aaaaaa', fontFamily: 'monospace'
             }).setOrigin(0, 0.5);
 
             const inputTxt = Object.entries(recipe.input).map(([m, q]) => `${this.shipInventory[m] || 0}/${q} ${m}`).join('  ');
-            const info = this.add.text(-110, y + 12, inputTxt, {
-                fontSize: '9px', fill: '#444444', fontFamily: 'monospace'
+            const info = this.add.text(-90, y + 10, inputTxt, {
+                fontSize: '8px', fill: '#444444', fontFamily: 'monospace'
             }).setOrigin(0, 0.5);
 
-            const minBtn = this.add.rectangle(70, y, 22, 22, 0x1a1a28).setInteractive();
-            const minTxt = this.add.text(70, y, '-', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
-            const amtTxt = this.add.text(95, y, String(amt), {
-                fontSize: '11px', fill: '#cccccc', fontFamily: 'monospace'
+            const minBtn = this.add.rectangle(62, y, 20, 20, 0x1a1a28).setInteractive();
+            const minTxt = this.add.text(62, y, '-', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5);
+            const amtTxt = this.add.text(84, y, String(amt), {
+                fontSize: '10px', fill: '#cccccc', fontFamily: 'monospace'
             }).setOrigin(0.5);
-            const plBtn = this.add.rectangle(120, y, 22, 22, 0x1a1a28).setInteractive();
-            const plTxt = this.add.text(120, y, '+', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
+            const plBtn = this.add.rectangle(106, y, 20, 20, 0x1a1a28).setInteractive();
+            const plTxt = this.add.text(106, y, '+', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5);
 
             minBtn.on('pointerdown', () => {
-                if (this.modalAmounts[rowKey] > 1) { this.modalAmounts[rowKey]--; this.openRoomControlsModal(room); }
+                if (this.modalAmounts[rowKey] > 1) { this.modalAmounts[rowKey]--; this.openRoomControlsPanel(room); }
             });
             plBtn.on('pointerdown', () => {
-                if (this.modalAmounts[rowKey] < canMake) { this.modalAmounts[rowKey]++; this.openRoomControlsModal(room); }
+                if (this.modalAmounts[rowKey] < canMake) { this.modalAmounts[rowKey]++; this.openRoomControlsPanel(room); }
             });
 
-            const qBtn = this.createModalButton(165, y, 'QUEUE', () => {
+            const qBtn = this.createPanelButton(145, y, 'QUEUE', () => {
                 const qAmt = Math.min(this.modalAmounts[rowKey], canMake);
                 if (qAmt > 0 && this.queueJob(room, recipe, qAmt)) {
                     this.modalAmounts[rowKey] = 1;
-                    this.openRoomControlsModal(room);
+                    this.openRoomControlsPanel(room);
                 }
-            }, 55, 22, canMake > 0 ? 0x224422 : 0x151515, canMake > 0 ? '#88cc88' : '#444444');
+            }, 50, 20, canMake > 0 ? 0x224422 : 0x151515, canMake > 0 ? '#88cc88' : '#444444');
 
-            this.roomModalButtons.add([label, info, minBtn, minTxt, amtTxt, plBtn, plTxt]);
-            this.roomModalControlBtns.push(qBtn);
+            this.roomPanelButtons.add([label, info, minBtn, minTxt, amtTxt, plBtn, plTxt]);
+            this.roomPanelControlBtns.push(qBtn);
             y += rowHeight;
         });
+
+        // DESTROY button at bottom
+        const def = this.roomTypes[room.type];
+        if (def.cost > 0) {
+            const refund = Math.floor(def.cost * 0.5);
+            const btn = this.createPanelButton(0, ph / 2 - 34, `DESTROY (+${refund}cr)`, () => {
+                this.destroyRoom(room);
+                this.closeRoomControlsPanel();
+            }, 220, 26, 0x2a1515, '#aa5555');
+            this.roomPanelControlBtns.push(btn);
+        }
     }
 
     extractFromCrushedRock(crushedName, comp) {
@@ -1160,7 +1181,7 @@ class ShipScene extends Phaser.Scene {
         this.updateUI();
         if (this.selectedRoomCell) {
             const room = this.shipGrid[this.selectedRoomCell.x][this.selectedRoomCell.y];
-            if (room && room.type === 'trade') this.openRoomControlsModal(room);
+            if (room && room.type === 'trade') this.openRoomControlsPanel(room);
         }
     }
 
