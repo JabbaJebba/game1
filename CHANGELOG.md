@@ -7,7 +7,7 @@
   - Draws individual tile outlines for each tile in the mining sweep (left/right = 3 tiles, down = 2 tiles)
   - Pairs with the existing cooldown ring to make mining rhythm completely transparent
   - No gameplay change — purely informational visual feedback
-- Status: ✅ Pushed. Commit: TBD
+- Status: ✅ Pushed. Commit: `b00e7ef`
 
 ## 2026-05-10 — Nighttime Tile Dimming
 - **QoL/Atmosphere:** Tiles now darken at night as the day/night cycle progresses
