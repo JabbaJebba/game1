@@ -1,5 +1,13 @@
 # Game Improvement Log
 
+## 2026-05-10 — Fixed Right-Side Room Control Panel
+- **UI:** Room controls are now a fixed panel on the right side of the screen instead of a centered popup modal
+- Panel sits at `x=1180, y=360` with dimensions `280×560`
+- Shows room title, subtitle, controls, and DESTROY button
+- Processing rooms (crusher, smelter, refinery) show live progress bar + recipe rows
+- Clicking a different room swaps the panel contents; clicking empty space or ✕ hides it
+- Status: ✅ Pushed. Commit: b3a3c8d
+
 ## 2026-05-10 — Gem Tile Pulse Glow
 - **QoL:** Gem tiles now have a subtle pulsing glow — they softly breathe with a sine-wave alpha oscillation (±12%, ~3.5s cycle)
 - Each gem tile has a slightly different phase based on its grid position, creating a living, organic shimmer across veins
