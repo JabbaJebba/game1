@@ -1,5 +1,15 @@
 # Game Improvement Log
 
+## 2026-05-10 — Falling Wind Trail
+- **QoL/Game Feel:** Added thin white streaks that spawn behind the player when falling fast (vy > 250)
+  - Particles drift opposite to the player's facing direction (falling right → streaks trail left)
+  - Spawn rate: 40–90ms when falling fast, stops immediately on landing
+  - Thin vertical rectangles (2–5px wide, 12–20px tall) with 35% initial alpha
+  - Fade + drift outward over 180–300ms, giving a sense of wind rushing past
+  - Purely visual, purely additive — no gameplay or collision changes
+  - Pairs with existing landing dust to complete the jump arc: takeoff dust → fall trail → landing dust
+- Status: ✅ Pushed. Commit: TBD
+
 ## 2026-05-10 — Mining Recoil Animation
 - **QoL/Game Feel:** Added body recoil when mining — the character's entire sprite (body + eyes) briefly kicks in the opposite direction of the mine swing
   - Left mine → body recoils right 5px; Right mine → body recoils left 5px; Down mine → body recoils up 4px
@@ -161,6 +171,7 @@
 8. **Quality of life** - Auto-collect radius, better teleport mechanics
 
 ## Completed
+- [x] Falling wind trail — thin white streaks spawn behind the player when falling fast (vy > 250), drifting opposite to facing direction, 40-90ms spawn rate, 180-300ms fade
 - [x] Mine cooldown ring — circular arc around player showing mining cooldown progress, color shifts orange→green
 - [x] Idle breathing animation — character subtly bobs up/down when standing still on ground (±1.2px, ~3s cycle)
 - [x] Coyote time — 100ms jump grace period after walking off a ledge (platformer feel)

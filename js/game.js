@@ -449,6 +449,27 @@ class GameScene extends Phaser.Scene {
         }
     }
 
+    spawnFallTrail(x, y, facingRight) {
+        // Thin white streaks that drift opposite to facing direction
+        const sizeW = 2 + Math.floor(Math.random() * 3);
+        const sizeH = 12 + Math.floor(Math.random() * 8);
+        const drift = facingRight ? -1 : 1;
+        const particle = this.add.rectangle(x + drift * (18 + Math.random() * 12), y + (Math.random() - 0.5) * 30, sizeW, sizeH, 0xffffff);
+        particle.setDepth(2);
+        particle.setAlpha(0.35);
+        this.tweens.add({
+            targets: particle,
+            x: particle.x + drift * (20 + Math.random() * 30),
+            y: particle.y + 10 + Math.random() * 15,
+            alpha: 0,
+            scaleX: 0.2,
+            scaleY: 0.5,
+            duration: 180 + Math.random() * 120,
+            ease: 'Power1',
+            onComplete: () => particle.destroy()
+        });
+    }
+
     showFloatText(x, y, text, color = '#ffffff') {
         const label = this.add.text(x, y, text, {
             fontSize: '14px', fill: color, stroke: '#000000', strokeThickness: 2, fontFamily: 'monospace'

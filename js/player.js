@@ -84,6 +84,9 @@ class Player {
         this.mineRecoilY = 0;
         this.recoilTween = null;
 
+        // Falling wind trail — when dropping fast, streaks spawn behind the player
+        this.fallTrailTimer = 0;
+
         // Mining target preview outlines
         this.minePreview = scene.add.graphics();
         this.minePreview.setDepth(5);
@@ -303,6 +306,17 @@ class Player {
             }
         } else {
             this.walkDustTimer = 0;
+        }
+
+        // Falling wind trail — streaks when dropping fast
+        if (!this.onGround && this.vy > 250) {
+            this.fallTrailTimer -= delta;
+            if (this.fallTrailTimer <= 0) {
+                this.scene.spawnFallTrail(this.x, this.y - this.height * 0.6, this.facingRight);
+                this.fallTrailTimer = 40 + Math.random() * 50;
+            }
+        } else {
+            this.fallTrailTimer = 0;
         }
 
         // Mining target preview — shows which tiles will be hit
