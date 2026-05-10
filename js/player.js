@@ -73,6 +73,11 @@ class Player {
         this.walkDustTimer = 0;
         this.coyoteTimer = 0;
         this.jumpBuffer = 0;
+
+        // Eye blinking
+        this.isBlinking = false;
+        this.blinkStartTime = 0;
+        this.nextBlinkTime = 2000 + Math.random() * 3000;
     }
 
     update(delta) {
@@ -202,6 +207,37 @@ class Player {
         this.pupilLeft.y = this.y - this.height + 18 + breathY;
         this.pupilRight.x = this.x + 12 + eyeOffsetX * 1.5;
         this.pupilRight.y = this.y - this.height + 18 + breathY;
+
+        // Eye blinking
+        const nowBlink = this.scene.time.now;
+        if (!this.isBlinking && nowBlink > this.nextBlinkTime && this.onGround && Math.abs(this.vx) < 5 && !this.isMining) {
+            this.isBlinking = true;
+            this.blinkStartTime = nowBlink;
+        }
+        if (this.isBlinking) {
+            const elapsed = nowBlink - this.blinkStartTime;
+            const closeDur = 70;
+            const holdDur = 50;
+            const openDur = 70;
+            if (elapsed < closeDur) {
+                const s = 1 - (elapsed / closeDur) * 0.9;
+                this.pupilLeft.scaleY = s;
+                this.pupilRight.scaleY = s;
+            } else if (elapsed < closeDur + holdDur) {
+                this.pupilLeft.scaleY = 0.1;
+                this.pupilRight.scaleY = 0.1;
+            } else if (elapsed < closeDur + holdDur + openDur) {
+                const t = (elapsed - closeDur - holdDur) / openDur;
+                const s = 0.1 + t * 0.9;
+                this.pupilLeft.scaleY = s;
+                this.pupilRight.scaleY = s;
+            } else {
+                this.pupilLeft.scaleY = 1;
+                this.pupilRight.scaleY = 1;
+                this.isBlinking = false;
+                this.nextBlinkTime = nowBlink + 1500 + Math.random() * 3500;
+            }
+        }
 
         // Hide mine indicator if not mining
         if (!this.isMining) {
