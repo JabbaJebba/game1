@@ -245,7 +245,7 @@
   - Helps players evaluate run profitability on the fly for the tight economy design
   - Format: `Value: Xcr` on the fourth line of the run stats panel
   - No new assets, no gameplay changes — purely informational
-- Status: ✅ Pushed. Commit: `TBD`
+- Status: ✅ Pushed. Commit: `ff44f29`
 
 ## 2026-05-10 — Tile Mine Flash
 - **QoL/Game Feel:** Added a bright white flash on tiles when they are mined
