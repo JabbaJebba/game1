@@ -10,7 +10,7 @@
 - Spawns every 100-180ms when |vx| > 20, random horizontal spread
 - Small (2-4px), gray, short 250-400ms fade — subtle but adds life
 - Pairs with landing dust to ground the character in the world
-- Status: ✅ Pushed. Commit: TBD
+- Status: ✅ Pushed. Commit: 5076182
 
 ## 2026-05-10 — Depth Indicator
 - Replaced useless raw pixel position with depth readout (meters below surface)
