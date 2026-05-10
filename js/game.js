@@ -128,6 +128,12 @@ class GameScene extends Phaser.Scene {
             strokeThickness: 2
         }).setOrigin(0.5).setScrollFactor(0);
 
+        // Depth gauge
+        this.depthGauge = this.add.graphics().setScrollFactor(0).setDepth(0);
+        this.depthGaugeLabel = this.add.text(22, 185, 'DEPTH', {
+            fontSize: '10px', fill: '#445566', fontFamily: 'monospace', letterSpacing: 2
+        }).setOrigin(0.5).setScrollFactor(0);
+
         this.timeOfDay = 0;
         this.stars = this.add.graphics();
         this.generateStars();
@@ -218,6 +224,28 @@ class GameScene extends Phaser.Scene {
             `Cost: ${((this.player.fuelCosts[this.world.TILE_ROCK] || 0.05) * 1000).toFixed(0)}ml\n` +
             `Inventory: ${inventoryText || 'Empty'}`
         );
+
+        // Depth gauge — vertical bar on left edge showing depth progress
+        const maxDepth = Math.max(1, this.worldHeight - surfaceY);
+        const depthPct = Math.min(1, Math.max(0, depth / maxDepth));
+        this.depthGauge.clear();
+        const gx = 16, gy = 200, gh = 280, gw = 10;
+        // Background
+        this.depthGauge.fillStyle(0x1a1a2e, 0.85);
+        this.depthGauge.fillRect(gx, gy, gw, gh);
+        this.depthGauge.lineStyle(1, 0x334455, 0.5);
+        this.depthGauge.strokeRect(gx, gy, gw, gh);
+        // Fill — color by danger level
+        const dColor = depth < 20 ? 0x44aa66 : depth < 80 ? 0xccaa44 : depth < 150 ? 0xcc7744 : 0xcc4444;
+        this.depthGauge.fillStyle(dColor, 0.9);
+        const fillH = Math.max(1, gh * depthPct);
+        this.depthGauge.fillRect(gx, gy + gh - fillH, gw, fillH);
+        // Current depth marker tick
+        const markerY = gy + gh - fillH;
+        this.depthGauge.fillStyle(0xffffff, 1);
+        this.depthGauge.fillRect(gx - 4, markerY - 1, gw + 8, 3);
+        // Hide label when at surface
+        this.depthGaugeLabel.setAlpha(depth > 0 ? 1 : 0.3);
 
         // Update fuel bar
         const fuelPct = Math.max(0, this.player.fuel / this.player.maxFuel);

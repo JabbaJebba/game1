@@ -1,5 +1,14 @@
 # Game Improvement Log
 
+## 2026-05-10 — Depth Gauge
+- **QoL/UI:** Added a vertical depth gauge bar on the left edge of the screen
+  - Thin bar (10×280px) at x=16, y=200 with color-coded fill: green (0-20m), yellow (20-80m), orange (80-150m), red (150m+)
+  - Fill grows from bottom as player descends, giving instant visual read of how deep they are
+  - White tick marker shows exact current depth position on the bar
+  - "DEPTH" label fades to 30% opacity when at surface (depth=0), stays fully visible underground
+  - No gameplay change — purely informational, replaces the text-only depth readout with something you can read at a glance
+- Status: ⏳ Commit pending.
+
 ## 2026-05-10 — Player Torch / Night Lighting
 - **QoL/Atmosphere:** Added a player-carried torch that brightens tiles near the character at night
   - Circular light radius of ~180px (≈5–6 tiles) around the player
