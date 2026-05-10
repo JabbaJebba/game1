@@ -177,7 +177,7 @@
   - Layered at depth 4, above debris but below floating text
   - Pairs with existing screen shake + debris + recoil to make each mine hit feel more destructive
   - Purely visual — no gameplay or collision changes
-- Status: 🔄 Pushing...
+- Status: ✅ Pushed. Commit: `acf60da`
 
 ## Completed
 - [x] Falling wind trail — thin white streaks spawn behind the player when falling fast (vy > 250), drifting opposite to facing direction, 40-90ms spawn rate, 180-300ms fade
