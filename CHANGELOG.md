@@ -7,7 +7,7 @@
   - White tick marker shows exact current depth position on the bar
   - "DEPTH" label fades to 30% opacity when at surface (depth=0), stays fully visible underground
   - No gameplay change — purely informational, replaces the text-only depth readout with something you can read at a glance
-- Status: ⏳ Commit pending.
+- Status: ✅ Pushed. Commit: `75164cf`
 
 ## 2026-05-10 — Player Torch / Night Lighting
 - **QoL/Atmosphere:** Added a player-carried torch that brightens tiles near the character at night
