@@ -1,5 +1,15 @@
 # Game Improvement Log
 
+## 2026-05-11 — Gem Sparkle Particles
+- **QoL/Game Feel:** Added upward-floating sparkle particles when mining gem tiles
+  - 4–8 small colored squares spawn at the player's upper body and drift upward in a cone
+  - Color matches the gem type (ruby = red, sapphire = blue, etc.)
+  - 500–900ms fade with `Sine.easeOut` for a gentle, magical feel
+  - Layered at depth 7, above debris but below floating loot text
+  - Only triggers on gem tiles — rock/metal mining is unchanged
+  - Pairs with existing gem tile pulse glow + floating loot text to make gem finds feel genuinely special
+- Status: 🔄 Implementing. Commit: TBD
+
 ## 2026-05-10 — Depth Gauge
 - **QoL/UI:** Added a vertical depth gauge bar on the left edge of the screen
   - Thin bar (10×280px) at x=16, y=200 with color-coded fill: green (0-20m), yellow (20-80m), orange (80-150m), red (150m+)

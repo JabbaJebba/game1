@@ -511,6 +511,29 @@ class GameScene extends Phaser.Scene {
         });
     }
 
+    spawnGemSparkle(x, y, color) {
+        // Small colored sparkles that float upward and fade — celebration for gem finds
+        const count = 4 + Math.floor(Math.random() * 4);
+        for (let i = 0; i < count; i++) {
+            const size = 2 + Math.floor(Math.random() * 3);
+            const p = this.add.rectangle(x + (Math.random() - 0.5) * 24, y, size, size, color);
+            p.setDepth(7);
+            const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.2;
+            const speed = 30 + Math.random() * 60;
+            this.tweens.add({
+                targets: p,
+                x: p.x + Math.cos(angle) * speed * 0.5,
+                y: p.y - 20 + Math.sin(angle) * speed * 0.4,
+                alpha: 0,
+                scaleX: 0.1,
+                scaleY: 0.1,
+                duration: 500 + Math.random() * 400,
+                ease: 'Sine.easeOut',
+                onComplete: () => p.destroy()
+            });
+        }
+    }
+
     spawnFallTrail(x, y, facingRight) {
         // Thin white streaks that drift opposite to facing direction
         const sizeW = 2 + Math.floor(Math.random() * 3);

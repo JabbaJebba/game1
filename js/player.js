@@ -453,6 +453,14 @@ class Player {
         const itemName = this.getItemName(tile);
         const itemColor = this.getItemColor(tile);
         this.scene.showFloatText(tileX * 32 + 16, tileY * 32 - 8, `+1 ${itemName}`, itemColor);
+
+        // Gem sparkle — upward floating particles on gem finds
+        const isGem = tile === this.world.TILE_RUBY || tile === this.world.TILE_SAPPHIRE ||
+                      tile === this.world.TILE_EMERALD || tile === this.world.TILE_DIAMOND ||
+                      tile === this.world.TILE_AMETHYST;
+        if (isGem) {
+            this.scene.spawnGemSparkle(this.x, this.y - this.height * 0.6, tileColor);
+        }
         
         return true;
     }
