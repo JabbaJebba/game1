@@ -11,7 +11,7 @@
   - Positioned 24px below the cursor so it never covers the tile being inspected
   - Uses `setScrollFactor(0)` and screen coordinates so it stays pinned to the viewport while the camera moves
   - Helps new players learn tile types and helps experienced players confirm what they're about to mine
-- Status: ✅ Pushed. Commit: `PENDING`
+- Status: ✅ Pushed. Commit: `57d581b`
 
 ## 2026-05-11 — Run Statistics Panel
 - **QoL/UI:** Added a compact RUN STATS panel in the top-right corner of the mining screen
