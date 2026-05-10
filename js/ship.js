@@ -139,8 +139,22 @@ class ShipScene extends Phaser.Scene {
 
         this.calculatePower();
         this.updateUI();
-        this.input.on('pointerdown', (pointer) => this.handleGridClick(pointer));
-        this.input.on('pointermove', (pointer) => this.handleGridHover(pointer));
+        // Add ESC key to cancel build mode
+        this.input.keyboard.on('keydown-ESC', () => {
+            if (this.buildMode) {
+                this.buildMode = false;
+                this.selectedRoom = null;
+                this.ghostGraphics.clear();
+                if (this.ghostIcon) { this.ghostIcon.destroy(); this.ghostIcon = null; }
+            }
+            // Also close any open modals
+            this.closeBuildModal();
+            this.closeRoomControlsModal();
+            this.closeSellPopup();
+            this.closeTechTreePopup();
+            this.closeResetPopup();
+            this.closeInventoryModal();
+        });
     }
 
     createGhostGraphics() {
@@ -181,6 +195,23 @@ class ShipScene extends Phaser.Scene {
         this.gridGraphics = this.add.graphics();
         this.highlightGraphics = this.add.graphics();
 
+        // Draw outer grid border
+        const totalW = this.gridW * this.tileSize;
+        const totalH = this.gridH * this.tileSize;
+        this.gridGraphics.lineStyle(2, 0x00d4aa, 0.8);
+        this.gridGraphics.strokeRect(this.gridOffsetX - 1, this.gridOffsetY - 1, totalW + 2, totalH + 2);
+
+        // Draw inner grid lines
+        this.gridGraphics.lineStyle(1, 0x1a2a3a, 0.6);
+        for (let x = 1; x < this.gridW; x++) {
+            const px = this.gridOffsetX + x * this.tileSize;
+            this.gridGraphics.lineBetween(px, this.gridOffsetY, px, this.gridOffsetY + totalH);
+        }
+        for (let y = 1; y < this.gridH; y++) {
+            const py = this.gridOffsetY + y * this.tileSize;
+            this.gridGraphics.lineBetween(this.gridOffsetX, py, this.gridOffsetX + totalW, py);
+        }
+
         for (let x = 0; x < this.gridW; x++) {
             for (let y = 0; y < this.gridH; y++) {
                 const px = this.gridOffsetX + x * this.tileSize;
@@ -209,13 +240,9 @@ class ShipScene extends Phaser.Scene {
                         this.roomIcons.push(icon);
                     }
                 } else {
-                    // Empty tile
-                    this.gridGraphics.fillStyle(0x0a0a14, 0.8);
-                    this.gridGraphics.fillRect(px + 2, py + 2, this.tileSize - 4, this.tileSize - 4);
-                    // Crosshatch pattern
-                    this.gridGraphics.lineStyle(1, 0x111122, 0.5);
-                    this.gridGraphics.lineBetween(px + 6, py + 6, px + this.tileSize - 6, py + this.tileSize - 6);
-                    this.gridGraphics.lineBetween(px + this.tileSize - 6, py + 6, px + 6, py + this.tileSize - 6);
+                    // Empty tile — subtle fill
+                    this.gridGraphics.fillStyle(0x0d0d18, 0.6);
+                    this.gridGraphics.fillRect(px + 1, py + 1, this.tileSize - 2, this.tileSize - 2);
                 }
             }
         }
