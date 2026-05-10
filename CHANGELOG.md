@@ -1,5 +1,13 @@
 # Game Improvement Log
 
+## 2026-05-10 — Mine Cooldown Ring
+- **QoL:** Added a circular cooldown ring around the player when holding a mine key (A/S/D)
+  - Ring fills from 0% → 100% over the 180ms mining cooldown
+  - Color transitions from orange (just mined) to green (ready to mine again)
+  - Only visible while holding a mine key and on cooldown — unobtrusive
+  - Makes the mining rhythm tangible; players can see exactly when the next swing is ready
+- Status: 🔄 Committing and pushing...
+
 ## 2026-05-10 — Fixed Right-Side Room Control Panel
 - **UI:** Room controls are now a fixed panel on the right side of the screen instead of a centered popup modal
 - Panel sits at `x=1180, y=360` with dimensions `280×560`
@@ -119,6 +127,7 @@
 8. **Quality of life** - Auto-collect radius, better teleport mechanics
 
 ## Completed
+- [x] Mine cooldown ring — circular arc around player showing mining cooldown progress, color shifts orange→green
 - [x] Idle breathing animation — character subtly bobs up/down when standing still on ground (±1.2px, ~3s cycle)
 - [x] Coyote time — 100ms jump grace period after walking off a ledge (platformer feel)
 - [x] Auto-save/load via localStorage (auto-save on ship departure & return, auto-load on boot) — Commit: d920612

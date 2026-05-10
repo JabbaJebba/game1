@@ -78,6 +78,10 @@ class Player {
         this.isBlinking = false;
         this.blinkStartTime = 0;
         this.nextBlinkTime = 2000 + Math.random() * 3000;
+
+        // Mine cooldown ring
+        this.cooldownRing = scene.add.graphics();
+        this.cooldownRing.setDepth(6);
     }
 
     update(delta) {
@@ -290,6 +294,26 @@ class Player {
             }
         } else {
             this.walkDustTimer = 0;
+        }
+
+        // Mine cooldown ring — shows when holding a mine key and on cooldown
+        const miningKeysHeld = keys.mineLeft.isDown || keys.mineRight.isDown || keys.mineDown.isDown;
+        const cooldownProgress = Math.min(1, (now - this.lastMineTime) / this.mineCooldown);
+        this.cooldownRing.clear();
+        if (miningKeysHeld && cooldownProgress < 1) {
+            const cx = this.x;
+            const cy = this.y - this.height / 2;
+            const radius = 48;
+            const startAngle = -Math.PI / 2;
+            const endAngle = startAngle + cooldownProgress * Math.PI * 2;
+            // Color transitions from orange (just mined) to green (ready)
+            const r = Math.floor(255 * (1 - cooldownProgress));
+            const g = Math.floor(200 * cooldownProgress + 55);
+            const color = Phaser.Display.Color.GetColor(r, g, 0);
+            this.cooldownRing.lineStyle(3, color, 0.8);
+            this.cooldownRing.beginPath();
+            this.cooldownRing.arc(cx, cy, radius, startAngle, endAngle);
+            this.cooldownRing.strokePath();
         }
     }
 
