@@ -7,8 +7,7 @@
   - Layered at depth 6, above regular debris but below gem sparkles
   - Only triggers on metal ores (Cu, Fe, Au) — rock mining is unchanged, gem mining keeps its colored sparkles
   - Creates clear visual hierarchy: rock = debris, metal = sparks + debris, gem = colored sparkles + debris
-  - Pairs with existing screen shake + debris + recoil to make metal hits feel more valuable than rock
-- Status: ✅ Pushed.
+- Status: ✅ Pushed. Commit: `37789db`
 
 ## 2026-05-11 — Ship Scene Ambient Starfield
 - **QoL/Atmosphere:** Added a slow-drifting ambient starfield to the ship command screen
