@@ -1,5 +1,11 @@
 # Game Improvement Log
 
+## 2026-05-10 — Jump Buffering
+- **QoL:** Added 120ms jump buffer — pressing jump slightly before landing queues the jump
+- Jump fires the exact frame the player touches ground, pairing with existing coyote time
+- Makes rapid platforming sequences feel responsive and intentional
+- Status: ✅ Pushed.
+
 ## 2026-05-10 — Resource Processing (Timed Smelting, Crusher, Refinery)
 - **Feature:** Machines now process resources over time with a queue system
   - Smelter: 3 ore → 1 ingot in 3 seconds per ingot (copper, iron, gold)

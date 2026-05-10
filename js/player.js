@@ -72,6 +72,7 @@ class Player {
         // Walk dust timer
         this.walkDustTimer = 0;
         this.coyoteTimer = 0;
+        this.jumpBuffer = 0;
     }
 
     update(delta) {
@@ -104,6 +105,14 @@ class Player {
             this.vy = -this.jumpPower;
             this.onGround = false;
             this.coyoteTimer = 0;
+            this.jumpBuffer = 0;
+        }
+
+        // Jump buffering — if jump pressed in air, queue it for landing
+        if (Phaser.Input.Keyboard.JustDown(keys.jump) || Phaser.Input.Keyboard.JustDown(keys.up)) {
+            if (!this.onGround && this.coyoteTimer <= 0) {
+                this.jumpBuffer = 120;
+            }
         }
 
         // Apply gravity
@@ -113,11 +122,20 @@ class Player {
         this.moveX(this.vx * dt);
         this.moveY(this.vy * dt);
 
+        // Buffered jump fires immediately on landing
+        if (this.onGround && this.jumpBuffer > 0) {
+            this.vy = -this.jumpPower;
+            this.onGround = false;
+            this.jumpBuffer = 0;
+            this.coyoteTimer = 0;
+        }
+
         // Start coyote window when walking off a ledge
         if (wasOnGround && !this.onGround) {
             this.coyoteTimer = 100;
         }
         this.coyoteTimer = Math.max(0, this.coyoteTimer - delta);
+        this.jumpBuffer = Math.max(0, this.jumpBuffer - delta);
 
         // --- A KEY: Mine left if movement was blocked ---
         if (keys.mineLeft.isDown && Math.abs(this.x - oldX) < 1 && now - this.lastMineTime >= this.mineCooldown) {
