@@ -18,6 +18,16 @@ class ShipScene extends Phaser.Scene {
         this.shipFuelCapacity = data.shipFuelCapacity !== undefined ? data.shipFuelCapacity : 100;
         this.rockCompositions = data.rockCompositions || {};
         this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0 };
+        this.processingQueues = data.processingQueues || {};
+        // Offline processing: if we were away, catch up
+        const savedLaunchTime = data.launchTime || this.launchTime || null;
+        if (savedLaunchTime) {
+            const elapsed = Date.now() - savedLaunchTime;
+            if (elapsed > 1000) {
+                this.processOffline(elapsed);
+            }
+            this.launchTime = null;
+        }
         this.powerGen = 0;
         this.powerUse = 0;
         this.powerStored = 0;
@@ -126,6 +136,20 @@ class ShipScene extends Phaser.Scene {
             ]
         };
 
+        this.recipes = {
+            smelter: [
+                { id: 'copper_ingot', name: 'Copper Ingot', input: { 'Copper Ore': 3 }, output: { 'Copper Ingot': 1 }, time: 3000 },
+                { id: 'iron_ingot', name: 'Iron Ingot', input: { 'Iron Ore': 3 }, output: { 'Iron Ingot': 1 }, time: 3000 },
+                { id: 'gold_ingot', name: 'Gold Ingot', input: { 'Gold Ore': 3 }, output: { 'Gold Ingot': 1 }, time: 3000 },
+            ],
+            crusher: [
+                { id: 'crush', name: 'Crush Rock', input: {}, output: {}, time: 2000, dynamic: true },
+            ],
+            refinery: [
+                { id: 'extract', name: 'Extract', input: {}, output: {}, time: 5000, dynamic: true },
+            ]
+        };
+
         this.placeStarterRooms();
         this.drawShipGrid();
         this.createBottomDock();
@@ -165,6 +189,179 @@ class ShipScene extends Phaser.Scene {
         this.ghostGraphics = this.add.graphics();
     }
 
+    getQueueKey(room) {
+        return `${room.masterX},${room.masterY}`;
+    }
+
+    getQueue(room) {
+        const key = this.getQueueKey(room);
+        if (!this.processingQueues[key]) {
+            this.processingQueues[key] = { currentJob: null, pending: [] };
+        }
+        return this.processingQueues[key];
+    }
+
+    canAffordRecipe(recipe, dynamicInput) {
+        const input = dynamicInput || recipe.input;
+        for (const [mat, qty] of Object.entries(input)) {
+            if ((this.shipInventory[mat] || 0) < qty) return false;
+        }
+        return true;
+    }
+
+    deductRecipeInput(recipe, dynamicInput) {
+        const input = dynamicInput || recipe.input;
+        for (const [mat, qty] of Object.entries(input)) {
+            this.shipInventory[mat] -= qty;
+            if (this.shipInventory[mat] <= 0) delete this.shipInventory[mat];
+        }
+    }
+
+    queueJob(room, recipe, amount, dynamicInput) {
+        if (!this.canAffordRecipe(recipe, dynamicInput)) return false;
+        this.deductRecipeInput(recipe, dynamicInput);
+        const queue = this.getQueue(room);
+        queue.pending.push({ recipeId: recipe.id, amount, dynamicInput });
+        // If nothing is running, start immediately
+        if (!queue.currentJob) this.startNextJob(room);
+        return true;
+    }
+
+    startNextJob(room) {
+        const queue = this.getQueue(room);
+        if (queue.pending.length === 0) {
+            queue.currentJob = null;
+            return;
+        }
+        const job = queue.pending.shift();
+        const recipes = this.recipes[room.type];
+        const recipe = recipes.find(r => r.id === job.recipeId);
+        queue.currentJob = {
+            recipeId: job.recipeId,
+            startTime: Date.now(),
+            amount: job.amount,
+            done: 0,
+            dynamicInput: job.dynamicInput,
+            recipe: recipe,
+        };
+    }
+
+    processJobTick(room, now) {
+        const queue = this.getQueue(room);
+        if (!queue.currentJob) return;
+        const job = queue.currentJob;
+        const recipe = job.recipe;
+        const elapsed = now - job.startTime;
+        if (elapsed >= recipe.time) {
+            // Job unit complete
+            job.done++;
+            // Apply output
+            const output = recipe.dynamic ? this.resolveDynamicOutput(room, recipe, job) : recipe.output;
+            for (const [mat, qty] of Object.entries(output)) {
+                this.shipInventory[mat] = (this.shipInventory[mat] || 0) + qty;
+            }
+            if (job.done >= job.amount) {
+                // All units done
+                queue.currentJob = null;
+                this.startNextJob(room);
+            } else {
+                // Next unit
+                job.startTime = now;
+            }
+            this.updateUI();
+            // Refresh modal if this room is selected
+            if (this.selectedRoomCell) {
+                const selRoom = this.shipGrid[this.selectedRoomCell.x][this.selectedRoomCell.y];
+                if (selRoom && selRoom.masterX === room.masterX && selRoom.masterY === room.masterY) {
+                    this.openRoomControlsModal(selRoom);
+                }
+            }
+        }
+    }
+
+    resolveDynamicOutput(room, recipe, job) {
+        const type = room.type;
+        if (type === 'crusher') {
+            const rockName = job.dynamicInput ? Object.keys(job.dynamicInput)[0] : 'Rock';
+            return { [`Crushed ${rockName}`]: 2 };
+        }
+        if (type === 'refinery') {
+            const crushedName = job.dynamicInput ? Object.keys(job.dynamicInput)[0] : 'Crushed Rock';
+            const rockName = crushedName.replace('Crushed ', '');
+            const comp = this.rockCompositions[rockName];
+            const out = {};
+            if (Math.random() < comp.copper) out['Copper Ore'] = (out['Copper Ore'] || 0) + 1 + Math.floor(Math.random() * 2);
+            if (Math.random() < comp.iron) out['Iron Ore'] = (out['Iron Ore'] || 0) + 1 + Math.floor(Math.random() * 2);
+            if (Math.random() < comp.gold) out['Gold Ore'] = (out['Gold Ore'] || 0) + 1;
+            if (Math.random() < comp.gemChance) {
+                const gems = ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst'];
+                const gem = gems[Math.floor(Math.random() * gems.length)];
+                out[gem] = (out[gem] || 0) + 1;
+            }
+            if (Object.keys(out).length === 0) return { 'Rock Dust': 1 };
+            return out;
+        }
+        return {};
+    }
+
+    processOffline(elapsedMs) {
+        // Process all queues as if elapsedMs passed
+        const now = Date.now();
+        for (let x = 0; x < this.gridW; x++) {
+            for (let y = 0; y < this.gridH; y++) {
+                const room = this.shipGrid[x][y];
+                if (!room || room.masterX !== x || room.masterY !== y) continue;
+                if (!this.recipes[room.type]) continue;
+                const queue = this.getQueue(room);
+                let remainingMs = elapsedMs;
+                while (remainingMs > 0 && (queue.currentJob || queue.pending.length > 0)) {
+                    if (!queue.currentJob) this.startNextJob(room);
+                    if (!queue.currentJob) break;
+                    const job = queue.currentJob;
+                    const recipe = job.recipe || this.recipes[room.type].find(r => r.id === job.recipeId);
+                    job.recipe = recipe;
+                    const timeNeeded = recipe.time;
+                    const timeIntoCurrent = now - job.startTime; // normally 0, but for offline we simulate
+                    // For offline simulation, treat startTime as the moment we "resume"
+                    // So we just consume remainingMs
+                    const timeToComplete = timeNeeded; // fresh unit
+                    if (remainingMs >= timeToComplete) {
+                        remainingMs -= timeToComplete;
+                        job.done++;
+                        const output = recipe.dynamic ? this.resolveDynamicOutput(room, recipe, job) : recipe.output;
+                        for (const [mat, qty] of Object.entries(output)) {
+                            this.shipInventory[mat] = (this.shipInventory[mat] || 0) + qty;
+                        }
+                        if (job.done >= job.amount) {
+                            queue.currentJob = null;
+                        }
+                    } else {
+                        // Partial progress — set startTime back so it completes after remainingMs
+                        job.startTime = now - (timeNeeded - remainingMs);
+                        remainingMs = 0;
+                    }
+                }
+                if (!queue.currentJob && queue.pending.length > 0) {
+                    this.startNextJob(room);
+                }
+            }
+        }
+        this.saveGame();
+    }
+
+    update(time, delta) {
+        // Process active jobs every frame
+        const now = Date.now();
+        for (let x = 0; x < this.gridW; x++) {
+            for (let y = 0; y < this.gridH; y++) {
+                const room = this.shipGrid[x][y];
+                if (!room || room.masterX !== x || room.masterY !== y) continue;
+                if (!this.recipes[room.type]) continue;
+                this.processJobTick(room, now);
+            }
+        }
+    }
+
     saveGame() {
         const saveData = {
             shipGrid: this.shipGrid,
@@ -174,6 +371,8 @@ class ShipScene extends Phaser.Scene {
             shipFuelCapacity: this.shipFuelCapacity,
             rockCompositions: this.rockCompositions,
             techState: this.techState,
+            processingQueues: this.processingQueues,
+            launchTime: this.launchTime,
         };
         localStorage.setItem('miners_save', JSON.stringify(saveData));
     }
@@ -342,12 +541,15 @@ class ShipScene extends Phaser.Scene {
         this.createDockButton(startX + btnW + gap, y, 'INVENTORY', () => this.openInventoryModal(), btnW, btnH, 0x151525, '#8888aa');
         this.createDockButton(startX + 2 * (btnW + gap), y, 'BUILD', () => this.openBuildModal(), btnW, btnH, 0x152525, '#44aa88');
         this.createDockButton(startX + 3 * (btnW + gap), y, 'LAUNCH', () => {
+            this.launchTime = Date.now();
             this.saveGame();
             this.scene.start('GalaxyScene', {
                 shipGrid: this.shipGrid, shipInventory: this.shipInventory,
                 credits: this.credits, shipFuel: this.shipFuel, shipFuelCapacity: this.shipFuelCapacity,
                 rockCompositions: this.rockCompositions,
                 techState: this.techState,
+                processingQueues: this.processingQueues,
+                launchTime: this.launchTime,
             });
         }, btnW, btnH, 0x1a2a2a, '#44aa88');
     }
@@ -517,103 +719,13 @@ class ShipScene extends Phaser.Scene {
             );
 
         } else if (room.type === 'crusher') {
-            let lines = ['─ CRUSH ─'];
-            const rockTypes = Object.keys(this.shipInventory).filter(k =>
-                this.rockCompositions[k] && !k.startsWith('Crushed')
-            );
-            if (rockTypes.length === 0) {
-                lines.push('  No rocks');
-            } else {
-                rockTypes.forEach(rockName => {
-                    const count = this.shipInventory[rockName] || 0;
-                    lines.push(`  ${rockName}: ${count}`);
-                });
-            }
-            lines.push('');
-            lines.push('─ EXTRACT ─');
-            const crushed = Object.keys(this.shipInventory).filter(k => k.startsWith('Crushed '));
-            if (crushed.length === 0) {
-                lines.push('  No crushed rocks');
-            } else {
-                crushed.forEach(crushedName => {
-                    const count = this.shipInventory[crushedName] || 0;
-                    const rockName = crushedName.replace('Crushed ', '');
-                    const comp = this.rockCompositions[rockName];
-                    if (comp && count >= 5) {
-                        lines.push(`  ${crushedName}: ${count}  → ready`);
-                    } else if (comp) {
-                        lines.push(`  ${crushedName}: ${count}  (need 5)`);
-                    }
-                });
-            }
-            this.roomModalContent.setText(lines.join('\n'));
-
-            let y = 40;
-            rockTypes.forEach(rockName => {
-                const count = this.shipInventory[rockName] || 0;
-                if (count > 0) {
-                    const btn = this.createModalButton(0, y, `CRUSH ${rockName} (${count})`, () => {
-                        this.shipInventory[rockName]--;
-                        if (this.shipInventory[rockName] <= 0) delete this.shipInventory[rockName];
-                        const crushed = `Crushed ${rockName}`;
-                        this.shipInventory[crushed] = (this.shipInventory[crushed] || 0) + 2;
-                        this.updateUI();
-                        this.openRoomControlsModal(room);
-                    }, 200, 26, 0x333322, '#aaaa88');
-                    this.roomModalControlBtns.push(btn);
-                    y += 32;
-                }
-            });
-
-            y += 8;
-            crushed.forEach(crushedName => {
-                const count = this.shipInventory[crushedName] || 0;
-                const rockName = crushedName.replace('Crushed ', '');
-                const comp = this.rockCompositions[rockName];
-                if (comp && count >= 5) {
-                    const btn = this.createModalButton(0, y, `EXTRACT ${crushedName} (${count})`, () => {
-                        this.extractFromCrushedRock(crushedName, comp);
-                        this.updateUI();
-                        this.openRoomControlsModal(room);
-                    }, 200, 28, 0x222233, '#8888aa');
-                    this.roomModalControlBtns.push(btn);
-                    y += 34;
-                }
-            });
+            this.renderProcessingModal(room, 'crusher');
 
         } else if (room.type === 'smelter') {
-            let lines = ['─ SMELT (3 ore → 1 ingot) ─'];
-            const recipes = [
-                { ore: 'Copper Ore', ingot: 'Copper Ingot' },
-                { ore: 'Iron Ore', ingot: 'Iron Ingot' },
-                { ore: 'Gold Ore', ingot: 'Gold Ingot' },
-            ];
-            recipes.forEach(r => {
-                const count = this.shipInventory[r.ore] || 0;
-                const can = count >= 3;
-                lines.push(`  ${r.ore}: ${count}  ${can ? '→ ready' : '(need 3)'}`);
-            });
-            this.roomModalContent.setText(lines.join('\n'));
-
-            let y = 40;
-            recipes.forEach(r => {
-                const count = this.shipInventory[r.ore] || 0;
-                const can = count >= 3;
-                if (can) {
-                    const btn = this.createModalButton(0, y, `SMELT ${r.ore}`, () => {
-                        this.shipInventory[r.ore] -= 3;
-                        if (this.shipInventory[r.ore] <= 0) delete this.shipInventory[r.ore];
-                        this.shipInventory[r.ingot] = (this.shipInventory[r.ingot] || 0) + 1;
-                        this.updateUI();
-                        this.openRoomControlsModal(room);
-                    }, 200, 26, 0x442222, '#cc8888');
-                    this.roomModalControlBtns.push(btn);
-                    y += 32;
-                }
-            });
+            this.renderProcessingModal(room, 'smelter');
 
         } else if (room.type === 'refinery') {
-            this.roomModalContent.setText('Active.\nAdvanced processing coming soon.');
+            this.renderProcessingModal(room, 'refinery');
 
         } else if (room.type === 'drill') {
             this.roomModalContent.setText(
@@ -658,6 +770,233 @@ class ShipScene extends Phaser.Scene {
         this.roomModal.setVisible(false);
         this.selectedRoomCell = null;
         this.drawShipGrid();
+    }
+
+    renderProcessingModal(room, machineType) {
+        const recipes = this.recipes[machineType];
+        const queue = this.getQueue(room);
+        const now = Date.now();
+
+        // Active job display
+        let contentLines = [];
+        if (queue.currentJob) {
+            const job = queue.currentJob;
+            const recipe = job.recipe || recipes.find(r => r.id === job.recipeId);
+            const elapsed = now - job.startTime;
+            const pct = Math.min(1, elapsed / recipe.time);
+            const remaining = Math.ceil((recipe.time - elapsed) / 1000);
+            contentLines.push(`🔥 ${recipe.name}  ${job.done + 1}/${job.amount}`);
+            contentLines.push(`  ${Math.floor(pct * 100)}%  ~${remaining}s`);
+        } else {
+            contentLines.push('IDLE');
+        }
+        if (queue.pending.length > 0) {
+            const totalPending = queue.pending.reduce((s, j) => s + j.amount, 0);
+            contentLines.push(`Queue: ${totalPending} job${totalPending > 1 ? 's' : ''}`);
+        }
+        this.roomModalContent.setText(contentLines.join('\n'));
+
+        // Progress bar for active job
+        if (queue.currentJob) {
+            const job = queue.currentJob;
+            const recipe = job.recipe || recipes.find(r => r.id === job.recipeId);
+            const elapsed = now - job.startTime;
+            const pct = Math.min(1, elapsed / recipe.time);
+            const barW = 240;
+            const barH = 8;
+            const barY = -130;
+            // Background
+            const barBg = this.add.rectangle(0, barY, barW, barH, 0x111118).setOrigin(0.5);
+            // Fill
+            const barFill = this.add.rectangle(-barW / 2 + (barW * pct) / 2, barY, barW * pct, barH, 0xcc8844).setOrigin(0.5);
+            this.roomModalButtons.add([barBg, barFill]);
+        }
+
+        let y = -80;
+
+        // Initialize amount selectors if not present
+        if (!this.modalAmounts) this.modalAmounts = {};
+
+        recipes.forEach(recipe => {
+            // Determine available count for this recipe
+            let canMake = Infinity;
+            let availableText = '';
+            let dynamicInput = null;
+
+            if (machineType === 'crusher') {
+                // Dynamic: list each rock type as a separate row
+                const rockTypes = Object.keys(this.shipInventory).filter(k =>
+                    this.rockCompositions[k] && !k.startsWith('Crushed')
+                );
+                rockTypes.forEach(rockName => {
+                    const count = this.shipInventory[rockName] || 0;
+                    if (count <= 0) return;
+                    const rowKey = `${recipe.id}_${rockName}`;
+                    if (this.modalAmounts[rowKey] === undefined) this.modalAmounts[rowKey] = 1;
+                    const amt = this.modalAmounts[rowKey];
+                    canMake = count;
+
+                    // Row label
+                    const label = this.add.text(-100, y, `${rockName}`, {
+                        fontSize: '11px', fill: '#aaaaaa', fontFamily: 'monospace'
+                    }).setOrigin(0, 0.5);
+                    const have = this.add.text(40, y, `${count}`, {
+                        fontSize: '10px', fill: '#555555', fontFamily: 'monospace'
+                    }).setOrigin(0.5);
+
+                    // Amount selector
+                    const minBtn = this.add.rectangle(80, y, 20, 20, 0x1a1a28).setInteractive();
+                    const minTxt = this.add.text(80, y, '-', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
+                    const amtTxt = this.add.text(105, y, String(amt), {
+                        fontSize: '11px', fill: '#cccccc', fontFamily: 'monospace'
+                    }).setOrigin(0.5);
+                    const plBtn = this.add.rectangle(130, y, 20, 20, 0x1a1a28).setInteractive();
+                    const plTxt = this.add.text(130, y, '+', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
+
+                    minBtn.on('pointerdown', () => {
+                        if (this.modalAmounts[rowKey] > 1) {
+                            this.modalAmounts[rowKey]--;
+                            this.openRoomControlsModal(room);
+                        }
+                    });
+                    plBtn.on('pointerdown', () => {
+                        if (this.modalAmounts[rowKey] < canMake) {
+                            this.modalAmounts[rowKey]++;
+                            this.openRoomControlsModal(room);
+                        }
+                    });
+
+                    const qBtn = this.createModalButton(170, y, 'QUEUE', () => {
+                        const qAmt = this.modalAmounts[rowKey];
+                        if (qAmt > 0 && qAmt <= count) {
+                            const din = { [rockName]: 1 };
+                            if (this.queueJob(room, recipe, qAmt, din)) {
+                                this.modalAmounts[rowKey] = 1;
+                                this.openRoomControlsModal(room);
+                            }
+                        }
+                    }, 60, 22, 0x224422, '#88cc88');
+
+                    this.roomModalButtons.add([label, have, minBtn, minTxt, amtTxt, plBtn, plTxt]);
+                    this.roomModalControlBtns.push(qBtn);
+                    y += 32;
+                });
+                return; // skip normal recipe row for crusher
+            }
+
+            if (machineType === 'refinery') {
+                const crushedList = Object.keys(this.shipInventory).filter(k => k.startsWith('Crushed '));
+                crushedList.forEach(crushedName => {
+                    const count = this.shipInventory[crushedName] || 0;
+                    const rockName = crushedName.replace('Crushed ', '');
+                    const comp = this.rockCompositions[rockName];
+                    if (!comp || count < 5) return;
+                    const rowKey = `${recipe.id}_${crushedName}`;
+                    if (this.modalAmounts[rowKey] === undefined) this.modalAmounts[rowKey] = 1;
+                    const amt = this.modalAmounts[rowKey];
+                    canMake = Math.floor(count / 5);
+
+                    const label = this.add.text(-100, y, `${crushedName}`, {
+                        fontSize: '11px', fill: '#aaaaaa', fontFamily: 'monospace'
+                    }).setOrigin(0, 0.5);
+                    const have = this.add.text(40, y, `${count}`, {
+                        fontSize: '10px', fill: '#555555', fontFamily: 'monospace'
+                    }).setOrigin(0.5);
+
+                    const minBtn = this.add.rectangle(80, y, 20, 20, 0x1a1a28).setInteractive();
+                    const minTxt = this.add.text(80, y, '-', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
+                    const amtTxt = this.add.text(105, y, String(amt), {
+                        fontSize: '11px', fill: '#cccccc', fontFamily: 'monospace'
+                    }).setOrigin(0.5);
+                    const plBtn = this.add.rectangle(130, y, 20, 20, 0x1a1a28).setInteractive();
+                    const plTxt = this.add.text(130, y, '+', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
+
+                    minBtn.on('pointerdown', () => {
+                        if (this.modalAmounts[rowKey] > 1) {
+                            this.modalAmounts[rowKey]--;
+                            this.openRoomControlsModal(room);
+                        }
+                    });
+                    plBtn.on('pointerdown', () => {
+                        if (this.modalAmounts[rowKey] < canMake) {
+                            this.modalAmounts[rowKey]++;
+                            this.openRoomControlsModal(room);
+                        }
+                    });
+
+                    const qBtn = this.createModalButton(170, y, 'QUEUE', () => {
+                        const qAmt = this.modalAmounts[rowKey];
+                        if (qAmt > 0 && qAmt <= canMake) {
+                            const din = { [crushedName]: 5 };
+                            if (this.queueJob(room, recipe, qAmt, din)) {
+                                this.modalAmounts[rowKey] = 1;
+                                this.openRoomControlsModal(room);
+                            }
+                        }
+                    }, 60, 22, 0x224422, '#88cc88');
+
+                    this.roomModalButtons.add([label, have, minBtn, minTxt, amtTxt, plBtn, plTxt]);
+                    this.roomModalControlBtns.push(qBtn);
+                    y += 32;
+                });
+                return;
+            }
+
+            // Normal recipes (smelter)
+            for (const [mat, qty] of Object.entries(recipe.input)) {
+                const have = this.shipInventory[mat] || 0;
+                canMake = Math.min(canMake, Math.floor(have / qty));
+            }
+            if (canMake === Infinity) canMake = 0;
+
+            const rowKey = recipe.id;
+            if (this.modalAmounts[rowKey] === undefined) this.modalAmounts[rowKey] = 1;
+            const amt = this.modalAmounts[rowKey];
+
+            const label = this.add.text(-100, y, `${recipe.name}`, {
+                fontSize: '11px', fill: '#aaaaaa', fontFamily: 'monospace'
+            }).setOrigin(0, 0.5);
+
+            // Input info
+            const inputTxt = Object.entries(recipe.input).map(([m, q]) => `${m}:${this.shipInventory[m] || 0}`).join(' ');
+            const info = this.add.text(-100, y + 12, inputTxt, {
+                fontSize: '9px', fill: '#444444', fontFamily: 'monospace'
+            }).setOrigin(0, 0.5);
+
+            // Amount selector
+            const minBtn = this.add.rectangle(80, y, 20, 20, 0x1a1a28).setInteractive();
+            const minTxt = this.add.text(80, y, '-', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
+            const amtTxt = this.add.text(105, y, String(Math.min(amt, canMake)), {
+                fontSize: '11px', fill: '#cccccc', fontFamily: 'monospace'
+            }).setOrigin(0.5);
+            const plBtn = this.add.rectangle(130, y, 20, 20, 0x1a1a28).setInteractive();
+            const plTxt = this.add.text(130, y, '+', { fontSize: '12px', fill: '#888888' }).setOrigin(0.5);
+
+            minBtn.on('pointerdown', () => {
+                if (this.modalAmounts[rowKey] > 1) {
+                    this.modalAmounts[rowKey]--;
+                    this.openRoomControlsModal(room);
+                }
+            });
+            plBtn.on('pointerdown', () => {
+                if (this.modalAmounts[rowKey] < canMake) {
+                    this.modalAmounts[rowKey]++;
+                    this.openRoomControlsModal(room);
+                }
+            });
+
+            const qBtn = this.createModalButton(170, y, 'QUEUE', () => {
+                const qAmt = Math.min(this.modalAmounts[rowKey], canMake);
+                if (qAmt > 0 && this.queueJob(room, recipe, qAmt)) {
+                    this.modalAmounts[rowKey] = 1;
+                    this.openRoomControlsModal(room);
+                }
+            }, 60, 22, canMake > 0 ? 0x224422 : 0x151515, canMake > 0 ? '#88cc88' : '#444444');
+
+            this.roomModalButtons.add([label, info, minBtn, minTxt, amtTxt, plBtn, plTxt]);
+            this.roomModalControlBtns.push(qBtn);
+            y += 36;
+        });
     }
 
     extractFromCrushedRock(crushedName, comp) {

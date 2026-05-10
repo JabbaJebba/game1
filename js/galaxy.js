@@ -12,6 +12,8 @@ class GalaxyScene extends Phaser.Scene {
         this.engineLevel = this.calculateEngineLevel();
         this.rockCompositions = data.rockCompositions || {};
         this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0 };
+        this.processingQueues = data.processingQueues || {};
+        this.launchTime = data.launchTime || null;
     }
 
     calculateEngineLevel() {
@@ -40,6 +42,8 @@ class GalaxyScene extends Phaser.Scene {
                 shipFuelCapacity: this.shipFuelCapacity,
                 rockCompositions: this.rockCompositions,
                 techState: this.techState,
+                processingQueues: this.processingQueues,
+                launchTime: this.launchTime,
             });
         }, 180, 36);
 
@@ -148,6 +152,8 @@ class GalaxyScene extends Phaser.Scene {
                 rockType: rt,
                 rockCompositions: this.rockCompositions,
                 techState: this.techState,
+                processingQueues: this.processingQueues,
+                launchTime: this.launchTime,
             });
         }, 200, 50);
     }

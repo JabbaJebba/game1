@@ -13,6 +13,8 @@ class GameScene extends Phaser.Scene {
         this.rockType = data.rockType || { name: 'Stone' };
         this.rockCompositions = data.rockCompositions || {};
         this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0 };
+        this.processingQueues = data.processingQueues || {};
+        this.launchTime = data.launchTime || null;
     }
 
     create() {
@@ -156,6 +158,8 @@ class GameScene extends Phaser.Scene {
             shipFuelCapacity: this.shipFuelCapacity,
             rockCompositions: this.rockCompositions,
             techState: this.techState,
+            processingQueues: this.processingQueues,
+            launchTime: this.launchTime,
         };
         localStorage.setItem('miners_save', JSON.stringify(saveData));
 
@@ -168,6 +172,8 @@ class GameScene extends Phaser.Scene {
             shipFuelCapacity: this.shipFuelCapacity,
             rockCompositions: this.rockCompositions,
             techState: this.techState,
+            processingQueues: this.processingQueues,
+            launchTime: this.launchTime,
         });
     }
 
