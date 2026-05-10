@@ -7,7 +7,7 @@
   - Applies in both `renderWorld()` (batch draw) and `updateTile()` (single-tile redraw after mining)
   - Gem and metal tiles are left untouched — they already have their own visual identity (pulse glow, symbol labels)
   - No gameplay impact; purely visual polish that makes the world feel more organic and less "programmer art"
-- Status: ✅ Pushed. Commit: `TBD`
+- Status: ✅ Pushed. Commit: `cb61d56`
 
 ## 2026-05-11 — Gem Sparkle Particles
 - **QoL/Game Feel:** Added upward-floating sparkle particles when mining gem tiles
