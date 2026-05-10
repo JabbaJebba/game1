@@ -50,6 +50,20 @@ class ShipScene extends Phaser.Scene {
 
     create() {
         this.cameras.main.setBackgroundColor('#040408');
+
+        // Ambient starfield — slow-drifting background particles
+        this.ambientStars = [];
+        for (let i = 0; i < 50; i++) {
+            const x = Math.random() * 1280;
+            const y = Math.random() * 720;
+            const size = Math.random() * 1.5 + 0.5;
+            const star = this.add.circle(x, y, size, 0xffffff, Math.random() * 0.3 + 0.1);
+            star.setScrollFactor(0);
+            star.speed = Math.random() * 0.25 + 0.05;
+            star.wobble = Math.random() * 0.003 + 0.001;
+            star.phase = Math.random() * Math.PI * 2;
+            this.ambientStars.push(star);
+        }
         this.tileSize = 52;
         this.gridW = 4;
         this.gridH = 6;
@@ -356,6 +370,17 @@ class ShipScene extends Phaser.Scene {
     }
 
     update(time, delta) {
+        // Drift ambient starfield
+        this.ambientStars.forEach(star => {
+            star.x -= star.speed;
+            star.y += Math.sin(time * star.wobble + star.phase) * 0.25;
+            star.alpha = 0.08 + Math.abs(Math.sin(time * 0.0008 + star.phase)) * 0.25;
+            if (star.x < -5) {
+                star.x = 1285;
+                star.y = Math.random() * 720;
+            }
+        });
+
         // Process active jobs every frame
         const now = Date.now();
         for (let x = 0; x < this.gridW; x++) {

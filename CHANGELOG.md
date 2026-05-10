@@ -1,5 +1,15 @@
 # Game Improvement Log
 
+## 2026-05-11 — Ship Scene Ambient Starfield
+- **QoL/Atmosphere:** Added a slow-drifting ambient starfield to the ship command screen
+  - 50 tiny white particles (0.5–2px) with randomized drift speed (0.05–0.3 px/frame) and subtle vertical sine wobble
+  - Alpha breathes gently (0.08 → 0.33) via sine wave so stars twinkle organically
+  - Stars wrap from left edge to right edge when they drift off-screen, creating an infinite field
+  - `setScrollFactor(0)` so they stay fixed to the viewport — the ship is the frame, not the camera
+  - Purely visual, no gameplay impact; turns the previously static black void into a living space backdrop
+  - Pairs with the dark UI theme to make ship management feel like you're actually in a spaceship
+- Status: 🔄 Pending push
+
 ## 2026-05-11 — Rock Tile Color Variation
 - **QoL/Visual:** Added deterministic per-tile brightness variation for rock, grass, and bedrock tiles
   - Uses a pseudo-random hash based on tile coordinates so the same tile always renders the same shade
