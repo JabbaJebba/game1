@@ -8,7 +8,7 @@
   - Cancels previous recoil tween if a new mine fires before the old one finishes — no visual fighting
   - Purely visual: logical position (this.x/this.y) never changes, so collision and snapping are unaffected
   - Pairs with existing screen shake + debris particles to make each mine hit feel genuinely physical
-- Status: 🔄 Committing now
+- Status: ✅ Pushed. Commit: `d1eae9c`
 
 ## 2026-05-10 — Mining Target Preview
 - **QoL/Game Feel:** Added mining target preview outlines — when holding A/S/D, the exact tiles that will be mined are outlined with a pulsing border
