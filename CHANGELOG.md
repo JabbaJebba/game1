@@ -170,6 +170,15 @@
 7. **Hazards** - Falling rocks, lava, enemies
 8. **Quality of life** - Auto-collect radius, better teleport mechanics
 
+## 2026-05-10 — Tile Mine Flash
+- **QoL/Game Feel:** Added a bright white flash on tiles when they are mined
+  - White rectangle spawns at the tile position with 55% alpha
+  - Scales up to 1.25× and fades to zero over 110ms
+  - Layered at depth 4, above debris but below floating text
+  - Pairs with existing screen shake + debris + recoil to make each mine hit feel more destructive
+  - Purely visual — no gameplay or collision changes
+- Status: 🔄 Pushing...
+
 ## Completed
 - [x] Falling wind trail — thin white streaks spawn behind the player when falling fast (vy > 250), drifting opposite to facing direction, 40-90ms spawn rate, 180-300ms fade
 - [x] Mine cooldown ring — circular arc around player showing mining cooldown progress, color shifts orange→green

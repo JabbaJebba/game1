@@ -449,6 +449,23 @@ class GameScene extends Phaser.Scene {
         }
     }
 
+    spawnMineFlash(tileX, tileY) {
+        const px = tileX * 32 + 16;
+        const py = tileY * 32 + 16;
+        const flash = this.add.rectangle(px, py, 32, 32, 0xffffff);
+        flash.setDepth(4);
+        flash.setAlpha(0.55);
+        this.tweens.add({
+            targets: flash,
+            alpha: 0,
+            scaleX: 1.25,
+            scaleY: 1.25,
+            duration: 110,
+            ease: 'Power1',
+            onComplete: () => flash.destroy()
+        });
+    }
+
     spawnFallTrail(x, y, facingRight) {
         // Thin white streaks that drift opposite to facing direction
         const sizeW = 2 + Math.floor(Math.random() * 3);

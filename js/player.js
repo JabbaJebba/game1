@@ -439,6 +439,9 @@ class Player {
         this.addToInventory(tile);
         this.scene.updateTile(tileX, tileY);
         
+        // Flash effect on mined tile
+        this.scene.spawnMineFlash(tileX, tileY);
+
         // Screen shake on successful mine
         this.scene.cameras.main.shake(60, 0.004);
 
