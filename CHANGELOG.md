@@ -1,5 +1,10 @@
 # Game Improvement Log
 
+## 2026-05-10 — Landing Dust + Syntax Fix
+- **Fix:** `const tileX` redeclaration in `update()` (depth indicator commit) caused SyntaxError — renamed second declaration to `playerTileX`
+- **QoL:** Added landing dust particles when player hits the ground after a jump (3-5 gray particles spray upward and fade)
+- Status: ✅ Pushed. 
+
 ## 2026-05-10 — Depth Indicator
 - Replaced useless raw pixel position with depth readout (meters below surface)
 - Depth calculated from surface Y at current X, clamped to world bounds

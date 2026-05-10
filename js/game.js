@@ -197,8 +197,8 @@ class GameScene extends Phaser.Scene {
             .map(([k, v]) => `${this.getTileName(parseInt(k))}: ${v}`)
             .join(' | ');
 
-        const tileX = Math.max(0, Math.min(this.worldWidth - 1, Math.floor(this.player.x / 32)));
-        const surfaceY = this.world.getSurfaceY(tileX) || 0;
+        const playerTileX = Math.max(0, Math.min(this.worldWidth - 1, Math.floor(this.player.x / 32)));
+        const surfaceY = this.world.getSurfaceY(playerTileX) || 0;
         const depth = Math.max(0, Math.floor(this.player.y / 32) - surfaceY);
         const depthColor = depth < 20 ? '#88ff88' : depth < 80 ? '#ffff44' : depth < 150 ? '#ffaa44' : '#ff4444';
 
@@ -358,6 +358,28 @@ class GameScene extends Phaser.Scene {
                 scaleY: 0.2,
                 angle: Math.random() * 180 - 90,
                 duration: 350 + Math.random() * 250,
+                ease: 'Power2',
+                onComplete: () => particle.destroy()
+            });
+        }
+    }
+
+    spawnLandingDust(x, y) {
+        const count = 3 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < count; i++) {
+            const size = 2 + Math.floor(Math.random() * 3);
+            const particle = this.add.rectangle(x + (Math.random() - 0.5) * 40, y, size, size, 0xcccccc);
+            particle.setDepth(4);
+            const angle = (Math.random() * Math.PI) + Math.PI; // upward arc
+            const speed = 40 + Math.random() * 60;
+            this.tweens.add({
+                targets: particle,
+                x: particle.x + Math.cos(angle) * speed * 0.4,
+                y: particle.y + Math.sin(angle) * speed * 0.3,
+                alpha: 0,
+                scaleX: 0.2,
+                scaleY: 0.2,
+                duration: 300 + Math.random() * 200,
                 ease: 'Power2',
                 onComplete: () => particle.destroy()
             });

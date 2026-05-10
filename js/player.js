@@ -237,6 +237,7 @@ class Player {
 
     moveY(amount) {
         this.y += amount;
+        const wasOnGround = this.onGround;
         this.onGround = false;
 
         const { left, right, top, bottom } = this.getTileBounds();
@@ -248,6 +249,9 @@ class Player {
                     this.y = feetRow * 32;
                     this.vy = 0;
                     this.onGround = true;
+                    if (!wasOnGround) {
+                        this.scene.spawnLandingDust(this.x, this.y);
+                    }
                     break;
                 }
             }
