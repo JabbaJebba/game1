@@ -9,7 +9,7 @@
   - Monospace font with dark stroke for readability against any background
   - Helps players optimize their runs — see exactly how much fuel each dive costs and how long it took
   - Resets automatically on each new planet launch (fresh stats per run)
-- Status: ✅ Pushed. Commit: `TBD`
+- Status: ✅ Pushed. Commit: `155cd37`
 
 ## 2026-05-11 — Metal Ore Spark Particles
 - **QoL/Game Feel:** Added bright metallic spark particles when mining copper, iron, or gold ore tiles
