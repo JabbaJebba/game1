@@ -235,9 +235,12 @@ class GameScene extends Phaser.Scene {
         const darkness = 1 - dayProgress * 0.7;
         this.tileAlpha = 0.6 + dayProgress * 0.4; // tiles dim at night (0.6→1.0)
 
-        const r = Math.floor(135 * darkness);
-        const g = Math.floor(206 * darkness);
-        const b = Math.floor(235 * darkness);
+        // Depth-based sky darkening — background fades to near-black as you go deeper underground
+        const depthFactor = Math.min(1, depth / 200);
+        const depthMult = 1 - depthFactor * 0.92;
+        const r = Math.floor(135 * darkness * depthMult);
+        const g = Math.floor(206 * darkness * depthMult);
+        const b = Math.floor(235 * darkness * depthMult);
         this.cameras.main.setBackgroundColor(`rgb(${r},${g},${b})`);
 
         this.stars.setAlpha(1 - dayProgress);

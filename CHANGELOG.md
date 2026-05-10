@@ -241,7 +241,14 @@
 - Added mine indicator flash animation (scale up/down on hit)
 - Status: Mining now has visual feedback. Next: debris particles, sound effects, or save system.
 
-## TODO Queue (prioritized)
+## 2026-05-11 — Depth-Based Sky Darkening
+- **QoL/Atmosphere:** Background now darkens progressively as the player descends deeper underground
+  - At surface (0m): sky renders at full day/night brightness — unchanged
+  - At 100m depth: sky is roughly 50% darker, creating a "shallow cave" feel
+  - At 200m+ depth: sky fades to near-black (~8% brightness), making deep mining feel genuinely subterranean
+  - Multiplies existing day/n cycle darkness so both depth and time of day stack naturally
+  - No gameplay impact — purely atmospheric depth cue that makes the world feel more dimensional
+- Status: ⏳ Commit pending
 1. **Better UI** - Cleaner inventory display, stats panel, depth colors
 2. **More content** - Additional gem types, planet variety
 3. **Audio** - Mining sounds, ambient music
