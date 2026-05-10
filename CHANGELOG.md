@@ -1,5 +1,14 @@
 # Game Improvement Log
 
+## 2026-05-10 — Mining Target Preview
+- **QoL/Game Feel:** Added mining target preview outlines — when holding A/S/D, the exact tiles that will be mined are outlined with a pulsing border
+  - Color transitions from orange (on cooldown) to green (ready to mine)
+  - Alpha brightens from 25% to 70% as the 180ms cooldown refreshes
+  - Draws individual tile outlines for each tile in the mining sweep (left/right = 3 tiles, down = 2 tiles)
+  - Pairs with the existing cooldown ring to make mining rhythm completely transparent
+  - No gameplay change — purely informational visual feedback
+- Status: ✅ Pushed. Commit: TBD
+
 ## 2026-05-10 — Nighttime Tile Dimming
 - **QoL/Atmosphere:** Tiles now darken at night as the day/night cycle progresses
   - Tile brightness scales from 60% at full night → 100% at full day

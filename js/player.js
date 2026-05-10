@@ -79,6 +79,10 @@ class Player {
         this.blinkStartTime = 0;
         this.nextBlinkTime = 2000 + Math.random() * 3000;
 
+        // Mining target preview outlines
+        this.minePreview = scene.add.graphics();
+        this.minePreview.setDepth(5);
+
         // Mine cooldown ring
         this.cooldownRing = scene.add.graphics();
         this.cooldownRing.setDepth(6);
@@ -294,6 +298,30 @@ class Player {
             }
         } else {
             this.walkDustTimer = 0;
+        }
+
+        // Mining target preview — shows which tiles will be hit
+        this.minePreview.clear();
+        const miningKeyHeld = keys.mineLeft.isDown || keys.mineRight.isDown || keys.mineDown.isDown;
+        if (miningKeyHeld) {
+            let targetTiles = [];
+            if (keys.mineLeft.isDown) {
+                const { left, top, bottom } = this.getTileBounds();
+                for (let y = top; y <= bottom; y++) targetTiles.push({ x: left - 1, y });
+            } else if (keys.mineRight.isDown) {
+                const { right, top, bottom } = this.getTileBounds();
+                for (let y = top; y <= bottom; y++) targetTiles.push({ x: right + 1, y });
+            } else if (keys.mineDown.isDown && this.onGround) {
+                const { left, right, bottom } = this.getTileBounds();
+                for (let x = left; x <= right; x++) targetTiles.push({ x, y: bottom + 1 });
+            }
+            const progress = Math.min(1, (now - this.lastMineTime) / this.mineCooldown);
+            const alpha = 0.25 + progress * 0.45;
+            const color = progress < 1 ? 0xffaa44 : 0x44ff88;
+            this.minePreview.lineStyle(2, color, alpha);
+            targetTiles.forEach(t => {
+                this.minePreview.strokeRect(t.x * 32, t.y * 32, 32, 32);
+            });
         }
 
         // Mine cooldown ring — shows when holding a mine key and on cooldown
