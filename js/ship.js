@@ -4,7 +4,6 @@ class ShipScene extends Phaser.Scene {
     }
 
     init(data) {
-        // Auto-load from localStorage on first boot
         const isFirstBoot = !data || Object.keys(data).length === 0;
         if (isFirstBoot) {
             const save = localStorage.getItem('miners_save');
@@ -40,40 +39,62 @@ class ShipScene extends Phaser.Scene {
     }
 
     create() {
-        this.cameras.main.setBackgroundColor('#0d0d1a');
+        this.cameras.main.setBackgroundColor('#040408');
         this.tileSize = 52;
         this.gridW = 4;
         this.gridH = 6;
-        this.gridOffsetX = 540;
-        this.gridOffsetY = 60;
+        this.gridOffsetX = (1280 - this.gridW * this.tileSize) / 2; // 512
+        this.gridOffsetY = 160;
+
+        // Decorative corner brackets around grid
+        this.frameGraphics = this.add.graphics();
+        const fw = this.gridW * this.tileSize + 24;
+        const fh = this.gridH * this.tileSize + 24;
+        const fx = this.gridOffsetX - 12;
+        const fy = this.gridOffsetY - 12;
+        this.frameGraphics.lineStyle(2, 0x00d4aa, 0.6);
+        // Top-left corner
+        this.frameGraphics.lineBetween(fx, fy + 20, fx, fy);
+        this.frameGraphics.lineBetween(fx, fy, fx + 20, fy);
+        // Top-right corner
+        this.frameGraphics.lineBetween(fx + fw - 20, fy, fx + fw, fy);
+        this.frameGraphics.lineBetween(fx + fw, fy, fx + fw, fy + 20);
+        // Bottom-left corner
+        this.frameGraphics.lineBetween(fx, fy + fh - 20, fx, fy + fh);
+        this.frameGraphics.lineBetween(fx, fy + fh, fx + 20, fy + fh);
+        // Bottom-right corner
+        this.frameGraphics.lineBetween(fx + fw - 20, fy + fh, fx + fw, fy + fh);
+        this.frameGraphics.lineBetween(fx + fw, fy + fh - 20, fx + fw, fy + fh);
 
         // Title
-        this.add.text(640, 16, '═══ SPACE SHIP ═══', {
-            fontSize: '26px', fill: '#ffffff', fontStyle: 'bold',
-            fontFamily: 'monospace',
+        this.add.text(640, 28, 'SHIP COMMAND', {
+            fontSize: '16px', fill: '#445566', fontFamily: 'monospace', letterSpacing: 6
         }).setOrigin(0.5);
 
-        // Compact status bar under title
-        this.statusBarFuel = this.add.text(420, 42, '', {
-            fontSize: '13px', fill: '#FF8C00', fontFamily: 'monospace'
-        }).setOrigin(0.5);
-        this.statusBarCredits = this.add.text(860, 42, '', {
-            fontSize: '13px', fill: '#FFD700', fontFamily: 'monospace'
-        }).setOrigin(0.5);
+        // Status bar
+        this.statusFuel = this.add.text(80, 60, '', {
+            fontSize: '13px', fill: '#cc8844', fontFamily: 'monospace'
+        }).setOrigin(0, 0.5);
+        this.statusCredits = this.add.text(1200, 60, '', {
+            fontSize: '13px', fill: '#c9a84c', fontFamily: 'monospace'
+        }).setOrigin(1, 0.5);
 
-        // All rooms: power set to 0 for now (per Boss request)
+        // Thin separator
+        const sep = this.add.graphics();
+        sep.lineStyle(1, 0x111122, 1);
+        sep.lineBetween(60, 82, 1220, 82);
+
         this.roomTypes = {
-            solar: { name: 'Solar Panel', size: 1, power: 0, cost: 0, color: 0xFFD700, icon: 'S' },
-            battery: { name: 'Battery', size: 1, powerCap: 50, cost: 100, color: 0x4169E1, icon: 'B' },
-            fuelTank: { name: 'Fuel Tank', size: 1, fuelCap: 50, cost: 200, color: 0xFF4500, icon: 'F' },
-            refinery: { name: 'Refinery', size: 2, power: 0, cost: 500, color: 0x8B4513, icon: 'R' },
-            trade: { name: 'Trade Terminal', size: 1, power: 0, cost: 300, color: 0x00FF00, icon: 'T' },
-            smelter: { name: 'Smelter', size: 2, power: 0, cost: 500, color: 0xCD5C5C, icon: 'm' },
-            drill: { name: 'Mech Workshop', size: 2, power: 0, cost: 400, color: 0xA9A9A9, icon: 'W' },
-            engine: { name: 'Engine', size: 2, power: 0, cost: 1000, color: 0xFF6347, icon: 'E' },
-            quarters: { name: 'Quarters', size: 1, power: 0, cost: 150, color: 0x9370DB, icon: 'Q' },
-            crusher: { name: 'Crusher', size: 2, power: 0, cost: 300, color: 0x8B8B83, icon: 'C' },
-            smelter: { name: 'Smelter', size: 2, power: 0, cost: 500, color: 0xCD5C5C, icon: 'M' },
+            solar: { name: 'Solar Panel', size: 1, power: 0, cost: 0, color: 0xccaa44, icon: '☀' },
+            battery: { name: 'Battery', size: 1, powerCap: 50, cost: 100, color: 0x4466cc, icon: '⚡' },
+            fuelTank: { name: 'Fuel Tank', size: 1, fuelCap: 50, cost: 200, color: 0xcc6633, icon: '⛽' },
+            refinery: { name: 'Refinery', size: 2, power: 0, cost: 500, color: 0x8b6f47, icon: '⚙' },
+            trade: { name: 'Trade Terminal', size: 1, power: 0, cost: 300, color: 0x44aa66, icon: '💰' },
+            smelter: { name: 'Smelter', size: 2, power: 0, cost: 500, color: 0xaa5555, icon: '🔥' },
+            drill: { name: 'Mech Workshop', size: 2, power: 0, cost: 400, color: 0x999999, icon: '🔧' },
+            engine: { name: 'Engine', size: 2, power: 0, cost: 1000, color: 0xcc5544, icon: '✈' },
+            quarters: { name: 'Quarters', size: 1, power: 0, cost: 150, color: 0x8866bb, icon: '💤' },
+            crusher: { name: 'Crusher', size: 2, power: 0, cost: 300, color: 0x777766, icon: '💥' },
         };
 
         this.gemPrices = {
@@ -107,25 +128,14 @@ class ShipScene extends Phaser.Scene {
 
         this.placeStarterRooms();
         this.drawShipGrid();
-        this.createSidePanels();
-        this.createRoomControlsPanel();
-        this.createBuildPanel();
+        this.createBottomDock();
         this.createSellPopup();
         this.createTechTreePopup();
+        this.createBuildModal();
+        this.createRoomControlsModal();
+        this.createInventoryModal();
         this.createGhostGraphics();
-
-        this.createButton(640, 690, 'LAUNCH TO GALAXY', () => {
-            this.saveGame();
-            this.scene.start('GalaxyScene', {
-                shipGrid: this.shipGrid, shipInventory: this.shipInventory,
-                credits: this.credits, shipFuel: this.shipFuel, shipFuelCapacity: this.shipFuelCapacity,
-                rockCompositions: this.rockCompositions,
-                techState: this.techState,
-            });
-        }, 320, 42);
-
-        // Reset button — small, tucked in bottom-left
-        this.createResetButton(50, 690);
+        this.createResetConfirmPopup();
 
         this.calculatePower();
         this.updateUI();
@@ -171,17 +181,6 @@ class ShipScene extends Phaser.Scene {
         this.gridGraphics = this.add.graphics();
         this.highlightGraphics = this.add.graphics();
 
-        const gridW = this.gridW * this.tileSize;
-        const gridH = this.gridH * this.tileSize;
-        const cx = this.gridOffsetX + gridW / 2;
-        const cy = this.gridOffsetY + gridH / 2;
-
-        // Ship hull outline
-        this.gridGraphics.lineStyle(3, 0x555577, 1);
-        this.gridGraphics.strokeRect(this.gridOffsetX - 8, this.gridOffsetY - 8, gridW + 16, gridH + 16);
-        this.gridGraphics.fillStyle(0x1a1a2e, 0.8);
-        this.gridGraphics.fillRect(this.gridOffsetX - 8, this.gridOffsetY - 8, gridW + 16, gridH + 16);
-
         for (let x = 0; x < this.gridW; x++) {
             for (let y = 0; y < this.gridH; y++) {
                 const px = this.gridOffsetX + x * this.tileSize;
@@ -189,30 +188,38 @@ class ShipScene extends Phaser.Scene {
                 const room = this.shipGrid[x][y];
                 if (room) {
                     const def = this.roomTypes[room.type];
-                    // Room background
+                    // Main tile fill
                     this.gridGraphics.fillStyle(def.color, 0.9);
                     this.gridGraphics.fillRect(px + 1, py + 1, this.tileSize - 2, this.tileSize - 2);
-                    // Room border
-                    this.gridGraphics.lineStyle(2, 0xffffff, 0.4);
+                    // Inner highlight (top-left)
+                    this.gridGraphics.fillStyle(0xffffff, 0.15);
+                    this.gridGraphics.fillRect(px + 1, py + 1, this.tileSize - 2, 3);
+                    this.gridGraphics.fillRect(px + 1, py + 1, 3, this.tileSize - 2);
+                    // Inner shadow (bottom-right)
+                    this.gridGraphics.fillStyle(0x000000, 0.3);
+                    this.gridGraphics.fillRect(px + 1, py + this.tileSize - 4, this.tileSize - 2, 3);
+                    this.gridGraphics.fillRect(px + this.tileSize - 4, py + 1, 3, this.tileSize - 2);
+                    // Border
+                    this.gridGraphics.lineStyle(1, 0x000000, 0.4);
                     this.gridGraphics.strokeRect(px + 1, py + 1, this.tileSize - 2, this.tileSize - 2);
-                    // Room icon (only on master cell)
                     if (room.masterX === x && room.masterY === y) {
                         const icon = this.add.text(px + this.tileSize / 2, py + this.tileSize / 2,
-                            def.icon, { fontSize: '22px', fill: '#ffffff', fontStyle: 'bold' }).setOrigin(0.5);
+                            def.icon, { fontSize: '24px' }).setOrigin(0.5);
                         icon.setDepth(2);
                         this.roomIcons.push(icon);
                     }
                 } else {
-                    // Empty cell
-                    this.gridGraphics.fillStyle(0x2a2a3e, 0.5);
+                    // Empty tile
+                    this.gridGraphics.fillStyle(0x0a0a14, 0.8);
                     this.gridGraphics.fillRect(px + 2, py + 2, this.tileSize - 4, this.tileSize - 4);
-                    this.gridGraphics.lineStyle(1, 0x444466, 0.3);
-                    this.gridGraphics.strokeRect(px + 2, py + 2, this.tileSize - 4, this.tileSize - 4);
+                    // Crosshatch pattern
+                    this.gridGraphics.lineStyle(1, 0x111122, 0.5);
+                    this.gridGraphics.lineBetween(px + 6, py + 6, px + this.tileSize - 6, py + this.tileSize - 6);
+                    this.gridGraphics.lineBetween(px + this.tileSize - 6, py + 6, px + 6, py + this.tileSize - 6);
                 }
             }
         }
 
-        // Selection highlight
         if (this.selectedRoomCell) {
             const room = this.shipGrid[this.selectedRoomCell.x][this.selectedRoomCell.y];
             if (room) {
@@ -220,28 +227,25 @@ class ShipScene extends Phaser.Scene {
                 const size = def.size;
                 const px = this.gridOffsetX + room.masterX * this.tileSize;
                 const py = this.gridOffsetY + room.masterY * this.tileSize;
-                this.highlightGraphics.lineStyle(3, 0x00FFFF, 0.9);
+                this.highlightGraphics.lineStyle(2, 0x00d4aa, 1);
                 this.highlightGraphics.strokeRect(px - 3, py - 3, size * this.tileSize + 6, size * this.tileSize + 6);
+                // Animated glow layer
+                this.highlightGraphics.fillStyle(0x00d4aa, 0.08);
+                this.highlightGraphics.fillRect(px - 3, py - 3, size * this.tileSize + 6, size * this.tileSize + 6);
             }
         }
     }
 
     handleGridHover(pointer) {
         if (!this.buildMode || !this.selectedRoom) return;
-
         const gx = Math.floor((pointer.x - this.gridOffsetX) / this.tileSize);
         const gy = Math.floor((pointer.y - this.gridOffsetY) / this.tileSize);
-
-        // Clear previous ghost graphics and text
         this.ghostGraphics.clear();
         if (this.ghostIcon) { this.ghostIcon.destroy(); this.ghostIcon = null; }
-
         if (gx < 0 || gx >= this.gridW || gy < 0 || gy >= this.gridH) return;
 
         const def = this.roomTypes[this.selectedRoom];
         const size = def.size;
-
-        // Check if valid placement
         let valid = true;
         if (gx + size > this.gridW || gy + size > this.gridH) valid = false;
         else {
@@ -251,19 +255,16 @@ class ShipScene extends Phaser.Scene {
                 }
             }
         }
-
         if (!valid) return;
 
-        // Draw ghost preview
         const px = this.gridOffsetX + gx * this.tileSize;
         const py = this.gridOffsetY + gy * this.tileSize;
-        this.ghostGraphics.fillStyle(def.color, 0.35);
+        this.ghostGraphics.fillStyle(def.color, 0.25);
         this.ghostGraphics.fillRect(px, py, size * this.tileSize, size * this.tileSize);
         this.ghostGraphics.lineStyle(2, def.color, 0.8);
         this.ghostGraphics.strokeRect(px, py, size * this.tileSize, size * this.tileSize);
-        // Ghost icon
         this.ghostIcon = this.add.text(px + size * this.tileSize / 2, py + size * this.tileSize / 2,
-            def.icon, { fontSize: '22px', fill: '#ffffff' }).setOrigin(0.5);
+            def.icon, { fontSize: '24px', fill: '#ffffff' }).setOrigin(0.5);
         this.ghostIcon.setAlpha(0.5);
         this.ghostIcon.setDepth(3);
     }
@@ -273,7 +274,6 @@ class ShipScene extends Phaser.Scene {
         const gy = Math.floor((pointer.y - this.gridOffsetY) / this.tileSize);
         if (gx < 0 || gx >= this.gridW || gy < 0 || gy >= this.gridH) return;
 
-        // Build mode: click to confirm placement
         if (this.buildMode && this.selectedRoom) {
             const def = this.roomTypes[this.selectedRoom];
             if (this.credits >= def.cost) {
@@ -282,163 +282,277 @@ class ShipScene extends Phaser.Scene {
                     this.calculatePower();
                     this.updateUI();
                     this.drawShipGrid();
-                    // Clear ghost
                     this.ghostGraphics.clear();
                     if (this.ghostIcon) { this.ghostIcon.destroy(); this.ghostIcon = null; }
-                    // Stay in build mode for multi-placement
                 }
             }
             return;
         }
 
-        // Normal mode: select room
         const room = this.shipGrid[gx][gy];
         if (room) {
             this.selectedRoomCell = { x: gx, y: gy };
             this.drawShipGrid();
-            this.showRoomControls(room);
+            this.openRoomControlsModal(room);
         } else {
             this.selectedRoomCell = null;
             this.drawShipGrid();
-            this.hideRoomControls();
         }
     }
 
-    createSidePanels() {
-        // Left panel — tall Inventory only
-        const leftBg = this.add.graphics();
-        leftBg.fillStyle(0x151525, 0.9);
-        leftBg.fillRoundedRect(10, 55, 260, 600, 8);
-        leftBg.lineStyle(1, 0x444466, 0.5);
-        leftBg.strokeRoundedRect(10, 55, 260, 600, 8);
+    createBottomDock() {
+        const y = 660;
+        const btnH = 38;
+        const btnW = 160;
+        const gap = 20;
+        const totalW = 4 * btnW + 3 * gap;
+        const startX = (1280 - totalW) / 2 + btnW / 2;
 
-        this.add.text(20, 65, 'INVENTORY', {
-            fontSize: '16px', fill: '#FFD700', fontStyle: 'bold', fontFamily: 'monospace'
-        });
-        this.inventoryText = this.add.text(20, 95, '', { fontSize: '13px', fill: '#cccccc', fontFamily: 'monospace' });
-
-        // Power text moved inside left panel, below inventory
-        this.powerText = this.add.text(20, 560, '', { fontSize: '12px', fill: '#888888', fontFamily: 'monospace' });
+        this.createDockButton(startX, y, 'RESET', () => this.openResetPopup(), btnW, btnH, 0x2a1515, '#aa5555');
+        this.createDockButton(startX + btnW + gap, y, 'INVENTORY', () => this.openInventoryModal(), btnW, btnH, 0x151525, '#8888aa');
+        this.createDockButton(startX + 2 * (btnW + gap), y, 'BUILD', () => this.openBuildModal(), btnW, btnH, 0x152525, '#44aa88');
+        this.createDockButton(startX + 3 * (btnW + gap), y, 'LAUNCH', () => {
+            this.saveGame();
+            this.scene.start('GalaxyScene', {
+                shipGrid: this.shipGrid, shipInventory: this.shipInventory,
+                credits: this.credits, shipFuel: this.shipFuel, shipFuelCapacity: this.shipFuelCapacity,
+                rockCompositions: this.rockCompositions,
+                techState: this.techState,
+            });
+        }, btnW, btnH, 0x1a2a2a, '#44aa88');
     }
 
-    createRoomControlsPanel() {
-        const panelX = 1010;
-        const panelY = 55;
-
-        this.controlsPanel = this.add.container(panelX, panelY);
-        this.controlsBg = this.add.rectangle(0, 0, 260, 600, 0x1a1a2e, 0.95).setOrigin(0);
-        this.controlsBg.setStrokeStyle(1, 0x444466);
-        this.controlsTitle = this.add.text(10, 10, 'ROOM CONTROLS', {
-            fontSize: '15px', fill: '#00FFFF', fontStyle: 'bold', fontFamily: 'monospace'
-        });
-        this.controlsContent = this.add.text(10, 40, 'Click a room to interact', {
-            fontSize: '13px', fill: '#aaaaaa', fontFamily: 'monospace'
-        });
-        this.controlsPanel.add([this.controlsBg, this.controlsTitle, this.controlsContent]);
-        this.controlsPanel.setVisible(true);
-        this.controlButtons = [];
+    createDockButton(x, y, text, callback, w, h, color, textColor) {
+        const rect = this.add.rectangle(x, y, w, h, color).setInteractive();
+        const label = this.add.text(x, y, text, {
+            fontSize: '13px', fill: textColor, fontFamily: 'monospace', letterSpacing: 1
+        }).setOrigin(0.5);
+        rect.on('pointerover', () => { rect.setFillStyle(color + 0x111111); label.setFill('#ffffff'); });
+        rect.on('pointerout', () => { rect.setFillStyle(color); label.setFill(textColor); });
+        rect.on('pointerdown', callback);
     }
 
-    showRoomControls(room) {
+    createInventoryModal() {
+        this.invModal = this.add.container(640, 360);
+        this.invModal.setVisible(false);
+        this.invModal.setDepth(10);
+
+        const bg = this.add.rectangle(0, 0, 440, 480, 0x0c0c18, 0.98).setOrigin(0.5);
+        bg.setStrokeStyle(1, 0x222233);
+        const title = this.add.text(0, -220, 'INVENTORY', {
+            fontSize: '18px', fill: '#8888aa', fontFamily: 'monospace', letterSpacing: 3
+        }).setOrigin(0.5);
+
+        this.invContent = this.add.text(0, 0, '', {
+            fontSize: '12px', fill: '#aaaaaa', fontFamily: 'monospace', lineSpacing: 6, align: 'center'
+        }).setOrigin(0.5);
+
+        const closeBtn = this.add.rectangle(0, 220, 120, 28, 0x1a1a28).setInteractive();
+        const closeTxt = this.add.text(0, 220, 'CLOSE', {
+            fontSize: '12px', fill: '#888888', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+        closeBtn.on('pointerover', () => closeBtn.setFillStyle(0x252535));
+        closeBtn.on('pointerout', () => closeBtn.setFillStyle(0x1a1a28));
+        closeBtn.on('pointerdown', () => this.closeInventoryModal());
+
+        this.invModal.add([bg, title, this.invContent, closeBtn, closeTxt]);
+    }
+
+    openInventoryModal() {
+        const entries = Object.entries(this.shipInventory);
+        if (entries.length === 0) {
+            this.invContent.setText('Empty');
+        } else {
+            // Group by category
+            const ores = entries.filter(([k]) => k.includes('Ore') || k.includes('Ingot'));
+            const gems = entries.filter(([k]) => this.gemPrices[k]);
+            const crushed = entries.filter(([k]) => k.startsWith('Crushed'));
+            const other = entries.filter(([k]) => !ores.find(o => o[0] === k) && !gems.find(g => g[0] === k) && !crushed.find(c => c[0] === k));
+            
+            let lines = [];
+            if (ores.length > 0) {
+                lines.push('─ ORES / METALS ─');
+                ores.forEach(([k, v]) => lines.push(`  ${k}: ${v}`));
+                lines.push('');
+            }
+            if (gems.length > 0) {
+                lines.push('─ GEMS ─');
+                gems.forEach(([k, v]) => lines.push(`  ${k}: ${v}`));
+                lines.push('');
+            }
+            if (crushed.length > 0) {
+                lines.push('─ CRUSHED ─');
+                crushed.forEach(([k, v]) => lines.push(`  ${k}: ${v}`));
+                lines.push('');
+            }
+            if (other.length > 0) {
+                lines.push('─ OTHER ─');
+                other.forEach(([k, v]) => lines.push(`  ${k}: ${v}`));
+            }
+            this.invContent.setText(lines.join('\n'));
+        }
+        this.invModal.setVisible(true);
+    }
+
+    closeInventoryModal() {
+        this.invModal.setVisible(false);
+    }
+
+    createRoomControlsModal() {
+        this.roomModal = this.add.container(640, 360);
+        this.roomModal.setVisible(false);
+        this.roomModal.setDepth(10);
+
+        this.roomModalBg = this.add.rectangle(0, 0, 420, 520, 0x0c0c18, 0.98).setOrigin(0.5);
+        this.roomModalBg.setStrokeStyle(1, 0x222233);
+        this.roomModalTitle = this.add.text(0, -240, '', {
+            fontSize: '18px', fill: '#00d4aa', fontFamily: 'monospace', letterSpacing: 2
+        }).setOrigin(0.5);
+        this.roomModalSubtitle = this.add.text(0, -210, '', {
+            fontSize: '11px', fill: '#555555', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+        this.roomModalContent = this.add.text(0, -170, '', {
+            fontSize: '12px', fill: '#aaaaaa', fontFamily: 'monospace', lineSpacing: 4, align: 'center'
+        }).setOrigin(0.5, 0);
+        this.roomModalButtons = this.add.container(0, 0);
+
+        const closeBtn = this.add.rectangle(0, 240, 120, 28, 0x1a1a28).setInteractive();
+        const closeTxt = this.add.text(0, 240, 'CLOSE', {
+            fontSize: '12px', fill: '#888888', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+        closeBtn.on('pointerover', () => closeBtn.setFillStyle(0x252535));
+        closeBtn.on('pointerout', () => closeBtn.setFillStyle(0x1a1a28));
+        closeBtn.on('pointerdown', () => this.closeRoomControlsModal());
+
+        this.roomModal.add([
+            this.roomModalBg, this.roomModalTitle, this.roomModalSubtitle,
+            this.roomModalContent, this.roomModalButtons, closeBtn, closeTxt
+        ]);
+        this.roomModalControlBtns = [];
+    }
+
+    openRoomControlsModal(room) {
         const def = this.roomTypes[room.type];
-        this.controlButtons.forEach(b => { if (b.rect) b.rect.destroy(); if (b.text) b.text.destroy(); });
-        this.controlButtons = [];
+        this.roomModalButtons.removeAll(true);
+        this.roomModalControlBtns = [];
 
-        let content = `${def.icon}  ${def.name}\nSize: ${def.size}×${def.size}\n\n`;
+        this.roomModalTitle.setText(`${def.icon}  ${def.name.toUpperCase()}`);
+        this.roomModalSubtitle.setText(`${def.size}×${def.size}  |  ${def.cost > 0 ? def.cost + 'cr' : 'Free'}  |  ${def.power > 0 ? '+' + def.power + ' power' : def.powerCap ? '+' + def.powerCap + ' storage' : def.fuelCap ? '+' + def.fuelCap + 'L fuel' : ''}`);
+        this.roomModalContent.setText('');
 
         if (room.type === 'trade') {
-            content += '─ CLICK GEM TO SELL ─\n';
-            this.controlsContent.setText(content);
-            let y = 100;
+            let lines = ['─ GEMS ─'];
             const gemNames = ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst'];
-
             gemNames.forEach(gemName => {
                 const count = this.shipInventory[gemName] || 0;
                 const price = this.gemPrices[gemName];
-                const btn = this.createControlButton(10, y, `${gemName} (${count}) — ${price}cr/ea`, () => {
-                    if (count > 0) this.openSellPopup(gemName, count, price);
-                }, 240, 28);
-                this.controlButtons.push(btn);
-                y += 34;
+                lines.push(`  ${gemName}: ${count}  @${price}cr`);
+            });
+            lines.push('');
+            lines.push('─ FUEL ─');
+            Object.entries(this.fuelPrices).forEach(([amount, cost]) => {
+                lines.push(`  +${amount}L  —  ${cost}cr`);
+            });
+            this.roomModalContent.setText(lines.join('\n'));
+
+            let y = 40;
+            gemNames.forEach(gemName => {
+                const count = this.shipInventory[gemName] || 0;
+                if (count > 0) {
+                    const price = this.gemPrices[gemName];
+                    const btn = this.createModalButton(0, y, `SELL ${gemName}`, () => this.openSellPopup(gemName, count, price), 200, 28, 0x224422, '#88cc88');
+                    this.roomModalControlBtns.push(btn);
+                    y += 36;
+                }
             });
 
-            y += 10;
+            y += 8;
             Object.entries(this.fuelPrices).forEach(([amount, cost]) => {
-                const fuelBtn = this.createControlButton(10, y, `BUY ${amount}L FUEL — ${cost}cr`, () => {
+                const btn = this.createModalButton(0, y, `BUY ${amount}L FUEL — ${cost}cr`, () => {
                     if (this.credits >= cost && this.shipFuel + parseInt(amount) <= this.shipFuelCapacity) {
                         this.credits -= cost;
                         this.shipFuel = Math.min(this.shipFuelCapacity, this.shipFuel + parseInt(amount));
                         this.updateUI();
-                        this.showRoomControls(room);
+                        this.openRoomControlsModal(room);
                     }
-                }, 240, 32);
-                this.controlButtons.push(fuelBtn);
-                y += 38;
+                }, 200, 28, 0x222244, '#8888cc');
+                this.roomModalControlBtns.push(btn);
+                y += 36;
             });
 
         } else if (room.type === 'fuelTank') {
-            content += `Fuel: ${this.shipFuel.toFixed(1)}L / ${this.shipFuelCapacity.toFixed(1)}L\nCapacity: +${def.fuelCap}L\n`;
-            this.controlsContent.setText(content);
-
-        } else if (room.type === 'crusher') {
-            this.controlsContent.setText(content + '─ CRUSHER ─\n');
-            let y = 100;
-
-            const rockTypesInInv = Object.keys(this.shipInventory).filter(k =>
-                this.rockCompositions[k] && !k.startsWith('Crushed')
+            this.roomModalContent.setText(
+                `Stored: ${this.shipFuel.toFixed(1)} / ${this.shipFuelCapacity.toFixed(1)}L\n` +
+                `Bonus capacity: +${def.fuelCap}L`
             );
 
-            if (rockTypesInInv.length === 0) {
-                const noneBtn = this.createControlButton(10, y, 'No rocks in inventory', () => {}, 240, 28);
-                noneBtn.rect.removeInteractive();
-                this.controlButtons.push(noneBtn);
-                y += 34;
+        } else if (room.type === 'crusher') {
+            let lines = ['─ CRUSH ─'];
+            const rockTypes = Object.keys(this.shipInventory).filter(k =>
+                this.rockCompositions[k] && !k.startsWith('Crushed')
+            );
+            if (rockTypes.length === 0) {
+                lines.push('  No rocks');
             } else {
-                rockTypesInInv.forEach(rockName => {
+                rockTypes.forEach(rockName => {
                     const count = this.shipInventory[rockName] || 0;
-                    const crushBtn = this.createControlButton(10, y, `Crush ${rockName} (${count}) → 2 Crushed`, () => {
-                        if (count >= 1) {
-                            this.shipInventory[rockName]--;
-                            if (this.shipInventory[rockName] <= 0) delete this.shipInventory[rockName];
-                            const crushedName = `Crushed ${rockName}`;
-                            this.shipInventory[crushedName] = (this.shipInventory[crushedName] || 0) + 2;
-                            this.updateUI();
-                            this.showRoomControls(room);
-                        }
-                    }, 240, 28);
-                    this.controlButtons.push(crushBtn);
-                    y += 34;
+                    lines.push(`  ${rockName}: ${count}`);
                 });
             }
-
-            y += 10;
-            const crushedTypes = Object.keys(this.shipInventory).filter(k => k.startsWith('Crushed '));
-            if (crushedTypes.length > 0) {
-                this.controlsContent.setText(this.controlsContent.text + '\n─ EXTRACT ORES ─\n');
-                crushedTypes.forEach(crushedName => {
+            lines.push('');
+            lines.push('─ EXTRACT ─');
+            const crushed = Object.keys(this.shipInventory).filter(k => k.startsWith('Crushed '));
+            if (crushed.length === 0) {
+                lines.push('  No crushed rocks');
+            } else {
+                crushed.forEach(crushedName => {
                     const count = this.shipInventory[crushedName] || 0;
                     const rockName = crushedName.replace('Crushed ', '');
                     const comp = this.rockCompositions[rockName];
                     if (comp && count >= 5) {
-                        const extractBtn = this.createControlButton(10, y, `Extract ${crushedName} (${count})`, () => {
-                            this.extractFromCrushedRock(crushedName, comp);
-                            this.updateUI();
-                            this.showRoomControls(room);
-                        }, 240, 32);
-                        this.controlButtons.push(extractBtn);
-                        y += 38;
+                        lines.push(`  ${crushedName}: ${count}  → ready`);
                     } else if (comp) {
-                        const needBtn = this.createControlButton(10, y, `${crushedName}: need 5 (have ${count})`, () => {}, 240, 28);
-                        needBtn.rect.removeInteractive();
-                        this.controlButtons.push(needBtn);
-                        y += 34;
+                        lines.push(`  ${crushedName}: ${count}  (need 5)`);
                     }
                 });
             }
+            this.roomModalContent.setText(lines.join('\n'));
+
+            let y = 40;
+            rockTypes.forEach(rockName => {
+                const count = this.shipInventory[rockName] || 0;
+                if (count > 0) {
+                    const btn = this.createModalButton(0, y, `CRUSH ${rockName} (${count})`, () => {
+                        this.shipInventory[rockName]--;
+                        if (this.shipInventory[rockName] <= 0) delete this.shipInventory[rockName];
+                        const crushed = `Crushed ${rockName}`;
+                        this.shipInventory[crushed] = (this.shipInventory[crushed] || 0) + 2;
+                        this.updateUI();
+                        this.openRoomControlsModal(room);
+                    }, 200, 26, 0x333322, '#aaaa88');
+                    this.roomModalControlBtns.push(btn);
+                    y += 32;
+                }
+            });
+
+            y += 8;
+            crushed.forEach(crushedName => {
+                const count = this.shipInventory[crushedName] || 0;
+                const rockName = crushedName.replace('Crushed ', '');
+                const comp = this.rockCompositions[rockName];
+                if (comp && count >= 5) {
+                    const btn = this.createModalButton(0, y, `EXTRACT ${crushedName} (${count})`, () => {
+                        this.extractFromCrushedRock(crushedName, comp);
+                        this.updateUI();
+                        this.openRoomControlsModal(room);
+                    }, 200, 28, 0x222233, '#8888aa');
+                    this.roomModalControlBtns.push(btn);
+                    y += 34;
+                }
+            });
 
         } else if (room.type === 'smelter') {
-            this.controlsContent.setText(content + '─ SMELTER (3 → 1) ─\n');
-            let y = 100;
+            let lines = ['─ SMELT (3 ore → 1 ingot) ─'];
             const recipes = [
                 { ore: 'Copper Ore', ingot: 'Copper Ingot' },
                 { ore: 'Iron Ore', ingot: 'Iron Ingot' },
@@ -446,54 +560,79 @@ class ShipScene extends Phaser.Scene {
             ];
             recipes.forEach(r => {
                 const count = this.shipInventory[r.ore] || 0;
-                const canSmelt = count >= 3;
-                const smeltBtn = this.createControlButton(10, y,
-                    `${r.ore}: ${count} ${canSmelt ? '→ SMELT' : '(need 3)'}`, () => {
-                        if (count >= 3) {
-                            this.shipInventory[r.ore] -= 3;
-                            if (this.shipInventory[r.ore] <= 0) delete this.shipInventory[r.ore];
-                            this.shipInventory[r.ingot] = (this.shipInventory[r.ingot] || 0) + 1;
-                            this.updateUI();
-                            this.showRoomControls(room);
-                        }
-                    }, 240, 28);
-                if (!canSmelt) smeltBtn.rect.removeInteractive();
-                this.controlButtons.push(smeltBtn);
-                y += 34;
+                const can = count >= 3;
+                lines.push(`  ${r.ore}: ${count}  ${can ? '→ ready' : '(need 3)'}`);
+            });
+            this.roomModalContent.setText(lines.join('\n'));
+
+            let y = 40;
+            recipes.forEach(r => {
+                const count = this.shipInventory[r.ore] || 0;
+                const can = count >= 3;
+                if (can) {
+                    const btn = this.createModalButton(0, y, `SMELT ${r.ore}`, () => {
+                        this.shipInventory[r.ore] -= 3;
+                        if (this.shipInventory[r.ore] <= 0) delete this.shipInventory[r.ore];
+                        this.shipInventory[r.ingot] = (this.shipInventory[r.ingot] || 0) + 1;
+                        this.updateUI();
+                        this.openRoomControlsModal(room);
+                    }, 200, 26, 0x442222, '#cc8888');
+                    this.roomModalControlBtns.push(btn);
+                    y += 32;
+                }
             });
 
         } else if (room.type === 'refinery') {
-            content += 'Refinery active.\n(Advanced processing coming soon)\n';
-            this.controlsContent.setText(content);
+            this.roomModalContent.setText('Active.\nAdvanced processing coming soon.');
 
         } else if (room.type === 'drill') {
-            content += `Mech Workshop active.\nFuel Tank: Lv${this.techState.fuelTankLevel || 0}/6  |  Efficiency: Lv${this.techState.efficiencyLevel || 0}/10\n`;
-            this.controlsContent.setText(content);
-
-            const upgradeBtn = this.createControlButton(10, 100, 'OPEN TECH TREE', () => {
+            this.roomModalContent.setText(
+                `Fuel Tank Level: ${this.techState.fuelTankLevel || 0} / 6\n` +
+                `Efficiency Level: ${this.techState.efficiencyLevel || 0} / 10`
+            );
+            const btn = this.createModalButton(0, 40, 'OPEN TECH TREE', () => {
+                this.closeRoomControlsModal();
                 this.openTechTreePopup();
-            }, 240, 32);
-            this.controlButtons.push(upgradeBtn);
+            }, 200, 28, 0x152525, '#44aa88');
+            this.roomModalControlBtns.push(btn);
 
         } else {
-            content += 'No special controls for this room.';
-            this.controlsContent.setText(content);
+            this.roomModalContent.setText('No controls available.');
         }
 
-        // DESTROY button — bottom of right panel
         if (def.cost > 0) {
             const refund = Math.floor(def.cost * 0.5);
-            const destroyBtn = this.createControlButton(10, 540, `DESTROY — Refund ${refund}cr`, () => {
+            const btn = this.createModalButton(0, 200, `DESTROY (+${refund}cr)`, () => {
                 this.destroyRoom(room);
-            }, 240, 32);
-            this.controlButtons.push(destroyBtn);
+                this.closeRoomControlsModal();
+            }, 200, 28, 0x2a1515, '#aa5555');
+            this.roomModalControlBtns.push(btn);
         }
+
+        this.roomModal.setVisible(true);
+    }
+
+    createModalButton(x, y, text, callback, w, h, color, textColor) {
+        const rect = this.add.rectangle(x, y, w, h, color).setInteractive();
+        const label = this.add.text(x, y, text, {
+            fontSize: '11px', fill: textColor, fontFamily: 'monospace'
+        }).setOrigin(0.5);
+        rect.on('pointerover', () => { rect.setFillStyle(color + 0x111111); label.setFill('#ffffff'); });
+        rect.on('pointerout', () => { rect.setFillStyle(color); label.setFill(textColor); });
+        rect.on('pointerdown', callback);
+        this.roomModalButtons.add([rect, label]);
+        return { rect, text: label };
+    }
+
+    closeRoomControlsModal() {
+        this.roomModal.setVisible(false);
+        this.selectedRoomCell = null;
+        this.drawShipGrid();
     }
 
     extractFromCrushedRock(crushedName, comp) {
         const count = this.shipInventory[crushedName] || 0;
         if (count < 5) return;
-
         this.shipInventory[crushedName] -= 5;
         if (this.shipInventory[crushedName] <= 0) delete this.shipInventory[crushedName];
 
@@ -519,112 +658,86 @@ class ShipScene extends Phaser.Scene {
             this.shipInventory[gem] = (this.shipInventory[gem] || 0) + 1;
             results.push(`1 ${gem}`);
         }
-
-        if (results.length === 0) {
-            results.push('Nothing found this time');
-        }
-    }
-
-    createControlButton(x, y, text, callback, w = 240, h = 28) {
-        const rect = this.add.rectangle(x + w / 2, y + h / 2, w, h, 0x333355).setOrigin(0.5);
-        rect.setInteractive();
-        const label = this.add.text(x + w / 2, y + h / 2, text, {
-            fontSize: '11px', fill: '#ffffff', fontFamily: 'monospace'
-        }).setOrigin(0.5);
-        rect.on('pointerover', () => { rect.setFillStyle(0x555577); label.setFill('#ffffff'); });
-        rect.on('pointerout', () => { rect.setFillStyle(0x333355); label.setFill('#ffffff'); });
-        rect.on('pointerdown', callback);
-        this.controlsPanel.add([rect, label]);
-        return { rect, text: label };
-    }
-
-    hideRoomControls() {
-        this.controlButtons.forEach(b => { if (b.rect) b.rect.destroy(); if (b.text) b.text.destroy(); });
-        this.controlButtons = [];
-        this.controlsContent.setText('Click a room to interact');
+        if (results.length === 0) results.push('Nothing found');
     }
 
     createSellPopup() {
         this.sellPopup = this.add.container(640, 360);
         this.sellPopup.setVisible(false);
-        this.sellPopup.setDepth(10);
+        this.sellPopup.setDepth(12);
 
-        this.sellBg = this.add.rectangle(0, 0, 380, 270, 0x111122, 0.98).setOrigin(0.5);
-        this.sellBg.setStrokeStyle(2, 0x444466);
-        this.sellTitle = this.add.text(0, -110, 'SELL', {
-            fontSize: '22px', fill: '#FFD700', fontStyle: 'bold', fontFamily: 'monospace'
+        const bg = this.add.rectangle(0, 0, 360, 260, 0x0c0c18, 0.98).setOrigin(0.5);
+        bg.setStrokeStyle(1, 0x222233);
+        this.sellTitle = this.add.text(0, -105, 'SELL', {
+            fontSize: '20px', fill: '#c9a84c', fontFamily: 'monospace', letterSpacing: 2
         }).setOrigin(0.5);
-        this.sellInfo = this.add.text(0, -75, '', {
-            fontSize: '14px', fill: '#cccccc', fontFamily: 'monospace'
+        this.sellInfo = this.add.text(0, -72, '', {
+            fontSize: '13px', fill: '#666666', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         const btnData = [
-            { label: '1', qty: 1, y: -30 },
-            { label: '10', qty: 10, y: 10 },
-            { label: '50', qty: 50, y: 50 },
-            { label: 'ALL', qty: -1, y: 90 },
+            { label: '1', qty: 1, y: -28 },
+            { label: '10', qty: 10, y: 8 },
+            { label: '50', qty: 50, y: 44 },
+            { label: 'ALL', qty: -1, y: 80 },
         ];
 
         this.sellQuickBtns = [];
         btnData.forEach(d => {
-            const rect = this.add.rectangle(-60, d.y, 90, 30, 0x444466).setInteractive();
-            const txt = this.add.text(-60, d.y, d.label, {
-                fontSize: '14px', fill: '#ffffff', fontFamily: 'monospace'
+            const rect = this.add.rectangle(-50, d.y, 80, 28, 0x1a1a28).setInteractive();
+            const txt = this.add.text(-50, d.y, d.label, {
+                fontSize: '13px', fill: '#cccccc', fontFamily: 'monospace'
             }).setOrigin(0.5);
-            rect.on('pointerover', () => rect.setFillStyle(0x666688));
-            rect.on('pointerout', () => rect.setFillStyle(0x444466));
+            rect.on('pointerover', () => rect.setFillStyle(0x252535));
+            rect.on('pointerout', () => rect.setFillStyle(0x1a1a28));
             rect.on('pointerdown', () => this.confirmSell(d.qty));
             this.sellQuickBtns.push({ rect, text: txt });
         });
 
-        this.sellCustomLabel = this.add.text(80, -30, 'CUSTOM:', {
-            fontSize: '14px', fill: '#aaaaaa', fontFamily: 'monospace'
+        this.sellCustomLabel = this.add.text(70, -28, 'CUSTOM', {
+            fontSize: '12px', fill: '#444444', fontFamily: 'monospace'
         }).setOrigin(0.5);
-        this.sellCustomBg = this.add.rectangle(80, 10, 110, 30, 0x222233).setStrokeStyle(1, 0x666688);
-        this.sellCustomText = this.add.text(80, 10, '0', {
-            fontSize: '14px', fill: '#ffffff', fontFamily: 'monospace'
+        this.sellCustomBg = this.add.rectangle(70, 8, 100, 28, 0x151520).setStrokeStyle(1, 0x333344);
+        this.sellCustomText = this.add.text(70, 8, '0', {
+            fontSize: '13px', fill: '#cccccc', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
-        const minusBtn = this.add.rectangle(20, 10, 26, 26, 0x444466).setInteractive();
-        const minusTxt = this.add.text(20, 10, '-', {
-            fontSize: '16px', fill: '#ffffff'
-        }).setOrigin(0.5);
+        const minusBtn = this.add.rectangle(20, 8, 24, 24, 0x1a1a28).setInteractive();
+        const minusTxt = this.add.text(20, 8, '-', { fontSize: '14px', fill: '#cccccc' }).setOrigin(0.5);
         minusBtn.on('pointerdown', () => {
             let val = parseInt(this.sellCustomText.text) || 0;
             if (val > 0) this.sellCustomText.setText(String(val - 1));
         });
 
-        const plusBtn = this.add.rectangle(140, 10, 26, 26, 0x444466).setInteractive();
-        const plusTxt = this.add.text(140, 10, '+', {
-            fontSize: '16px', fill: '#ffffff'
-        }).setOrigin(0.5);
+        const plusBtn = this.add.rectangle(120, 8, 24, 24, 0x1a1a28).setInteractive();
+        const plusTxt = this.add.text(120, 8, '+', { fontSize: '14px', fill: '#cccccc' }).setOrigin(0.5);
         plusBtn.on('pointerdown', () => {
             let val = parseInt(this.sellCustomText.text) || 0;
             const max = this.pendingSellGem ? (this.shipInventory[this.pendingSellGem] || 0) : 0;
             if (val < max) this.sellCustomText.setText(String(val + 1));
         });
 
-        const sellCustomBtn = this.add.rectangle(80, 55, 110, 30, 0x228822).setInteractive();
-        const sellCustomTxt = this.add.text(80, 55, 'SELL', {
-            fontSize: '13px', fill: '#ffffff', fontFamily: 'monospace'
+        const sellCustomBtn = this.add.rectangle(70, 50, 100, 26, 0x224422).setInteractive();
+        const sellCustomTxt = this.add.text(70, 50, 'SELL', {
+            fontSize: '12px', fill: '#cccccc', fontFamily: 'monospace'
         }).setOrigin(0.5);
-        sellCustomBtn.on('pointerover', () => sellCustomBtn.setFillStyle(0x44aa44));
-        sellCustomBtn.on('pointerout', () => sellCustomBtn.setFillStyle(0x228822));
+        sellCustomBtn.on('pointerover', () => sellCustomBtn.setFillStyle(0x335533));
+        sellCustomBtn.on('pointerout', () => sellCustomBtn.setFillStyle(0x224422));
         sellCustomBtn.on('pointerdown', () => {
             const qty = parseInt(this.sellCustomText.text) || 0;
             if (qty > 0) this.confirmSell(qty);
         });
 
-        const cancelBtn = this.add.rectangle(0, 115, 140, 30, 0x882222).setInteractive();
-        const cancelTxt = this.add.text(0, 115, 'CANCEL', {
-            fontSize: '14px', fill: '#ffffff', fontFamily: 'monospace'
+        const cancelBtn = this.add.rectangle(0, 110, 120, 26, 0x1a1a28).setInteractive();
+        const cancelTxt = this.add.text(0, 110, 'CLOSE', {
+            fontSize: '12px', fill: '#888888', fontFamily: 'monospace'
         }).setOrigin(0.5);
-        cancelBtn.on('pointerover', () => cancelBtn.setFillStyle(0xaa4444));
-        cancelBtn.on('pointerout', () => cancelBtn.setFillStyle(0x882222));
+        cancelBtn.on('pointerover', () => cancelBtn.setFillStyle(0x252535));
+        cancelBtn.on('pointerout', () => cancelBtn.setFillStyle(0x1a1a28));
         cancelBtn.on('pointerdown', () => this.closeSellPopup());
 
         this.sellPopup.add([
-            this.sellBg, this.sellTitle, this.sellInfo,
+            bg, this.sellTitle, this.sellInfo,
             ...this.sellQuickBtns.map(b => [b.rect, b.text]).flat(),
             this.sellCustomLabel, this.sellCustomBg, this.sellCustomText,
             minusBtn, minusTxt, plusBtn, plusTxt,
@@ -636,7 +749,7 @@ class ShipScene extends Phaser.Scene {
     openSellPopup(gemName, count, price) {
         this.pendingSellGem = gemName;
         this.sellTitle.setText(`SELL ${gemName.toUpperCase()}`);
-        this.sellInfo.setText(`Available: ${count}  |  ${price}cr each  |  Total: ${count * price}cr`);
+        this.sellInfo.setText(`Have: ${count}  |  ${price}cr each  |  Max: ${count * price}cr`);
         this.sellCustomText.setText('0');
         this.sellPopup.setVisible(true);
     }
@@ -662,45 +775,44 @@ class ShipScene extends Phaser.Scene {
         this.updateUI();
         if (this.selectedRoomCell) {
             const room = this.shipGrid[this.selectedRoomCell.x][this.selectedRoomCell.y];
-            if (room && room.type === 'trade') this.showRoomControls(room);
+            if (room && room.type === 'trade') this.openRoomControlsModal(room);
         }
     }
 
     createTechTreePopup() {
         this.techPopup = this.add.container(640, 360);
         this.techPopup.setVisible(false);
-        this.techPopup.setDepth(10);
+        this.techPopup.setDepth(12);
 
-        this.techBg = this.add.rectangle(0, 0, 480, 460, 0x111122, 0.98).setOrigin(0.5);
-        this.techBg.setStrokeStyle(2, 0x444466);
-        this.techTitle = this.add.text(0, -220, 'TECH TREE', {
-            fontSize: '22px', fill: '#00FFFF', fontStyle: 'bold', fontFamily: 'monospace'
+        this.techBg = this.add.rectangle(0, 0, 460, 440, 0x0c0c18, 0.98).setOrigin(0.5);
+        this.techBg.setStrokeStyle(1, 0x222233);
+        this.techTitle = this.add.text(0, -210, 'TECH TREE', {
+            fontSize: '20px', fill: '#00d4aa', fontFamily: 'monospace', letterSpacing: 2
         }).setOrigin(0.5);
 
-        // Tab buttons
-        this.techFuelTab = this.add.rectangle(-100, -190, 180, 28, 0x444466).setInteractive();
-        this.techFuelTabText = this.add.text(-100, -190, 'FUEL TANK', {
-            fontSize: '12px', fill: '#ffffff', fontFamily: 'monospace'
+        this.techFuelTab = this.add.rectangle(-90, -182, 160, 26, 0x1a1a28).setInteractive();
+        this.techFuelTabText = this.add.text(-90, -182, 'FUEL TANK', {
+            fontSize: '11px', fill: '#cccccc', fontFamily: 'monospace'
         }).setOrigin(0.5);
-        this.techEffTab = this.add.rectangle(100, -190, 180, 28, 0x222233).setInteractive();
-        this.techEffTabText = this.add.text(100, -190, 'EFFICIENCY', {
-            fontSize: '12px', fill: '#aaaaaa', fontFamily: 'monospace'
+        this.techEffTab = this.add.rectangle(90, -182, 160, 26, 0x111118).setInteractive();
+        this.techEffTabText = this.add.text(90, -182, 'EFFICIENCY', {
+            fontSize: '11px', fill: '#666666', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         this.techFuelTab.on('pointerdown', () => this.switchTechTab('fuelTank'));
         this.techEffTab.on('pointerdown', () => this.switchTechTab('efficiency'));
 
-        this.techSubtitle = this.add.text(0, -160, '', {
-            fontSize: '13px', fill: '#FFD700', fontFamily: 'monospace'
+        this.techSubtitle = this.add.text(0, -152, '', {
+            fontSize: '12px', fill: '#c9a84c', fontFamily: 'monospace'
         }).setOrigin(0.5);
         this.techContent = this.add.container(0, 0);
 
-        const closeBtn = this.add.rectangle(0, 220, 140, 30, 0x882222).setInteractive();
-        const closeTxt = this.add.text(0, 220, 'CLOSE', {
-            fontSize: '14px', fill: '#ffffff', fontFamily: 'monospace'
+        const closeBtn = this.add.rectangle(0, 208, 120, 26, 0x1a1a28).setInteractive();
+        const closeTxt = this.add.text(0, 208, 'CLOSE', {
+            fontSize: '12px', fill: '#888888', fontFamily: 'monospace'
         }).setOrigin(0.5);
-        closeBtn.on('pointerover', () => closeBtn.setFillStyle(0xaa4444));
-        closeBtn.on('pointerout', () => closeBtn.setFillStyle(0x882222));
+        closeBtn.on('pointerover', () => closeBtn.setFillStyle(0x252535));
+        closeBtn.on('pointerout', () => closeBtn.setFillStyle(0x1a1a28));
         closeBtn.on('pointerdown', () => this.closeTechTreePopup());
 
         this.techPopup.add([
@@ -714,15 +826,15 @@ class ShipScene extends Phaser.Scene {
     switchTechTab(tab) {
         this.techTab = tab;
         if (tab === 'fuelTank') {
-            this.techFuelTab.setFillStyle(0x444466);
-            this.techFuelTabText.setFill('#ffffff');
-            this.techEffTab.setFillStyle(0x222233);
-            this.techEffTabText.setFill('#aaaaaa');
+            this.techFuelTab.setFillStyle(0x1a1a28);
+            this.techFuelTabText.setFill('#cccccc');
+            this.techEffTab.setFillStyle(0x111118);
+            this.techEffTabText.setFill('#666666');
         } else {
-            this.techFuelTab.setFillStyle(0x222233);
-            this.techFuelTabText.setFill('#aaaaaa');
-            this.techEffTab.setFillStyle(0x444466);
-            this.techEffTabText.setFill('#ffffff');
+            this.techFuelTab.setFillStyle(0x111118);
+            this.techFuelTabText.setFill('#666666');
+            this.techEffTab.setFillStyle(0x1a1a28);
+            this.techEffTabText.setFill('#cccccc');
         }
         this.openTechTreePopup();
     }
@@ -737,14 +849,14 @@ class ShipScene extends Phaser.Scene {
         if (branch === 'fuelTank') {
             const baseFuel = 25;
             const currentMax = baseFuel + currentLevel;
-            this.techSubtitle.setText(`Fuel Tank Capacity — Current: ${currentMax}L (Base ${baseFuel}L + ${currentLevel} upgrades)`);
+            this.techSubtitle.setText(`Fuel Tank: ${currentMax}L (base ${baseFuel}L + ${currentLevel})`);
         } else {
             const baseCost = 50;
             const currentCost = Math.max(40, baseCost - currentLevel);
-            this.techSubtitle.setText(`Mining Efficiency — Current: ${currentCost}ml/tile (Base ${baseCost}ml − ${currentLevel} upgrades)`);
+            this.techSubtitle.setText(`Efficiency: ${currentCost}ml/tile (base ${baseCost}ml − ${currentLevel})`);
         }
 
-        let y = -135;
+        let y = -128;
         levels.forEach((lvl, i) => {
             const isUnlocked = i < currentLevel;
             const isNext = i === currentLevel;
@@ -753,44 +865,44 @@ class ShipScene extends Phaser.Scene {
                 .map(([mat, qty]) => `${mat}: ${qty.toLocaleString()}`)
                 .join(', ');
 
-            const statusText = isUnlocked ? '✓ UNLOCKED' : (isNext ? 'AVAILABLE' : 'LOCKED');
-            const textColor = isUnlocked ? '#44ff44' : (isNext ? '#ffffff' : '#666666');
+            const statusText = isUnlocked ? '✓' : (isNext ? '→' : '−');
+            const textColor = isUnlocked ? '#44aa66' : (isNext ? '#cccccc' : '#444444');
             const bonusLabel = branch === 'fuelTank' ? `+${lvl.bonus}L` : `−${lvl.bonus}ml`;
 
-            const label = this.add.text(-220, y, `Lv${lvl.level}: ${bonusLabel}`, {
-                fontSize: '13px', fill: textColor, fontFamily: 'monospace'
+            const label = this.add.text(-210, y, `Lv${lvl.level}  ${bonusLabel}`, {
+                fontSize: '12px', fill: textColor, fontFamily: 'monospace'
             }).setOrigin(0, 0.5);
 
-            const cost = this.add.text(-140, y, costText, {
-                fontSize: '11px', fill: isUnlocked ? '#44ff44' : '#aaaaaa', fontFamily: 'monospace'
+            const cost = this.add.text(-130, y, costText, {
+                fontSize: '10px', fill: isUnlocked ? '#44aa66' : '#888888', fontFamily: 'monospace'
             }).setOrigin(0, 0.5);
 
             if (isNext) {
                 const canAfford = this.canAffordTech(lvl.cost);
-                const btnColor = canAfford ? 0x228822 : 0x333333;
-                const btnText = canAfford ? 'UPGRADE' : 'INSUFFICIENT';
-                const btnTxtColor = canAfford ? '#ffffff' : '#666666';
+                const btnColor = canAfford ? 0x224422 : 0x151515;
+                const btnText = canAfford ? 'UPGRADE' : 'CANT';
+                const btnTxtColor = canAfford ? '#cccccc' : '#444444';
 
-                const btn = this.add.rectangle(180, y, 100, 24, btnColor).setInteractive();
-                const btnLabel = this.add.text(180, y, btnText, {
-                    fontSize: '11px', fill: btnTxtColor, fontFamily: 'monospace'
+                const btn = this.add.rectangle(170, y, 90, 22, btnColor).setInteractive();
+                const btnLabel = this.add.text(170, y, btnText, {
+                    fontSize: '10px', fill: btnTxtColor, fontFamily: 'monospace'
                 }).setOrigin(0.5);
 
                 if (canAfford) {
-                    btn.on('pointerover', () => btn.setFillStyle(0x44aa44));
-                    btn.on('pointerout', () => btn.setFillStyle(0x228822));
+                    btn.on('pointerover', () => btn.setFillStyle(0x335533));
+                    btn.on('pointerout', () => btn.setFillStyle(0x224422));
                     btn.on('pointerdown', () => this.doUpgrade(branch, lvl));
                 }
 
                 this.techContent.add([label, cost, btn, btnLabel]);
             } else {
-                const status = this.add.text(180, y, statusText, {
+                const status = this.add.text(170, y, statusText, {
                     fontSize: '11px', fill: textColor, fontFamily: 'monospace'
                 }).setOrigin(0.5);
                 this.techContent.add([label, cost, status]);
             }
 
-            y += 36;
+            y += 34;
         });
 
         this.techPopup.setVisible(true);
@@ -813,7 +925,6 @@ class ShipScene extends Phaser.Scene {
 
     doUpgrade(branch, level) {
         if (!this.canAffordTech(level.cost)) return;
-
         for (const [mat, qty] of Object.entries(level.cost)) {
             if (mat === 'credits') {
                 this.credits -= qty;
@@ -822,114 +933,95 @@ class ShipScene extends Phaser.Scene {
                 if (this.shipInventory[mat] <= 0) delete this.shipInventory[mat];
             }
         }
-
         this.techState[branch + 'Level'] = level.level;
         this.updateUI();
         this.openTechTreePopup();
     }
 
-    createBuildPanel() {
-        // Horizontal build strip below the grid, centered
-        const stripY = 390;
-        const stripH = 240;
-        const stripW = 720;
-        const stripX = 280;
+    createBuildModal() {
+        this.buildModal = this.add.container(640, 360);
+        this.buildModal.setVisible(false);
+        this.buildModal.setDepth(12);
 
-        const buildBg = this.add.graphics();
-        buildBg.fillStyle(0x151525, 0.9);
-        buildBg.fillRoundedRect(stripX, stripY, stripW, stripH, 8);
-        buildBg.lineStyle(1, 0x444466, 0.5);
-        buildBg.strokeRoundedRect(stripX, stripY, stripW, stripH, 8);
+        const bg = this.add.rectangle(0, 0, 520, 420, 0x0c0c18, 0.98).setOrigin(0.5);
+        bg.setStrokeStyle(1, 0x222233);
+        const title = this.add.text(0, -190, 'BUILD ROOMS', {
+            fontSize: '18px', fill: '#00d4aa', fontFamily: 'monospace', letterSpacing: 2
+        }).setOrigin(0.5);
 
-        this.add.text(stripX + 12, stripY + 8, 'BUILD ROOMS', {
-            fontSize: '15px', fill: '#00FFFF', fontStyle: 'bold', fontFamily: 'monospace'
-        });
+        const subtitle = this.add.text(0, -164, 'Select a room, then click the grid to place', {
+            fontSize: '11px', fill: '#444444', fontFamily: 'monospace'
+        }).setOrigin(0.5);
 
-        this.buildButtons = [];
+        this.buildModalContent = this.add.container(0, 0);
+        this.buildModal.add([bg, title, subtitle, this.buildModalContent]);
+
+        const closeBtn = this.add.rectangle(220, -190, 50, 22, 0x1a1a28).setInteractive();
+        const closeTxt = this.add.text(220, -190, 'X', {
+            fontSize: '12px', fill: '#666666', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+        closeBtn.on('pointerover', () => closeBtn.setFillStyle(0x252535));
+        closeBtn.on('pointerout', () => closeBtn.setFillStyle(0x1a1a28));
+        closeBtn.on('pointerdown', () => this.closeBuildModal());
+        this.buildModal.add([closeBtn, closeTxt]);
+    }
+
+    openBuildModal() {
+        this.buildModalContent.removeAll(true);
         const buildables = Object.entries(this.roomTypes).filter(([_, def]) => def.cost > 0);
-        const mid = Math.ceil(buildables.length / 2);
+        const perRow = 3;
+        const cardW = 150;
+        const cardH = 70;
+        const gapX = 12;
+        const gapY = 12;
+        const startX = -((perRow * cardW + (perRow - 1) * gapX) / 2) + cardW / 2;
+        const startY = -140 + cardH / 2;
 
-        // Left column
-        let y = stripY + 34;
-        buildables.slice(0, mid).forEach(([key, def]) => {
-            const btn = this.createBuildButton(stripX + 175, y, `${def.icon} ${def.name}`, def.cost, key, () => {
+        buildables.forEach(([key, def], i) => {
+            const row = Math.floor(i / perRow);
+            const col = i % perRow;
+            const cx = startX + col * (cardW + gapX);
+            const cy = startY + row * (cardH + gapY);
+
+            const card = this.add.rectangle(cx, cy, cardW, cardH, 0x151520).setInteractive();
+            card.setStrokeStyle(1, 0x222233);
+
+            const icon = this.add.text(cx - cardW / 2 + 14, cy - 10, def.icon, {
+                fontSize: '22px', fill: '#cccccc', fontFamily: 'monospace'
+            }).setOrigin(0, 0.5);
+
+            const name = this.add.text(cx - cardW / 2 + 36, cy - 10, def.name, {
+                fontSize: '11px', fill: '#aaaaaa', fontFamily: 'monospace'
+            }).setOrigin(0, 0.5);
+
+            const cost = this.add.text(cx - cardW / 2 + 14, cy + 14, `${def.cost}cr  ${def.size}×${def.size}`, {
+                fontSize: '10px', fill: '#c9a84c', fontFamily: 'monospace'
+            }).setOrigin(0, 0.5);
+
+            card.on('pointerover', () => {
+                card.setFillStyle(0x1e1e2e);
+                card.setStrokeStyle(1, def.color);
+            });
+            card.on('pointerout', () => {
+                card.setFillStyle(0x151520);
+                card.setStrokeStyle(1, 0x222233);
+            });
+            card.on('pointerdown', () => {
                 this.selectedRoom = key;
                 this.buildMode = true;
                 this.selectedRoomCell = null;
                 this.drawShipGrid();
-                this.hideRoomControls();
-                this.buildStatusText.setText(`Building: ${def.icon} ${def.name} — hover grid, click to place`);
+                this.closeBuildModal();
             });
-            this.buildButtons.push(btn);
-            y += 34;
+
+            this.buildModalContent.add([card, icon, name, cost]);
         });
 
-        // Right column
-        y = stripY + 34;
-        buildables.slice(mid).forEach(([key, def]) => {
-            const btn = this.createBuildButton(stripX + 175 + 355, y, `${def.icon} ${def.name}`, def.cost, key, () => {
-                this.selectedRoom = key;
-                this.buildMode = true;
-                this.selectedRoomCell = null;
-                this.drawShipGrid();
-                this.hideRoomControls();
-                this.buildStatusText.setText(`Building: ${def.icon} ${def.name} — hover grid, click to place`);
-            });
-            this.buildButtons.push(btn);
-            y += 34;
-        });
-
-        // Status text at bottom of strip
-        this.buildStatusText = this.add.text(stripX + 12, stripY + stripH - 22, 'Select a room to build', {
-            fontSize: '11px', fill: '#aaaaaa', fontFamily: 'monospace'
-        });
-
-        // Cancel build button — small, inside the strip bottom-right
-        const cancelBtn = this.createButton(stripX + stripW - 80, stripY + stripH - 16, 'CANCEL', () => {
-            this.buildMode = false;
-            this.selectedRoom = null;
-            this.ghostGraphics.clear();
-            if (this.ghostIcon) { this.ghostIcon.destroy(); this.ghostIcon = null; }
-            this.buildStatusText.setText('Select a room to build');
-        }, 140, 24);
+        this.buildModal.setVisible(true);
     }
 
-    createBuildButton(x, y, text, cost, roomKey, callback) {
-        const rect = this.add.rectangle(x, y, 240, 30, 0x333355).setInteractive();
-        const label = this.add.text(x, y, text, {
-            fontSize: '12px', fill: '#ffffff', fontFamily: 'monospace'
-        }).setOrigin(0.5);
-        const costLabel = this.add.text(x + 100, y, `${cost}cr`, {
-            fontSize: '11px', fill: '#FFD700', fontFamily: 'monospace'
-        }).setOrigin(0.5);
-
-        rect.on('pointerover', () => rect.setFillStyle(0x555577));
-        rect.on('pointerout', () => rect.setFillStyle(0x333355));
-        rect.on('pointerdown', () => {
-            if (this.buildMode && this.selectedRoom === roomKey) {
-                // Toggle off
-                this.buildMode = false;
-                this.selectedRoom = null;
-                this.ghostGraphics.clear();
-                if (this.ghostIcon) { this.ghostIcon.destroy(); this.ghostIcon = null; }
-                if (this.buildStatusText) this.buildStatusText.setText('Select a room to build');
-            } else {
-                callback();
-            }
-        });
-
-        return { rect, text: label, costLabel };
-    }
-
-    createResetButton(x, y) {
-        const btn = this.add.rectangle(x, y, 100, 30, 0x551111);
-        btn.setInteractive();
-        const label = this.add.text(x, y, 'RESET', {
-            fontSize: '12px', fill: '#ff6666', fontFamily: 'monospace'
-        }).setOrigin(0.5);
-        btn.on('pointerover', () => btn.setFillStyle(0x772222));
-        btn.on('pointerout', () => btn.setFillStyle(0x551111));
-        btn.on('pointerdown', () => this.openResetPopup());
+    closeBuildModal() {
+        this.buildModal.setVisible(false);
     }
 
     createResetConfirmPopup() {
@@ -937,43 +1029,42 @@ class ShipScene extends Phaser.Scene {
         this.resetPopup.setVisible(false);
         this.resetPopup.setDepth(15);
 
-        const bg = this.add.rectangle(0, 0, 420, 180, 0x111122, 0.98).setOrigin(0.5);
-        bg.setStrokeStyle(2, 0x882222);
+        const bg = this.add.rectangle(0, 0, 400, 170, 0x0c0c18, 0.98).setOrigin(0.5);
+        bg.setStrokeStyle(1, 0x552222);
 
-        const title = this.add.text(0, -55, '⚠ RESET SAVE', {
-            fontSize: '22px', fill: '#ff4444', fontStyle: 'bold', fontFamily: 'monospace'
+        const title = this.add.text(0, -50, 'RESET SAVE', {
+            fontSize: '18px', fill: '#cc4444', fontFamily: 'monospace', letterSpacing: 2
         }).setOrigin(0.5);
 
-        const warning = this.add.text(0, -15, 'This will erase ALL progress.\nShip, inventory, credits, upgrades — everything.', {
-            fontSize: '13px', fill: '#cccccc', fontFamily: 'monospace', align: 'center'
+        const warning = this.add.text(0, -14, 'This erases all progress.\nShip, inventory, credits, tech.', {
+            fontSize: '12px', fill: '#555555', fontFamily: 'monospace', align: 'center'
         }).setOrigin(0.5);
 
-        const yesBtn = this.add.rectangle(-80, 45, 120, 34, 0x882222).setInteractive();
-        const yesTxt = this.add.text(-80, 45, 'YES, ERASE', {
-            fontSize: '12px', fill: '#ffffff', fontFamily: 'monospace'
+        const yesBtn = this.add.rectangle(-70, 40, 110, 28, 0x442222).setInteractive();
+        const yesTxt = this.add.text(-70, 40, 'ERASE', {
+            fontSize: '11px', fill: '#cc8888', fontFamily: 'monospace'
         }).setOrigin(0.5);
-        yesBtn.on('pointerover', () => yesBtn.setFillStyle(0xaa3333));
-        yesBtn.on('pointerout', () => yesBtn.setFillStyle(0x882222));
+        yesBtn.on('pointerover', () => yesBtn.setFillStyle(0x553333));
+        yesBtn.on('pointerout', () => yesBtn.setFillStyle(0x442222));
         yesBtn.on('pointerdown', () => this.confirmReset());
 
-        const noBtn = this.add.rectangle(80, 45, 120, 34, 0x444466).setInteractive();
-        const noTxt = this.add.text(80, 45, 'CANCEL', {
-            fontSize: '12px', fill: '#ffffff', fontFamily: 'monospace'
+        const noBtn = this.add.rectangle(70, 40, 110, 28, 0x1a1a28).setInteractive();
+        const noTxt = this.add.text(70, 40, 'CANCEL', {
+            fontSize: '11px', fill: '#888888', fontFamily: 'monospace'
         }).setOrigin(0.5);
-        noBtn.on('pointerover', () => noBtn.setFillStyle(0x666688));
-        noBtn.on('pointerout', () => noBtn.setFillStyle(0x444466));
+        noBtn.on('pointerover', () => noBtn.setFillStyle(0x252535));
+        noBtn.on('pointerout', () => noBtn.setFillStyle(0x1a1a28));
         noBtn.on('pointerdown', () => this.closeResetPopup());
 
         this.resetPopup.add([bg, title, warning, yesBtn, yesTxt, noBtn, noTxt]);
     }
 
     openResetPopup() {
-        if (!this.resetPopup) this.createResetConfirmPopup();
         this.resetPopup.setVisible(true);
     }
 
     closeResetPopup() {
-        if (this.resetPopup) this.resetPopup.setVisible(false);
+        this.resetPopup.setVisible(false);
     }
 
     confirmReset() {
@@ -995,23 +1086,8 @@ class ShipScene extends Phaser.Scene {
     }
 
     updateUI() {
-        const invText = Object.entries(this.shipInventory)
-            .map(([k, v]) => `${k}: ${v}`)
-            .join('\n') || 'Empty';
-        this.inventoryText.setText(invText);
-
-        const netPower = this.powerGen - this.powerUse;
-        this.powerText.setText(
-            `Power: ${this.powerGen}gen / ${this.powerUse}use / ${this.powerStored}/${this.powerCapacity}stored`
-        );
-
-        // Compact status bar under title
-        this.statusBarFuel.setText(
-            `⛽ ${this.shipFuel.toFixed(1)}L / ${this.shipFuelCapacity.toFixed(1)}L  (~${Math.floor(this.shipFuel / 25)} runs)`
-        );
-        this.statusBarCredits.setText(
-            `💰 ${this.credits.toLocaleString()} cr`
-        );
+        this.statusFuel.setText(`⛽ ${this.shipFuel.toFixed(1)} / ${this.shipFuelCapacity.toFixed(1)}L  (~${Math.floor(this.shipFuel / 25)} runs)`);
+        this.statusCredits.setText(`${this.credits.toLocaleString()} cr 💰`);
     }
 
     calculatePower() {
@@ -1054,7 +1130,6 @@ class ShipScene extends Phaser.Scene {
         this.calculatePower();
         this.updateUI();
         this.drawShipGrid();
-        this.hideRoomControls();
     }
 
     placeRoom(gx, gy, type) {
