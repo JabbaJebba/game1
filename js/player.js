@@ -79,6 +79,11 @@ class Player {
         this.blinkStartTime = 0;
         this.nextBlinkTime = 2000 + Math.random() * 3000;
 
+        // Mining recoil — body kicks opposite to the swing direction
+        this.mineRecoilX = 0;
+        this.mineRecoilY = 0;
+        this.recoilTween = null;
+
         // Mining target preview outlines
         this.minePreview = scene.add.graphics();
         this.minePreview.setDepth(5);
@@ -204,19 +209,19 @@ class Player {
             : 0;
 
         // Update sprite position
-        this.sprite.x = this.x;
-        this.sprite.y = this.y + breathY;
+        this.sprite.x = this.x + this.mineRecoilX;
+        this.sprite.y = this.y + breathY + this.mineRecoilY;
 
         // Update eyes
         const eyeOffsetX = this.facingRight ? 3 : -3;
-        this.eyeLeft.x = this.x - 12 + eyeOffsetX;
-        this.eyeLeft.y = this.y - this.height + 18 + breathY;
-        this.eyeRight.x = this.x + 12 + eyeOffsetX;
-        this.eyeRight.y = this.y - this.height + 18 + breathY;
-        this.pupilLeft.x = this.x - 12 + eyeOffsetX * 1.5;
-        this.pupilLeft.y = this.y - this.height + 18 + breathY;
-        this.pupilRight.x = this.x + 12 + eyeOffsetX * 1.5;
-        this.pupilRight.y = this.y - this.height + 18 + breathY;
+        this.eyeLeft.x = this.x - 12 + eyeOffsetX + this.mineRecoilX;
+        this.eyeLeft.y = this.y - this.height + 18 + breathY + this.mineRecoilY;
+        this.eyeRight.x = this.x + 12 + eyeOffsetX + this.mineRecoilX;
+        this.eyeRight.y = this.y - this.height + 18 + breathY + this.mineRecoilY;
+        this.pupilLeft.x = this.x - 12 + eyeOffsetX * 1.5 + this.mineRecoilX;
+        this.pupilLeft.y = this.y - this.height + 18 + breathY + this.mineRecoilY;
+        this.pupilRight.x = this.x + 12 + eyeOffsetX * 1.5 + this.mineRecoilX;
+        this.pupilRight.y = this.y - this.height + 18 + breathY + this.mineRecoilY;
 
         // Eye blinking
         const nowBlink = this.scene.time.now;
@@ -274,12 +279,12 @@ class Player {
                 if (blocked) {
                     this.x = oldX;
                 } else {
-                    this.sprite.x = this.x;
+                    this.sprite.x = this.x + this.mineRecoilX;
                     const eyeOffsetX = this.facingRight ? 3 : -3;
-                    this.eyeLeft.x = this.x - 12 + eyeOffsetX;
-                    this.eyeRight.x = this.x + 12 + eyeOffsetX;
-                    this.pupilLeft.x = this.x - 12 + eyeOffsetX * 1.5;
-                    this.pupilRight.x = this.x + 12 + eyeOffsetX * 1.5;
+                    this.eyeLeft.x = this.x - 12 + eyeOffsetX + this.mineRecoilX;
+                    this.eyeRight.x = this.x + 12 + eyeOffsetX + this.mineRecoilX;
+                    this.pupilLeft.x = this.x - 12 + eyeOffsetX * 1.5 + this.mineRecoilX;
+                    this.pupilRight.x = this.x + 12 + eyeOffsetX * 1.5 + this.mineRecoilX;
                 }
             }
         }
@@ -329,8 +334,8 @@ class Player {
         const cooldownProgress = Math.min(1, (now - this.lastMineTime) / this.mineCooldown);
         this.cooldownRing.clear();
         if (miningKeysHeld && cooldownProgress < 1) {
-            const cx = this.x;
-            const cy = this.y - this.height / 2;
+            const cx = this.x + this.mineRecoilX;
+            const cy = this.y - this.height / 2 + this.mineRecoilY;
             const radius = 48;
             const startAngle = -Math.PI / 2;
             const endAngle = startAngle + cooldownProgress * Math.PI * 2;
@@ -475,6 +480,22 @@ class Player {
             duration: 80,
             yoyo: true,
             ease: 'Quad.easeOut'
+        });
+        // Mining recoil — body kicks opposite to the swing direction
+        if (this.recoilTween) this.recoilTween.stop();
+        const recoilDirX = x < this.x ? 1 : (x > this.x ? -1 : 0);
+        const recoilDirY = y > this.y ? -1 : 0;
+        this.recoilTween = this.scene.tweens.add({
+            targets: this,
+            mineRecoilX: recoilDirX * 5,
+            mineRecoilY: recoilDirY * 4,
+            duration: 70,
+            yoyo: true,
+            ease: 'Quad.easeOut',
+            onComplete: () => {
+                this.mineRecoilX = 0;
+                this.mineRecoilY = 0;
+            }
         });
     }
 

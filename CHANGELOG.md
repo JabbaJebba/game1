@@ -1,5 +1,15 @@
 # Game Improvement Log
 
+## 2026-05-10 — Mining Recoil Animation
+- **QoL/Game Feel:** Added body recoil when mining — the character's entire sprite (body + eyes) briefly kicks in the opposite direction of the mine swing
+  - Left mine → body recoils right 5px; Right mine → body recoils left 5px; Down mine → body recoils up 4px
+  - 70ms tween with yoyo, ease-out curve for a snappy, weighty feel
+  - Cooldown ring follows the recoil so it stays visually anchored to the player
+  - Cancels previous recoil tween if a new mine fires before the old one finishes — no visual fighting
+  - Purely visual: logical position (this.x/this.y) never changes, so collision and snapping are unaffected
+  - Pairs with existing screen shake + debris particles to make each mine hit feel genuinely physical
+- Status: 🔄 Committing now
+
 ## 2026-05-10 — Mining Target Preview
 - **QoL/Game Feel:** Added mining target preview outlines — when holding A/S/D, the exact tiles that will be mined are outlined with a pulsing border
   - Color transitions from orange (on cooldown) to green (ready to mine)
