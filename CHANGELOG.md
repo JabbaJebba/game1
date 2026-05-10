@@ -55,6 +55,7 @@
 8. **Quality of life** - Auto-collect radius, better teleport mechanics
 
 ## Completed
+- [x] Coyote time — 100ms jump grace period after walking off a ledge (platformer feel)
 - [x] Auto-save/load via localStorage (auto-save on ship departure & return, auto-load on boot) — Commit: d920612
 - [x] Restore original physics-based movement
 - [x] Fix mining to use actual tile bounds

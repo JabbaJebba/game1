@@ -71,6 +71,7 @@ class Player {
 
         // Walk dust timer
         this.walkDustTimer = 0;
+        this.coyoteTimer = 0;
     }
 
     update(delta) {
@@ -84,6 +85,8 @@ class Player {
         const oldX = this.x;
         const oldY = this.y;
 
+        const wasOnGround = this.onGround;
+
         // Horizontal movement - A/D and Arrow keys
         if (keys.mineLeft.isDown || keys.left.isDown) {
             this.vx = -this.speed;
@@ -96,10 +99,11 @@ class Player {
             if (Math.abs(this.vx) < 10) this.vx = 0;
         }
 
-        // Jump
-        if ((keys.jump.isDown || keys.up.isDown) && this.onGround) {
+        // Coyote time — brief jump grace period after leaving ground
+        if ((keys.jump.isDown || keys.up.isDown) && (this.onGround || this.coyoteTimer > 0)) {
             this.vy = -this.jumpPower;
             this.onGround = false;
+            this.coyoteTimer = 0;
         }
 
         // Apply gravity
@@ -108,6 +112,12 @@ class Player {
         // Apply movement
         this.moveX(this.vx * dt);
         this.moveY(this.vy * dt);
+
+        // Start coyote window when walking off a ledge
+        if (wasOnGround && !this.onGround) {
+            this.coyoteTimer = 100;
+        }
+        this.coyoteTimer = Math.max(0, this.coyoteTimer - delta);
 
         // --- A KEY: Mine left if movement was blocked ---
         if (keys.mineLeft.isDown && Math.abs(this.x - oldX) < 1 && now - this.lastMineTime >= this.mineCooldown) {
