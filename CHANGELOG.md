@@ -1,5 +1,11 @@
 # Game Improvement Log
 
+## 2026-05-10 — Jump Takeoff Dust
+- **QoL:** Added dust burst at the player's feet when jumping (3-5 gray particles spray outward and fade)
+- Symmetrically pairs with existing landing dust — jump now has both a takeoff and landing feel
+- Triggers on all jump paths: normal jump, coyote-time jump, and buffered jump
+- Status: ✅ Pushed. Commit: TBD
+
 ## 2026-05-10 — Eye Blinking
 - **QoL:** Added eye blinking animation — pupils briefly close and reopen when standing still on ground
 - Blink triggers every 1.5–5 seconds while idle (on ground, not moving, not mining)

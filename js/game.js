@@ -409,6 +409,28 @@ class GameScene extends Phaser.Scene {
         });
     }
 
+    spawnJumpDust(x, y) {
+        const count = 3 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < count; i++) {
+            const size = 2 + Math.floor(Math.random() * 3);
+            const particle = this.add.rectangle(x + (Math.random() - 0.5) * 48, y, size, size, 0xbbbbbb);
+            particle.setDepth(3);
+            const angle = Math.random() * Math.PI;
+            const speed = 30 + Math.random() * 50;
+            this.tweens.add({
+                targets: particle,
+                x: particle.x + Math.cos(angle) * speed * 0.3,
+                y: particle.y + Math.sin(angle) * speed * 0.2,
+                alpha: 0,
+                scaleX: 0.3,
+                scaleY: 0.3,
+                duration: 250 + Math.random() * 150,
+                ease: 'Power2',
+                onComplete: () => particle.destroy()
+            });
+        }
+    }
+
     showFloatText(x, y, text, color = '#ffffff') {
         const label = this.add.text(x, y, text, {
             fontSize: '14px', fill: color, stroke: '#000000', strokeThickness: 2, fontFamily: 'monospace'
