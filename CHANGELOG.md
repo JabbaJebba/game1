@@ -1,5 +1,18 @@
 # Game Improvement Log
 
+## 2026-05-11 — Rock Type Subtitle + Tile Hover Tooltip
+- **QoL/UI:** Added rock type name subtitle under the planet name on the mining screen
+  - Shows the current planet's rock type (Basalt, Granite, Obsidian, etc.) in small gray monospace text below the gold planet name
+  - Helps players remember which composition they're mining — critical for refinery planning since different rock types yield different ore/gem distributions
+  - Updates automatically per planet; hidden if no rock type data is available
+- **QoL/UI:** Added tile name tooltip that follows the mouse cursor when hovering over tiles
+  - Displays the human-readable tile name (e.g., "Copper Ore", "Ruby", "Bedrock") in a small dark tooltip box
+  - Only appears on non-air tiles; hides when cursor moves over empty space
+  - Positioned 24px below the cursor so it never covers the tile being inspected
+  - Uses `setScrollFactor(0)` and screen coordinates so it stays pinned to the viewport while the camera moves
+  - Helps new players learn tile types and helps experienced players confirm what they're about to mine
+- Status: ✅ Pushed. Commit: `PENDING`
+
 ## 2026-05-11 — Run Statistics Panel
 - **QoL/UI:** Added a compact RUN STATS panel in the top-right corner of the mining screen
   - Tracks tiles mined, fuel consumed, and time spent on current planet

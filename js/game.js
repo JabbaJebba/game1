@@ -128,6 +128,19 @@ class GameScene extends Phaser.Scene {
             strokeThickness: 2
         }).setOrigin(0.5).setScrollFactor(0);
 
+        // Rock type subtitle
+        this.rockText = this.add.text(640, 42, this.planet.rockType?.name || '', {
+            fontSize: '11px', fill: '#aaaaaa', fontFamily: 'monospace',
+            stroke: '#000000', strokeThickness: 1
+        }).setOrigin(0.5).setScrollFactor(0);
+
+        // Tile hover tooltip
+        this.tileTooltip = this.add.text(0, 0, '', {
+            fontSize: '11px', fill: '#ffffff', fontFamily: 'monospace',
+            stroke: '#000000', strokeThickness: 2, backgroundColor: '#00000088',
+            padding: { x: 4, y: 2 }
+        }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(100);
+
         // Depth gauge
         this.depthGauge = this.add.graphics().setScrollFactor(0).setDepth(0);
         this.depthGaugeLabel = this.add.text(22, 185, 'DEPTH', {
@@ -206,6 +219,16 @@ class GameScene extends Phaser.Scene {
         const tileY = Math.floor(worldPoint.y / 32);
         this.cursorHighlight.x = tileX * 32 + 16;
         this.cursorHighlight.y = tileY * 32 + 16;
+
+        // Tile hover tooltip
+        const hoverTile = this.world.getTile(tileX, tileY);
+        if (hoverTile !== this.world.TILE_AIR) {
+            this.tileTooltip.setText(this.getTileName(hoverTile));
+            this.tileTooltip.setPosition(pointer.x, pointer.y + 24);
+            this.tileTooltip.setVisible(true);
+        } else {
+            this.tileTooltip.setVisible(false);
+        }
 
         this.timeOfDay += delta * 0.0001;
         const dayProgress = (Math.sin(this.timeOfDay) + 1) / 2;
