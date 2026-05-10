@@ -1,5 +1,10 @@
 # Game Improvement Log
 
+## 2026-05-10 — Coyote Time
+- **QoL:** Added 100ms coyote time — you can still jump for a brief window after walking off a ledge
+- Makes platforming feel more forgiving without changing tile-snapping or movement precision
+- Status: ✅ Pushed. Commit: 036ac42
+
 ## 2026-05-10 — Landing Dust + Syntax Fix
 - **Fix:** `const tileX` redeclaration in `update()` (depth indicator commit) caused SyntaxError — renamed second declaration to `playerTileX`
 - **QoL:** Added landing dust particles when player hits the ground after a jump (3-5 gray particles spray upward and fade)
