@@ -139,6 +139,9 @@ class ShipScene extends Phaser.Scene {
 
         this.calculatePower();
         this.updateUI();
+        this.input.on('pointerdown', (pointer) => this.handleGridClick(pointer));
+        this.input.on('pointermove', (pointer) => this.handleGridHover(pointer));
+
         // Add ESC key to cancel build mode
         this.input.keyboard.on('keydown-ESC', () => {
             if (this.buildMode) {
