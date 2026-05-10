@@ -8,7 +8,7 @@
   - `setScrollFactor(0)` so they stay fixed to the viewport — the ship is the frame, not the camera
   - Purely visual, no gameplay impact; turns the previously static black void into a living space backdrop
   - Pairs with the dark UI theme to make ship management feel like you're actually in a spaceship
-- Status: 🔄 Pending push
+- Status: ✅ Pushed. Commit: `c9fdf21`
 
 ## 2026-05-11 — Rock Tile Color Variation
 - **QoL/Visual:** Added deterministic per-tile brightness variation for rock, grass, and bedrock tiles
