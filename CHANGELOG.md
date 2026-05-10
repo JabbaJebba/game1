@@ -5,7 +5,7 @@
 - Blink triggers every 1.5–5 seconds while idle (on ground, not moving, not mining)
 - Close → hold → open cycle: 70ms / 50ms / 70ms, scales pupil Y from 1 → 0.1 → 1
 - Pairs with idle breathing to make the character feel genuinely alive during quiet moments
-- Status: ✅ Pushed. Commit: TBD
+- Status: ✅ Pushed. Commit: 3c57153
 
 ## 2026-05-10 — Jump Buffering
 - **QoL:** Added 120ms jump buffer — pressing jump slightly before landing queues the jump
