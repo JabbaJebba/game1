@@ -163,6 +163,12 @@ class ShipScene extends Phaser.Scene {
 
         this.calculatePower();
         this.updateUI();
+        // Add modal click guard — prevents scene-level grid clicks from firing when clicking on popups
+        this.justClickedModal = false;
+
+        // Panel sell mode: when set to a gem name, trade panel shows sell UI for that gem
+        this.panelSellMode = null;
+
         this.input.on('pointerdown', (pointer) => this.handleGridClick(pointer));
         this.input.on('pointermove', (pointer) => this.handleGridHover(pointer));
 
@@ -510,6 +516,11 @@ class ShipScene extends Phaser.Scene {
     }
 
     handleGridClick(pointer) {
+        // Guard: if we just clicked a modal button this same frame, ignore — the modal already handled it
+        if (this.justClickedModal) {
+            this.justClickedModal = false;
+            return;
+        }
         // If we just selected a build card this same click, ignore it — wait for a fresh click on the grid
         if (this.justSelectedBuild) {
             this.justSelectedBuild = false;
@@ -538,10 +549,14 @@ class ShipScene extends Phaser.Scene {
         const room = this.shipGrid[gx][gy];
         if (room) {
             this.selectedRoomCell = { x: gx, y: gy };
+            this.panelSellMode = null;
+            this.panelSellCustom = 0;
             this.drawShipGrid();
             this.openRoomControlsPanel(room);
         } else {
             this.selectedRoomCell = null;
+            this.panelSellMode = null;
+            this.panelSellCustom = 0;
             this.drawShipGrid();
         }
     }
@@ -602,7 +617,10 @@ class ShipScene extends Phaser.Scene {
         }).setOrigin(0.5);
         closeBtn.on('pointerover', () => closeBtn.setFillStyle(0x252535));
         closeBtn.on('pointerout', () => closeBtn.setFillStyle(0x1a1a28));
-        closeBtn.on('pointerdown', () => this.closeInventoryModal());
+        closeBtn.on('pointerdown', () => {
+            this.justClickedModal = true;
+            this.closeInventoryModal();
+        });
 
         this.invModal.add([bg, title, this.invContent, closeBtn, closeTxt]);
     }
@@ -680,7 +698,10 @@ class ShipScene extends Phaser.Scene {
         }).setOrigin(0.5);
         closeBtn.on('pointerover', () => closeBtn.setFillStyle(0x333344));
         closeBtn.on('pointerout', () => closeBtn.setFillStyle(0x1a1a28));
-        closeBtn.on('pointerdown', () => this.closeRoomControlsPanel());
+        closeBtn.on('pointerdown', () => {
+            this.justClickedModal = true;
+            this.closeRoomControlsPanel();
+        });
 
         this.roomPanel.add([
             this.roomPanelBg, this.roomPanelTitle, this.roomPanelSubtitle,
@@ -705,38 +726,114 @@ class ShipScene extends Phaser.Scene {
         let y = -ph / 2 + 130;
 
         if (room.type === 'trade') {
-            this.roomPanelContent.setText(
-                '─ GEMS ─\n' +
-                ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst'].map(g => {
-                    const c = this.shipInventory[g] || 0;
-                    return `  ${g}: ${c}  @${this.gemPrices[g]}cr`;
-                }).join('\n') + '\n\n─ FUEL ─\n' +
-                Object.entries(this.fuelPrices).map(([amt, cost]) => `  +${amt}L  —  ${cost}cr`).join('\n')
-            );
-
-            y = -ph / 2 + 230;
-            ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst'].forEach(gemName => {
+            // ── Inline sell mode ──
+            if (this.panelSellMode) {
+                const gemName = this.panelSellMode;
                 const count = this.shipInventory[gemName] || 0;
-                if (count > 0) {
-                    const btn = this.createPanelButton(0, y, `SELL ${gemName}`, () => this.openSellPopup(gemName, count, this.gemPrices[gemName]), 220, 26, 0x224422, '#88cc88');
+                const price = this.gemPrices[gemName];
+                this.roomPanelTitle.setText(`SELL  ${gemName.toUpperCase()}`);
+                this.roomPanelSubtitle.setText(`${count} owned  ·  ${price}cr each  ·  max ${count * price}cr`);
+
+                // Quick sell buttons
+                const quick = [
+                    { label: 'SELL 1', qty: 1, y: -ph / 2 + 140 },
+                    { label: 'SELL 10', qty: 10, y: -ph / 2 + 178 },
+                    { label: 'SELL 50', qty: 50, y: -ph / 2 + 216 },
+                    { label: 'SELL ALL', qty: -1, y: -ph / 2 + 254 },
+                ];
+                quick.forEach(q => {
+                    if (q.qty === -1 || count >= q.qty) {
+                        const btn = this.createPanelButton(0, q.y, q.label, () => {
+                            this.justClickedModal = true;
+                            this.confirmSell(q.qty);
+                        }, 220, 28, 0x224422, '#88cc88');
+                        this.roomPanelControlBtns.push(btn);
+                    }
+                });
+
+                // Custom amount
+                const customY = -ph / 2 + 300;
+                if (!this.panelSellCustom) this.panelSellCustom = 0;
+                const customTxt = this.add.text(0, customY - 14, 'CUSTOM AMOUNT', {
+                    fontSize: '10px', fill: '#555555', fontFamily: 'monospace'
+                }).setOrigin(0.5);
+                this.roomPanelButtons.add(customTxt);
+
+                const minusBtn = this.add.rectangle(-50, customY + 18, 28, 28, 0x1a1a28).setInteractive();
+                const minusTxt = this.add.text(-50, customY + 18, '-', { fontSize: '13px', fill: '#cccccc' }).setOrigin(0.5);
+                const amtTxt = this.add.text(0, customY + 18, String(this.panelSellCustom), {
+                    fontSize: '13px', fill: '#cccccc', fontFamily: 'monospace'
+                }).setOrigin(0.5);
+                const plusBtn = this.add.rectangle(50, customY + 18, 28, 28, 0x1a1a28).setInteractive();
+                const plusTxt = this.add.text(50, customY + 18, '+', { fontSize: '13px', fill: '#cccccc' }).setOrigin(0.5);
+
+                minusBtn.on('pointerdown', () => {
+                    this.justClickedModal = true;
+                    if (this.panelSellCustom > 0) { this.panelSellCustom--; this.openRoomControlsPanel(room); }
+                });
+                plusBtn.on('pointerdown', () => {
+                    this.justClickedModal = true;
+                    if (this.panelSellCustom < count) { this.panelSellCustom++; this.openRoomControlsPanel(room); }
+                });
+
+                const sellCustomBtn = this.createPanelButton(0, customY + 58, `SELL ${this.panelSellCustom}`, () => {
+                    this.justClickedModal = true;
+                    if (this.panelSellCustom > 0) this.confirmSell(this.panelSellCustom);
+                }, 120, 26, this.panelSellCustom > 0 ? 0x224422 : 0x151515, this.panelSellCustom > 0 ? '#88cc88' : '#444444');
+
+                this.roomPanelButtons.add([minusBtn, minusTxt, amtTxt, plusBtn, plusTxt]);
+                this.roomPanelControlBtns.push(sellCustomBtn);
+
+                // Back button
+                const backBtn = this.createPanelButton(0, ph / 2 - 70, '← BACK', () => {
+                    this.justClickedModal = true;
+                    this.panelSellMode = null;
+                    this.panelSellCustom = 0;
+                    this.openRoomControlsPanel(room);
+                }, 220, 26, 0x1a1a28, '#888888');
+                this.roomPanelControlBtns.push(backBtn);
+
+            } else {
+                // ── Normal trade view ──
+                this.roomPanelContent.setText(
+                    '─ GEMS ─\n' +
+                    ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst'].map(g => {
+                        const c = this.shipInventory[g] || 0;
+                        return `  ${g}: ${c}  @${this.gemPrices[g]}cr`;
+                    }).join('\n') + '\n\n─ FUEL ─\n' +
+                    Object.entries(this.fuelPrices).map(([amt, cost]) => `  +${amt}L  —  ${cost}cr`).join('\n')
+                );
+
+                y = -ph / 2 + 230;
+                ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst'].forEach(gemName => {
+                    const count = this.shipInventory[gemName] || 0;
+                    if (count > 0) {
+                        const btn = this.createPanelButton(0, y, `SELL ${gemName}`, () => {
+                            this.justClickedModal = true;
+                            this.panelSellMode = gemName;
+                            this.panelSellCustom = 0;
+                            this.openRoomControlsPanel(room);
+                        }, 220, 26, 0x224422, '#88cc88');
+                        this.roomPanelControlBtns.push(btn);
+                        y += 32;
+                    }
+                });
+
+                y += 8;
+                Object.entries(this.fuelPrices).forEach(([amount, cost]) => {
+                    const btn = this.createPanelButton(0, y, `BUY ${amount}L — ${cost}cr`, () => {
+                        this.justClickedModal = true;
+                        if (this.credits >= cost && this.shipFuel + parseInt(amount) <= this.shipFuelCapacity) {
+                            this.credits -= cost;
+                            this.shipFuel = Math.min(this.shipFuelCapacity, this.shipFuel + parseInt(amount));
+                            this.updateUI();
+                            this.openRoomControlsPanel(room);
+                        }
+                    }, 220, 26, 0x222244, '#8888cc');
                     this.roomPanelControlBtns.push(btn);
                     y += 32;
-                }
-            });
-
-            y += 8;
-            Object.entries(this.fuelPrices).forEach(([amount, cost]) => {
-                const btn = this.createPanelButton(0, y, `BUY ${amount}L — ${cost}cr`, () => {
-                    if (this.credits >= cost && this.shipFuel + parseInt(amount) <= this.shipFuelCapacity) {
-                        this.credits -= cost;
-                        this.shipFuel = Math.min(this.shipFuelCapacity, this.shipFuel + parseInt(amount));
-                        this.updateUI();
-                        this.openRoomControlsPanel(room);
-                    }
-                }, 220, 26, 0x222244, '#8888cc');
-                this.roomPanelControlBtns.push(btn);
-                y += 32;
-            });
+                });
+            }
 
         } else if (room.type === 'fuelTank') {
             this.roomPanelContent.setText(
@@ -790,7 +887,7 @@ class ShipScene extends Phaser.Scene {
         }).setOrigin(0.5);
         rect.on('pointerover', () => { rect.setFillStyle(color + 0x111111); label.setFill('#ffffff'); });
         rect.on('pointerout', () => { rect.setFillStyle(color); label.setFill(textColor); });
-        rect.on('pointerdown', callback);
+        rect.on('pointerdown', () => { this.justClickedModal = true; callback(); });
         this.roomPanelButtons.add([rect, label]);
         return { rect, text: label };
     }
@@ -798,6 +895,8 @@ class ShipScene extends Phaser.Scene {
     closeRoomControlsPanel() {
         this.roomPanel.setVisible(false);
         this.selectedRoomCell = null;
+        this.panelSellMode = null;
+        this.panelSellCustom = 0;
         this.drawShipGrid();
     }
 
@@ -885,9 +984,11 @@ class ShipScene extends Phaser.Scene {
                     const plTxt = this.add.text(106, y, '+', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5);
 
                     minBtn.on('pointerdown', () => {
+                        this.justClickedModal = true;
                         if (this.modalAmounts[rowKey] > 1) { this.modalAmounts[rowKey]--; this.openRoomControlsPanel(room); }
                     });
                     plBtn.on('pointerdown', () => {
+                        this.justClickedModal = true;
                         if (this.modalAmounts[rowKey] < count) { this.modalAmounts[rowKey]++; this.openRoomControlsPanel(room); }
                     });
 
@@ -944,9 +1045,11 @@ class ShipScene extends Phaser.Scene {
                     const plTxt = this.add.text(106, y, '+', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5);
 
                     minBtn.on('pointerdown', () => {
+                        this.justClickedModal = true;
                         if (this.modalAmounts[rowKey] > 1) { this.modalAmounts[rowKey]--; this.openRoomControlsPanel(room); }
                     });
                     plBtn.on('pointerdown', () => {
+                        this.justClickedModal = true;
                         if (this.modalAmounts[rowKey] < canMake) { this.modalAmounts[rowKey]++; this.openRoomControlsPanel(room); }
                     });
 
@@ -1005,9 +1108,11 @@ class ShipScene extends Phaser.Scene {
             const plTxt = this.add.text(106, y, '+', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5);
 
             minBtn.on('pointerdown', () => {
+                this.justClickedModal = true;
                 if (this.modalAmounts[rowKey] > 1) { this.modalAmounts[rowKey]--; this.openRoomControlsPanel(room); }
             });
             plBtn.on('pointerdown', () => {
+                this.justClickedModal = true;
                 if (this.modalAmounts[rowKey] < canMake) { this.modalAmounts[rowKey]++; this.openRoomControlsPanel(room); }
             });
 
@@ -1096,7 +1201,10 @@ class ShipScene extends Phaser.Scene {
             }).setOrigin(0.5);
             rect.on('pointerover', () => rect.setFillStyle(0x252535));
             rect.on('pointerout', () => rect.setFillStyle(0x1a1a28));
-            rect.on('pointerdown', () => this.confirmSell(d.qty));
+            rect.on('pointerdown', () => {
+                this.justClickedModal = true;
+                this.confirmSell(d.qty);
+            });
             this.sellQuickBtns.push({ rect, text: txt });
         });
 
@@ -1130,6 +1238,7 @@ class ShipScene extends Phaser.Scene {
         sellCustomBtn.on('pointerover', () => sellCustomBtn.setFillStyle(0x335533));
         sellCustomBtn.on('pointerout', () => sellCustomBtn.setFillStyle(0x224422));
         sellCustomBtn.on('pointerdown', () => {
+            this.justClickedModal = true;
             const qty = parseInt(this.sellCustomText.text) || 0;
             if (qty > 0) this.confirmSell(qty);
         });
@@ -1140,7 +1249,10 @@ class ShipScene extends Phaser.Scene {
         }).setOrigin(0.5);
         cancelBtn.on('pointerover', () => cancelBtn.setFillStyle(0x252535));
         cancelBtn.on('pointerout', () => cancelBtn.setFillStyle(0x1a1a28));
-        cancelBtn.on('pointerdown', () => this.closeSellPopup());
+        cancelBtn.on('pointerdown', () => {
+            this.justClickedModal = true;
+            this.closeSellPopup();
+        });
 
         this.sellPopup.add([
             bg, this.sellTitle, this.sellInfo,
@@ -1166,18 +1278,22 @@ class ShipScene extends Phaser.Scene {
     }
 
     confirmSell(qty) {
-        if (!this.pendingSellGem) return;
-        const count = this.shipInventory[this.pendingSellGem] || 0;
-        const price = this.gemPrices[this.pendingSellGem];
+        if (!this.panelSellMode) return;
+        const gemName = this.panelSellMode;
+        const count = this.shipInventory[gemName] || 0;
+        const price = this.gemPrices[gemName];
         if (qty === -1) qty = count;
         qty = Math.min(qty, count);
         if (qty <= 0) return;
 
-        this.shipInventory[this.pendingSellGem] -= qty;
-        if (this.shipInventory[this.pendingSellGem] <= 0) delete this.shipInventory[this.pendingSellGem];
+        this.shipInventory[gemName] -= qty;
+        if (this.shipInventory[gemName] <= 0) delete this.shipInventory[gemName];
         this.credits += qty * price;
 
-        this.closeSellPopup();
+        this.panelSellCustom = 0;
+        if ((this.shipInventory[gemName] || 0) <= 0) {
+            this.panelSellMode = null; // auto-exit sell mode if none left
+        }
         this.updateUI();
         if (this.selectedRoomCell) {
             const room = this.shipGrid[this.selectedRoomCell.x][this.selectedRoomCell.y];
@@ -1205,8 +1321,14 @@ class ShipScene extends Phaser.Scene {
             fontSize: '11px', fill: '#666666', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
-        this.techFuelTab.on('pointerdown', () => this.switchTechTab('fuelTank'));
-        this.techEffTab.on('pointerdown', () => this.switchTechTab('efficiency'));
+        this.techFuelTab.on('pointerdown', () => {
+            this.justClickedModal = true;
+            this.switchTechTab('fuelTank');
+        });
+        this.techEffTab.on('pointerdown', () => {
+            this.justClickedModal = true;
+            this.switchTechTab('efficiency');
+        });
 
         this.techSubtitle = this.add.text(0, -152, '', {
             fontSize: '12px', fill: '#c9a84c', fontFamily: 'monospace'
@@ -1219,7 +1341,10 @@ class ShipScene extends Phaser.Scene {
         }).setOrigin(0.5);
         closeBtn.on('pointerover', () => closeBtn.setFillStyle(0x252535));
         closeBtn.on('pointerout', () => closeBtn.setFillStyle(0x1a1a28));
-        closeBtn.on('pointerdown', () => this.closeTechTreePopup());
+        closeBtn.on('pointerdown', () => {
+            this.justClickedModal = true;
+            this.closeTechTreePopup();
+        });
 
         this.techPopup.add([
             this.techBg, this.techTitle, this.techSubtitle, this.techContent,
@@ -1297,7 +1422,10 @@ class ShipScene extends Phaser.Scene {
                 if (canAfford) {
                     btn.on('pointerover', () => btn.setFillStyle(0x335533));
                     btn.on('pointerout', () => btn.setFillStyle(0x224422));
-                    btn.on('pointerdown', () => this.doUpgrade(branch, lvl));
+                    btn.on('pointerdown', () => {
+                        this.justClickedModal = true;
+                        this.doUpgrade(branch, lvl);
+                    });
                 }
 
                 this.techContent.add([label, cost, btn, btnLabel]);
@@ -1454,7 +1582,10 @@ class ShipScene extends Phaser.Scene {
         }).setOrigin(0.5);
         yesBtn.on('pointerover', () => yesBtn.setFillStyle(0x553333));
         yesBtn.on('pointerout', () => yesBtn.setFillStyle(0x442222));
-        yesBtn.on('pointerdown', () => this.confirmReset());
+        yesBtn.on('pointerdown', () => {
+            this.justClickedModal = true;
+            this.confirmReset();
+        });
 
         const noBtn = this.add.rectangle(70, 40, 110, 28, 0x1a1a28).setInteractive();
         const noTxt = this.add.text(70, 40, 'CANCEL', {
@@ -1462,7 +1593,10 @@ class ShipScene extends Phaser.Scene {
         }).setOrigin(0.5);
         noBtn.on('pointerover', () => noBtn.setFillStyle(0x252535));
         noBtn.on('pointerout', () => noBtn.setFillStyle(0x1a1a28));
-        noBtn.on('pointerdown', () => this.closeResetPopup());
+        noBtn.on('pointerdown', () => {
+            this.justClickedModal = true;
+            this.closeResetPopup();
+        });
 
         this.resetPopup.add([bg, title, warning, yesBtn, yesTxt, noBtn, noTxt]);
     }
