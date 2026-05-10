@@ -8,7 +8,7 @@
   - Only active when `tileAlpha < 1` (night/dusk), so daytime is unchanged
   - Makes night mining feel intimate and atmospheric — the world is dark, but your immediate workspace is lit
   - Pairs with existing nighttime tile dimming to complete the day/night cycle
-- Status: ⏳ Pending push
+- Status: ✅ Pushed. Commit: `c660082`
 
 ## 2026-05-10 — Falling Wind Trail
 - **QoL/Game Feel:** Added thin white streaks that spawn behind the player when falling fast (vy > 250)
