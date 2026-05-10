@@ -144,6 +144,10 @@ class GameScene extends Phaser.Scene {
             stroke: '#000000', strokeThickness: 2
         }).setOrigin(1, 0).setScrollFactor(0);
 
+        this.gemPrices = {
+            'Ruby': 50, 'Sapphire': 75, 'Emerald': 100, 'Diamond': 200, 'Amethyst': 80,
+        };
+
         this.generateStars();
     }
 
@@ -276,10 +280,17 @@ class GameScene extends Phaser.Scene {
         const elapsedMin = Math.floor((Date.now() - this.runStats.startTime) / 60000);
         const elapsedSec = Math.floor((Date.now() - this.runStats.startTime) / 1000) % 60;
         const timeStr = elapsedMin > 0 ? `${elapsedMin}m ${elapsedSec}s` : `${elapsedSec}s`;
+        let runValue = 0;
+        for (const [tileId, count] of Object.entries(this.player.inventory)) {
+            const name = this.getTileName(parseInt(tileId));
+            const price = this.gemPrices[name];
+            if (price) runValue += count * price;
+        }
         this.runStatsText.setText(
             `RUN STATS\n` +
             `Mined: ${this.runStats.tilesMined}\n` +
             `Fuel: ${this.runStats.fuelUsed.toFixed(2)}L\n` +
+            `Value: ${runValue}cr\n` +
             `Time: ${timeStr}`
         );
     }

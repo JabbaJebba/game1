@@ -238,6 +238,15 @@
 7. **Hazards** - Falling rocks, lava, enemies
 8. **Quality of life** - Auto-collect radius, better teleport mechanics
 
+## 2026-05-11 — Run Stats: Live Gem Value Estimate
+- **QoL/UI:** Added live gem value estimate to the run stats panel
+  - Calculates total sell value of all gems currently in player inventory using existing trade prices
+  - Updates in real-time — every gem mined instantly bumps the value counter
+  - Helps players evaluate run profitability on the fly for the tight economy design
+  - Format: `Value: Xcr` on the fourth line of the run stats panel
+  - No new assets, no gameplay changes — purely informational
+- Status: ✅ Pushed. Commit: `TBD`
+
 ## 2026-05-10 — Tile Mine Flash
 - **QoL/Game Feel:** Added a bright white flash on tiles when they are mined
   - White rectangle spawns at the tile position with 55% alpha
