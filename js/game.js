@@ -178,6 +178,7 @@ class GameScene extends Phaser.Scene {
     }
 
     update(time, delta) {
+        this.currentTime = time;
         this.player.update(delta);
         this.renderWorld();
 
@@ -264,7 +265,15 @@ class GameScene extends Phaser.Scene {
                     const color = this.tileColors[tile] || 0xffffff;
                     const px = x * 32;
                     const py = y * 32;
-                    this.tileGraphics.fillStyle(color, 1);
+                    const isGem = tile === this.world.TILE_RUBY || tile === this.world.TILE_SAPPHIRE ||
+                                  tile === this.world.TILE_EMERALD || tile === this.world.TILE_DIAMOND ||
+                                  tile === this.world.TILE_AMETHYST;
+                    if (isGem) {
+                        const pulse = Math.sin((this.currentTime || 0) * 0.003 + x * 0.3 + y * 0.3) * 0.12 + 0.88;
+                        this.tileGraphics.fillStyle(color, pulse);
+                    } else {
+                        this.tileGraphics.fillStyle(color, 1);
+                    }
                     this.tileGraphics.fillRect(px, py, 32, 32);
                     this.tileGraphics.lineStyle(1, 0x000000, 0.1);
                     this.tileGraphics.strokeRect(px, py, 32, 32);
@@ -308,7 +317,15 @@ class GameScene extends Phaser.Scene {
 
         if (tile !== this.world.TILE_AIR) {
             const color = this.tileColors[tile] || 0xffffff;
-            this.tileGraphics.fillStyle(color, 1);
+            const isGem = tile === this.world.TILE_RUBY || tile === this.world.TILE_SAPPHIRE ||
+                          tile === this.world.TILE_EMERALD || tile === this.world.TILE_DIAMOND ||
+                          tile === this.world.TILE_AMETHYST;
+            if (isGem) {
+                const pulse = Math.sin((this.currentTime || 0) * 0.003 + x * 0.3 + y * 0.3) * 0.12 + 0.88;
+                this.tileGraphics.fillStyle(color, pulse);
+            } else {
+                this.tileGraphics.fillStyle(color, 1);
+            }
             this.tileGraphics.fillRect(px, py, 32, 32);
             this.tileGraphics.lineStyle(1, 0x000000, 0.1);
             this.tileGraphics.strokeRect(px, py, 32, 32);

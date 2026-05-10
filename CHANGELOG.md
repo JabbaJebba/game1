@@ -1,5 +1,12 @@
 # Game Improvement Log
 
+## 2026-05-10 — Gem Tile Pulse Glow
+- **QoL:** Gem tiles now have a subtle pulsing glow — they softly breathe with a sine-wave alpha oscillation (±12%, ~3.5s cycle)
+- Each gem tile has a slightly different phase based on its grid position, creating a living, organic shimmer across veins
+- Makes valuable tiles visually distinct from plain rock and draws the player's eye naturally
+- Applied in both `renderWorld()` (batch draw) and `updateTile()` (single-tile redraw after mining)
+- Status: ✅ Pushed. Commit: TBD
+
 ## 2026-05-10 — Jump Takeoff Dust
 - **QoL:** Added dust burst at the player's feet when jumping (3-5 gray particles spray outward and fade)
 - Symmetrically pairs with existing landing dust — jump now has both a takeoff and landing feel
