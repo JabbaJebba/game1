@@ -5,6 +5,13 @@
 - **QoL:** Added landing dust particles when player hits the ground after a jump (3-5 gray particles spray upward and fade)
 - Status: ✅ Pushed. 
 
+## 2026-05-10 — Walking Dust Particles
+- Added tiny dust puffs at the player's feet while walking on ground
+- Spawns every 100-180ms when |vx| > 20, random horizontal spread
+- Small (2-4px), gray, short 250-400ms fade — subtle but adds life
+- Pairs with landing dust to ground the character in the world
+- Status: ✅ Pushed. Commit: TBD
+
 ## 2026-05-10 — Depth Indicator
 - Replaced useless raw pixel position with depth readout (meters below surface)
 - Depth calculated from surface Y at current X, clamped to world bounds

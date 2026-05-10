@@ -68,6 +68,9 @@ class Player {
         // Inventory
         this.inventory = {};
         this.selectedSlot = 0;
+
+        // Walk dust timer
+        this.walkDustTimer = 0;
     }
 
     update(delta) {
@@ -206,6 +209,17 @@ class Player {
         const worldWidthPx = this.world.width * 32;
         if (this.x < this.width / 2) { this.x = this.width / 2; this.vx = 0; }
         if (this.x > worldWidthPx - this.width / 2) { this.x = worldWidthPx - this.width / 2; this.vx = 0; }
+
+        // Walking dust
+        if (this.onGround && Math.abs(this.vx) > 20) {
+            this.walkDustTimer -= delta;
+            if (this.walkDustTimer <= 0) {
+                this.scene.spawnWalkDust(this.x, this.y);
+                this.walkDustTimer = 100 + Math.random() * 80;
+            }
+        } else {
+            this.walkDustTimer = 0;
+        }
     }
 
     getTileBounds() {

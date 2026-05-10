@@ -386,6 +386,23 @@ class GameScene extends Phaser.Scene {
         }
     }
 
+    spawnWalkDust(x, y) {
+        const size = 2 + Math.floor(Math.random() * 3);
+        const particle = this.add.rectangle(x + (Math.random() - 0.5) * 24, y, size, size, 0xaaaaaa);
+        particle.setDepth(3);
+        this.tweens.add({
+            targets: particle,
+            x: particle.x + (Math.random() - 0.5) * 15,
+            y: particle.y - 4,
+            alpha: 0,
+            scaleX: 0.3,
+            scaleY: 0.3,
+            duration: 250 + Math.random() * 150,
+            ease: 'Power2',
+            onComplete: () => particle.destroy()
+        });
+    }
+
     showFloatText(x, y, text, color = '#ffffff') {
         const label = this.add.text(x, y, text, {
             fontSize: '14px', fill: color, stroke: '#000000', strokeThickness: 2, fontFamily: 'monospace'
