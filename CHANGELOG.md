@@ -1,5 +1,12 @@
 # Game Improvement Log
 
+## 2026-05-10 — Inline Sell Mode + Modal Click Guard
+- **Bugfix:** Eliminated sell popup jumping to wrong room — root cause was scene-level `pointerdown` leaking through popup buttons to the grid, selecting a different room tile
+- **UI:** Trade room panel now uses inline sell mode instead of a centered popup — click SELL → panel switches to sell view with quick buttons (1/10/50/ALL) and custom amount
+- **Guard:** All panel/modal buttons now auto-set `justClickedModal` flag; `handleGridClick()` checks it at entry and consumes the click before it can hit the grid
+- **Consistency:** Sell flow stays entirely within the right-side panel — no more popup/panel visual clash
+- Status: ✅ Pushed. Commit: `22de797`
+
 ## 2026-05-10 — Mine Cooldown Ring
 - **QoL:** Added a circular cooldown ring around the player when holding a mine key (A/S/D)
   - Ring fills from 0% → 100% over the 180ms mining cooldown
