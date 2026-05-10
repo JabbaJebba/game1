@@ -121,6 +121,9 @@ class ShipScene extends Phaser.Scene {
             });
         });
 
+        // Reset button — small, bottom-left corner
+        this.createResetButton(60, 640);
+
         this.calculatePower();
         this.updateUI();
         this.input.on('pointerdown', (pointer) => this.handleGridClick(pointer));
@@ -903,6 +906,67 @@ class ShipScene extends Phaser.Scene {
         });
 
         return { rect, text: label, costLabel };
+    }
+
+    createResetButton(x, y) {
+        const btn = this.add.rectangle(x, y, 100, 30, 0x551111);
+        btn.setInteractive();
+        const label = this.add.text(x, y, 'RESET', {
+            fontSize: '12px', fill: '#ff6666', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+        btn.on('pointerover', () => btn.setFillStyle(0x772222));
+        btn.on('pointerout', () => btn.setFillStyle(0x551111));
+        btn.on('pointerdown', () => this.openResetPopup());
+    }
+
+    createResetConfirmPopup() {
+        this.resetPopup = this.add.container(640, 360);
+        this.resetPopup.setVisible(false);
+        this.resetPopup.setDepth(15);
+
+        const bg = this.add.rectangle(0, 0, 420, 180, 0x111122, 0.98).setOrigin(0.5);
+        bg.setStrokeStyle(2, 0x882222);
+
+        const title = this.add.text(0, -55, '⚠ RESET SAVE', {
+            fontSize: '22px', fill: '#ff4444', fontStyle: 'bold', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+
+        const warning = this.add.text(0, -15, 'This will erase ALL progress.\nShip, inventory, credits, upgrades — everything.', {
+            fontSize: '13px', fill: '#cccccc', fontFamily: 'monospace', align: 'center'
+        }).setOrigin(0.5);
+
+        const yesBtn = this.add.rectangle(-80, 45, 120, 34, 0x882222).setInteractive();
+        const yesTxt = this.add.text(-80, 45, 'YES, ERASE', {
+            fontSize: '12px', fill: '#ffffff', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+        yesBtn.on('pointerover', () => yesBtn.setFillStyle(0xaa3333));
+        yesBtn.on('pointerout', () => yesBtn.setFillStyle(0x882222));
+        yesBtn.on('pointerdown', () => this.confirmReset());
+
+        const noBtn = this.add.rectangle(80, 45, 120, 34, 0x444466).setInteractive();
+        const noTxt = this.add.text(80, 45, 'CANCEL', {
+            fontSize: '12px', fill: '#ffffff', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+        noBtn.on('pointerover', () => noBtn.setFillStyle(0x666688));
+        noBtn.on('pointerout', () => noBtn.setFillStyle(0x444466));
+        noBtn.on('pointerdown', () => this.closeResetPopup());
+
+        this.resetPopup.add([bg, title, warning, yesBtn, yesTxt, noBtn, noTxt]);
+    }
+
+    openResetPopup() {
+        if (!this.resetPopup) this.createResetConfirmPopup();
+        this.resetPopup.setVisible(true);
+    }
+
+    closeResetPopup() {
+        if (this.resetPopup) this.resetPopup.setVisible(false);
+    }
+
+    confirmReset() {
+        localStorage.removeItem('miners_save');
+        this.closeResetPopup();
+        this.scene.restart({});
     }
 
     createButton(x, y, text, callback, w = 280, h = 40) {
