@@ -8,7 +8,7 @@
   - Layered at depth 7, above debris but below floating loot text
   - Only triggers on gem tiles — rock/metal mining is unchanged
   - Pairs with existing gem tile pulse glow + floating loot text to make gem finds feel genuinely special
-- Status: 🔄 Implementing. Commit: TBD
+- Status: ✅ Pushed. Commit: `c007bcb`
 
 ## 2026-05-10 — Depth Gauge
 - **QoL/UI:** Added a vertical depth gauge bar on the left edge of the screen
