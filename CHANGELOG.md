@@ -6,7 +6,7 @@
   - Color transitions from orange (just mined) to green (ready to mine again)
   - Only visible while holding a mine key and on cooldown — unobtrusive
   - Makes the mining rhythm tangible; players can see exactly when the next swing is ready
-- Status: 🔄 Committing and pushing...
+- Status: ✅ Pushed. Commit: 30e2358
 
 ## 2026-05-10 — Fixed Right-Side Room Control Panel
 - **UI:** Room controls are now a fixed panel on the right side of the screen instead of a centered popup modal
