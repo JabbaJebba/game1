@@ -510,6 +510,12 @@ class ShipScene extends Phaser.Scene {
     }
 
     handleGridClick(pointer) {
+        // If we just selected a build card this same click, ignore it — wait for a fresh click on the grid
+        if (this.justSelectedBuild) {
+            this.justSelectedBuild = false;
+            return;
+        }
+
         const gx = Math.floor((pointer.x - this.gridOffsetX) / this.tileSize);
         const gy = Math.floor((pointer.y - this.gridOffsetY) / this.tileSize);
         if (gx < 0 || gx >= this.gridW || gy < 0 || gy >= this.gridH) return;
@@ -1392,6 +1398,7 @@ class ShipScene extends Phaser.Scene {
                 this.selectedRoomCell = null;
                 this.drawShipGrid();
                 this.closeBuildModal();
+                this.justSelectedBuild = true;
             });
 
             this.buildModalContent.add([card, icon, name, cost]);
