@@ -5,7 +5,7 @@
 - Each gem tile has a slightly different phase based on its grid position, creating a living, organic shimmer across veins
 - Makes valuable tiles visually distinct from plain rock and draws the player's eye naturally
 - Applied in both `renderWorld()` (batch draw) and `updateTile()` (single-tile redraw after mining)
-- Status: ✅ Pushed. Commit: TBD
+- Status: ✅ Pushed. Commit: 80ea04e
 
 ## 2026-05-10 — Jump Takeoff Dust
 - **QoL:** Added dust burst at the player's feet when jumping (3-5 gray particles spray outward and fade)
