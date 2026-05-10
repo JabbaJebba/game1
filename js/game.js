@@ -192,6 +192,7 @@ class GameScene extends Phaser.Scene {
         this.timeOfDay += delta * 0.0001;
         const dayProgress = (Math.sin(this.timeOfDay) + 1) / 2;
         const darkness = 1 - dayProgress * 0.7;
+        this.tileAlpha = 0.6 + dayProgress * 0.4; // tiles dim at night (0.6→1.0)
 
         const r = Math.floor(135 * darkness);
         const g = Math.floor(206 * darkness);
@@ -270,9 +271,9 @@ class GameScene extends Phaser.Scene {
                                   tile === this.world.TILE_AMETHYST;
                     if (isGem) {
                         const pulse = Math.sin((this.currentTime || 0) * 0.003 + x * 0.3 + y * 0.3) * 0.12 + 0.88;
-                        this.tileGraphics.fillStyle(color, pulse);
+                        this.tileGraphics.fillStyle(color, pulse * this.tileAlpha);
                     } else {
-                        this.tileGraphics.fillStyle(color, 1);
+                        this.tileGraphics.fillStyle(color, this.tileAlpha);
                     }
                     this.tileGraphics.fillRect(px, py, 32, 32);
                     this.tileGraphics.lineStyle(1, 0x000000, 0.1);
@@ -322,9 +323,9 @@ class GameScene extends Phaser.Scene {
                           tile === this.world.TILE_AMETHYST;
             if (isGem) {
                 const pulse = Math.sin((this.currentTime || 0) * 0.003 + x * 0.3 + y * 0.3) * 0.12 + 0.88;
-                this.tileGraphics.fillStyle(color, pulse);
+                this.tileGraphics.fillStyle(color, pulse * this.tileAlpha);
             } else {
-                this.tileGraphics.fillStyle(color, 1);
+                this.tileGraphics.fillStyle(color, this.tileAlpha);
             }
             this.tileGraphics.fillRect(px, py, 32, 32);
             this.tileGraphics.lineStyle(1, 0x000000, 0.1);

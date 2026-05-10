@@ -1,5 +1,13 @@
 # Game Improvement Log
 
+## 2026-05-10 — Nighttime Tile Dimming
+- **QoL/Atmosphere:** Tiles now darken at night as the day/night cycle progresses
+  - Tile brightness scales from 60% at full night → 100% at full day
+  - Gem pulse alpha multiplies with the night factor (gems still shimmer, just dimmer)
+  - Makes the day/night cycle visually cohesive — sky darkens AND the world darkens
+  - No gameplay impact, purely atmospheric; mining and movement unchanged
+- Status: ✅ Pushed. Commit: TBD
+
 ## 2026-05-10 — Inline Sell Mode + Modal Click Guard
 - **Bugfix:** Eliminated sell popup jumping to wrong room — root cause was scene-level `pointerdown` leaking through popup buttons to the grid, selecting a different room tile
 - **UI:** Trade room panel now uses inline sell mode instead of a centered popup — click SELL → panel switches to sell view with quick buttons (1/10/50/ALL) and custom amount
@@ -129,7 +137,7 @@
 3. **Audio** - Mining sounds, ambient music
 4. **Graphics** - Tile sprites instead of colored rectangles
 5. **Character sprite** - Replace blue rectangle with animated character
-6. **Day/Night impact** - Visibility reduction at night, torch system
+6. **Day/Night impact** - Torch/light system for player
 7. **Hazards** - Falling rocks, lava, enemies
 8. **Quality of life** - Auto-collect radius, better teleport mechanics
 
