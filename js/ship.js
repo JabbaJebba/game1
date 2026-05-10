@@ -1385,7 +1385,8 @@ class ShipScene extends Phaser.Scene {
                 card.setFillStyle(0x151520);
                 card.setStrokeStyle(1, 0x222233);
             });
-            card.on('pointerdown', () => {
+            card.on('pointerdown', (pointer) => {
+                pointer.event.stopPropagation();
                 this.selectedRoom = key;
                 this.buildMode = true;
                 this.selectedRoomCell = null;
