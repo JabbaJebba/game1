@@ -1,5 +1,24 @@
 # Game Improvement Log
 
+## 2026-05-10 — Resource Processing (Timed Smelting, Crusher, Refinery)
+- **Feature:** Machines now process resources over time with a queue system
+  - Smelter: 3 ore → 1 ingot in 3 seconds per ingot (copper, iron, gold)
+  - Crusher: 1 rock → 2 crushed rock in 2 seconds per unit
+  - Refinery: 5 crushed rock → random ores/gems in 5 seconds per batch
+- **Queue system:** Select amount with +/- buttons, queue jobs one-by-one
+  - Each machine has independent queue keyed by grid position
+  - Active job shows live progress bar + "X / Y completed"
+  - Pending jobs listed below active job
+- **Offline processing:** Ship machines keep working while you're on mining missions
+  - `launchTime` saved when you leave; on return, elapsed time is applied to all queues
+  - Partial job completion handled correctly
+- **UI:** Room modals redesigned for processing rooms
+  - Active job progress bar fills in real-time
+  - Amount selector per recipe with Queue button
+  - Input resource counts displayed for each recipe
+- **Save/load:** `processingQueues` and `launchTime` persist in save data
+- Status: ✅ Pushed. Commit: ca18ca6
+
 ## 2026-05-10 — Idle Breathing
 - **QoL:** Added idle breathing animation — when standing still on ground, the character subtly bobs up and down (±1.2px, ~3s sine cycle)
 - Eyes stay synced with the body bob so nothing looks detached
