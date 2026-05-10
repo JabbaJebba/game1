@@ -1,5 +1,11 @@
 # Game Improvement Log
 
+## 2026-05-10 — Idle Breathing
+- **QoL:** Added idle breathing animation — when standing still on ground, the character subtly bobs up and down (±1.2px, ~3s sine cycle)
+- Eyes stay synced with the body bob so nothing looks detached
+- Makes the character feel alive during those quiet moments between mining
+- Status: ✅ Pushed.
+
 ## 2026-05-10 — Coyote Time
 - **QoL:** Added 100ms coyote time — you can still jump for a brief window after walking off a ledge
 - Makes platforming feel more forgiving without changing tile-snapping or movement precision
@@ -60,6 +66,7 @@
 8. **Quality of life** - Auto-collect radius, better teleport mechanics
 
 ## Completed
+- [x] Idle breathing animation — character subtly bobs up/down when standing still on ground (±1.2px, ~3s cycle)
 - [x] Coyote time — 100ms jump grace period after walking off a ledge (platformer feel)
 - [x] Auto-save/load via localStorage (auto-save on ship departure & return, auto-load on boot) — Commit: d920612
 - [x] Restore original physics-based movement

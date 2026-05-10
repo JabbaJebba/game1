@@ -165,20 +165,25 @@ class Player {
             }
         }
 
+        // Idle breathing when standing still on ground
+        const breathY = (this.onGround && Math.abs(this.vx) < 5)
+            ? Math.sin(this.scene.time.now * 0.003) * 1.2
+            : 0;
+
         // Update sprite position
         this.sprite.x = this.x;
-        this.sprite.y = this.y;
+        this.sprite.y = this.y + breathY;
 
         // Update eyes
         const eyeOffsetX = this.facingRight ? 3 : -3;
         this.eyeLeft.x = this.x - 12 + eyeOffsetX;
-        this.eyeLeft.y = this.y - this.height + 18;
+        this.eyeLeft.y = this.y - this.height + 18 + breathY;
         this.eyeRight.x = this.x + 12 + eyeOffsetX;
-        this.eyeRight.y = this.y - this.height + 18;
+        this.eyeRight.y = this.y - this.height + 18 + breathY;
         this.pupilLeft.x = this.x - 12 + eyeOffsetX * 1.5;
-        this.pupilLeft.y = this.y - this.height + 18;
+        this.pupilLeft.y = this.y - this.height + 18 + breathY;
         this.pupilRight.x = this.x + 12 + eyeOffsetX * 1.5;
-        this.pupilRight.y = this.y - this.height + 18;
+        this.pupilRight.y = this.y - this.height + 18 + breathY;
 
         // Hide mine indicator if not mining
         if (!this.isMining) {
