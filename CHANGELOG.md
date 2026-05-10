@@ -1,5 +1,14 @@
 # Game Improvement Log
 
+## 2026-05-11 — Rock Tile Color Variation
+- **QoL/Visual:** Added deterministic per-tile brightness variation for rock, grass, and bedrock tiles
+  - Uses a pseudo-random hash based on tile coordinates so the same tile always renders the same shade
+  - ±12% brightness variation — subtle enough to not distract, strong enough to break the flat grid monotony
+  - Applies in both `renderWorld()` (batch draw) and `updateTile()` (single-tile redraw after mining)
+  - Gem and metal tiles are left untouched — they already have their own visual identity (pulse glow, symbol labels)
+  - No gameplay impact; purely visual polish that makes the world feel more organic and less "programmer art"
+- Status: ✅ Pushed. Commit: `TBD`
+
 ## 2026-05-11 — Gem Sparkle Particles
 - **QoL/Game Feel:** Added upward-floating sparkle particles when mining gem tiles
   - 4–8 small colored squares spawn at the player's upper body and drift upward in a cone

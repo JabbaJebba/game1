@@ -265,6 +265,16 @@ class GameScene extends Phaser.Scene {
         }
     }
 
+    getTileVariedColor(baseColor, x, y) {
+        // Deterministic pseudo-random brightness variation so the same tile always looks the same
+        const hash = ((x * 73856093) ^ (y * 19349663)) & 0xFFFF;
+        const variation = 0.88 + (hash / 0xFFFF) * 0.24; // ±12% brightness
+        const r = Math.min(255, Math.floor(((baseColor >> 16) & 0xFF) * variation));
+        const g = Math.min(255, Math.floor(((baseColor >> 8) & 0xFF) * variation));
+        const b = Math.min(255, Math.floor((baseColor & 0xFF) * variation));
+        return (r << 16) | (g << 8) | b;
+    }
+
     getVisibleTileRange() {
         const cam = this.cameras.main;
         const margin = 2;
@@ -311,7 +321,9 @@ class GameScene extends Phaser.Scene {
                             alpha = Math.min(1, alpha + boost);
                         }
                     }
-                    this.tileGraphics.fillStyle(color, alpha);
+                    const isBoring = tile === this.world.TILE_ROCK || tile === this.world.TILE_GRASS || tile === this.world.TILE_BEDROCK;
+                    let drawColor = isBoring ? this.getTileVariedColor(color, x, y) : color;
+                    this.tileGraphics.fillStyle(drawColor, alpha);
                     this.tileGraphics.fillRect(px, py, 32, 32);
                     this.tileGraphics.lineStyle(1, 0x000000, 0.1);
                     this.tileGraphics.strokeRect(px, py, 32, 32);
@@ -371,7 +383,9 @@ class GameScene extends Phaser.Scene {
                     alpha = Math.min(1, alpha + boost);
                 }
             }
-            this.tileGraphics.fillStyle(color, alpha);
+            const isBoring = tile === this.world.TILE_ROCK || tile === this.world.TILE_GRASS || tile === this.world.TILE_BEDROCK;
+            let drawColor = isBoring ? this.getTileVariedColor(color, x, y) : color;
+            this.tileGraphics.fillStyle(drawColor, alpha);
             this.tileGraphics.fillRect(px, py, 32, 32);
             this.tileGraphics.lineStyle(1, 0x000000, 0.1);
             this.tileGraphics.strokeRect(px, py, 32, 32);
