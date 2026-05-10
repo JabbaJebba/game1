@@ -45,18 +45,21 @@ class ShipScene extends Phaser.Scene {
         this.gridW = 4;
         this.gridH = 6;
         this.gridOffsetX = 540;
-        this.gridOffsetY = 100;
+        this.gridOffsetY = 60;
 
         // Title
-        this.add.text(640, 18, '═══ SPACE SHIP ═══', {
-            fontSize: '28px', fill: '#ffffff', fontStyle: 'bold',
+        this.add.text(640, 16, '═══ SPACE SHIP ═══', {
+            fontSize: '26px', fill: '#ffffff', fontStyle: 'bold',
             fontFamily: 'monospace',
         }).setOrigin(0.5);
 
-        // Decorative line
-        const titleLine = this.add.graphics();
-        titleLine.lineStyle(1, 0x444466, 1);
-        titleLine.lineBetween(200, 45, 1080, 45);
+        // Compact status bar under title
+        this.statusBarFuel = this.add.text(420, 42, '', {
+            fontSize: '13px', fill: '#FF8C00', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+        this.statusBarCredits = this.add.text(860, 42, '', {
+            fontSize: '13px', fill: '#FFD700', fontFamily: 'monospace'
+        }).setOrigin(0.5);
 
         // All rooms: power set to 0 for now (per Boss request)
         this.roomTypes = {
@@ -111,7 +114,7 @@ class ShipScene extends Phaser.Scene {
         this.createTechTreePopup();
         this.createGhostGraphics();
 
-        this.createButton(640, 640, 'LAUNCH TO GALAXY', () => {
+        this.createButton(640, 690, 'LAUNCH TO GALAXY', () => {
             this.saveGame();
             this.scene.start('GalaxyScene', {
                 shipGrid: this.shipGrid, shipInventory: this.shipInventory,
@@ -119,10 +122,10 @@ class ShipScene extends Phaser.Scene {
                 rockCompositions: this.rockCompositions,
                 techState: this.techState,
             });
-        });
+        }, 320, 42);
 
-        // Reset button — small, bottom-left corner
-        this.createResetButton(60, 640);
+        // Reset button — small, tucked in bottom-left
+        this.createResetButton(50, 690);
 
         this.calculatePower();
         this.updateUI();
@@ -302,39 +305,28 @@ class ShipScene extends Phaser.Scene {
     }
 
     createSidePanels() {
-        // Left panel - Inventory (shortened to make room for build panel)
+        // Left panel — tall Inventory only
         const leftBg = this.add.graphics();
         leftBg.fillStyle(0x151525, 0.9);
-        leftBg.fillRoundedRect(10, 70, 260, 290, 8);
+        leftBg.fillRoundedRect(10, 55, 260, 600, 8);
         leftBg.lineStyle(1, 0x444466, 0.5);
-        leftBg.strokeRoundedRect(10, 70, 260, 290, 8);
+        leftBg.strokeRoundedRect(10, 55, 260, 600, 8);
 
-        this.add.text(20, 80, 'INVENTORY', {
+        this.add.text(20, 65, 'INVENTORY', {
             fontSize: '16px', fill: '#FFD700', fontStyle: 'bold', fontFamily: 'monospace'
         });
-        this.inventoryText = this.add.text(20, 110, '', { fontSize: '13px', fill: '#cccccc', fontFamily: 'monospace' });
+        this.inventoryText = this.add.text(20, 95, '', { fontSize: '13px', fill: '#cccccc', fontFamily: 'monospace' });
 
-        // Right panel - Ship Status
-        const rightBg = this.add.graphics();
-        rightBg.fillStyle(0x151525, 0.9);
-        rightBg.fillRoundedRect(1010, 70, 260, 280, 8);
-        rightBg.lineStyle(1, 0x444466, 0.5);
-        rightBg.strokeRoundedRect(1010, 70, 260, 280, 8);
-
-        this.add.text(1020, 80, 'SHIP STATUS', {
-            fontSize: '16px', fill: '#00FF00', fontStyle: 'bold', fontFamily: 'monospace'
-        });
-        this.powerText = this.add.text(1020, 110, '', { fontSize: '13px', fill: '#cccccc', fontFamily: 'monospace' });
-        this.fuelText = this.add.text(1020, 190, '', { fontSize: '13px', fill: '#cccccc', fontFamily: 'monospace' });
-        this.creditsText = this.add.text(1020, 260, '', { fontSize: '16px', fill: '#FFD700', fontStyle: 'bold', fontFamily: 'monospace' });
+        // Power text moved inside left panel, below inventory
+        this.powerText = this.add.text(20, 560, '', { fontSize: '12px', fill: '#888888', fontFamily: 'monospace' });
     }
 
     createRoomControlsPanel() {
         const panelX = 1010;
-        const panelY = 370;
+        const panelY = 55;
 
         this.controlsPanel = this.add.container(panelX, panelY);
-        this.controlsBg = this.add.rectangle(0, 0, 260, 320, 0x1a1a2e, 0.95).setOrigin(0);
+        this.controlsBg = this.add.rectangle(0, 0, 260, 600, 0x1a1a2e, 0.95).setOrigin(0);
         this.controlsBg.setStrokeStyle(1, 0x444466);
         this.controlsTitle = this.add.text(10, 10, 'ROOM CONTROLS', {
             fontSize: '15px', fill: '#00FFFF', fontStyle: 'bold', fontFamily: 'monospace'
@@ -357,7 +349,7 @@ class ShipScene extends Phaser.Scene {
         if (room.type === 'trade') {
             content += '─ CLICK GEM TO SELL ─\n';
             this.controlsContent.setText(content);
-            let y = 95;
+            let y = 100;
             const gemNames = ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst'];
 
             gemNames.forEach(gemName => {
@@ -365,12 +357,12 @@ class ShipScene extends Phaser.Scene {
                 const price = this.gemPrices[gemName];
                 const btn = this.createControlButton(10, y, `${gemName} (${count}) — ${price}cr/ea`, () => {
                     if (count > 0) this.openSellPopup(gemName, count, price);
-                }, 240, 26);
+                }, 240, 28);
                 this.controlButtons.push(btn);
-                y += 32;
+                y += 34;
             });
 
-            y += 6;
+            y += 10;
             Object.entries(this.fuelPrices).forEach(([amount, cost]) => {
                 const fuelBtn = this.createControlButton(10, y, `BUY ${amount}L FUEL — ${cost}cr`, () => {
                     if (this.credits >= cost && this.shipFuel + parseInt(amount) <= this.shipFuelCapacity) {
@@ -379,9 +371,9 @@ class ShipScene extends Phaser.Scene {
                         this.updateUI();
                         this.showRoomControls(room);
                     }
-                }, 240, 30);
+                }, 240, 32);
                 this.controlButtons.push(fuelBtn);
-                y += 36;
+                y += 38;
             });
 
         } else if (room.type === 'fuelTank') {
@@ -390,17 +382,17 @@ class ShipScene extends Phaser.Scene {
 
         } else if (room.type === 'crusher') {
             this.controlsContent.setText(content + '─ CRUSHER ─\n');
-            let y = 95;
+            let y = 100;
 
             const rockTypesInInv = Object.keys(this.shipInventory).filter(k =>
                 this.rockCompositions[k] && !k.startsWith('Crushed')
             );
 
             if (rockTypesInInv.length === 0) {
-                const noneBtn = this.createControlButton(10, y, 'No rocks in inventory', () => {}, 240, 26);
+                const noneBtn = this.createControlButton(10, y, 'No rocks in inventory', () => {}, 240, 28);
                 noneBtn.rect.removeInteractive();
                 this.controlButtons.push(noneBtn);
-                y += 32;
+                y += 34;
             } else {
                 rockTypesInInv.forEach(rockName => {
                     const count = this.shipInventory[rockName] || 0;
@@ -413,13 +405,13 @@ class ShipScene extends Phaser.Scene {
                             this.updateUI();
                             this.showRoomControls(room);
                         }
-                    }, 240, 26);
+                    }, 240, 28);
                     this.controlButtons.push(crushBtn);
-                    y += 32;
+                    y += 34;
                 });
             }
 
-            y += 6;
+            y += 10;
             const crushedTypes = Object.keys(this.shipInventory).filter(k => k.startsWith('Crushed '));
             if (crushedTypes.length > 0) {
                 this.controlsContent.setText(this.controlsContent.text + '\n─ EXTRACT ORES ─\n');
@@ -432,21 +424,21 @@ class ShipScene extends Phaser.Scene {
                             this.extractFromCrushedRock(crushedName, comp);
                             this.updateUI();
                             this.showRoomControls(room);
-                        }, 240, 30);
+                        }, 240, 32);
                         this.controlButtons.push(extractBtn);
-                        y += 36;
+                        y += 38;
                     } else if (comp) {
-                        const needBtn = this.createControlButton(10, y, `${crushedName}: need 5 (have ${count})`, () => {}, 240, 26);
+                        const needBtn = this.createControlButton(10, y, `${crushedName}: need 5 (have ${count})`, () => {}, 240, 28);
                         needBtn.rect.removeInteractive();
                         this.controlButtons.push(needBtn);
-                        y += 32;
+                        y += 34;
                     }
                 });
             }
 
         } else if (room.type === 'smelter') {
             this.controlsContent.setText(content + '─ SMELTER (3 → 1) ─\n');
-            let y = 95;
+            let y = 100;
             const recipes = [
                 { ore: 'Copper Ore', ingot: 'Copper Ingot' },
                 { ore: 'Iron Ore', ingot: 'Iron Ingot' },
@@ -464,10 +456,10 @@ class ShipScene extends Phaser.Scene {
                             this.updateUI();
                             this.showRoomControls(room);
                         }
-                    }, 240, 26);
+                    }, 240, 28);
                 if (!canSmelt) smeltBtn.rect.removeInteractive();
                 this.controlButtons.push(smeltBtn);
-                y += 32;
+                y += 34;
             });
 
         } else if (room.type === 'refinery') {
@@ -478,9 +470,9 @@ class ShipScene extends Phaser.Scene {
             content += `Mech Workshop active.\nFuel Tank: Lv${this.techState.fuelTankLevel || 0}/6  |  Efficiency: Lv${this.techState.efficiencyLevel || 0}/10\n`;
             this.controlsContent.setText(content);
 
-            const upgradeBtn = this.createControlButton(10, 95, 'OPEN TECH TREE', () => {
+            const upgradeBtn = this.createControlButton(10, 100, 'OPEN TECH TREE', () => {
                 this.openTechTreePopup();
-            }, 240, 30);
+            }, 240, 32);
             this.controlButtons.push(upgradeBtn);
 
         } else {
@@ -488,12 +480,12 @@ class ShipScene extends Phaser.Scene {
             this.controlsContent.setText(content);
         }
 
-        // DESTROY button
+        // DESTROY button — bottom of right panel
         if (def.cost > 0) {
             const refund = Math.floor(def.cost * 0.5);
-            const destroyBtn = this.createControlButton(10, 278, `DESTROY — Refund ${refund}cr`, () => {
+            const destroyBtn = this.createControlButton(10, 540, `DESTROY — Refund ${refund}cr`, () => {
                 this.destroyRoom(room);
-            }, 240, 30);
+            }, 240, 32);
             this.controlButtons.push(destroyBtn);
         }
     }
@@ -837,48 +829,69 @@ class ShipScene extends Phaser.Scene {
     }
 
     createBuildPanel() {
-        const panelX = 10;
-        const panelY = 370;
-        const panelH = 340;
+        // Horizontal build strip below the grid, centered
+        const stripY = 390;
+        const stripH = 240;
+        const stripW = 720;
+        const stripX = 280;
 
         const buildBg = this.add.graphics();
         buildBg.fillStyle(0x151525, 0.9);
-        buildBg.fillRoundedRect(panelX, panelY, 260, panelH, 8);
+        buildBg.fillRoundedRect(stripX, stripY, stripW, stripH, 8);
         buildBg.lineStyle(1, 0x444466, 0.5);
-        buildBg.strokeRoundedRect(panelX, panelY, 260, panelH, 8);
+        buildBg.strokeRoundedRect(stripX, stripY, stripW, stripH, 8);
 
-        this.add.text(panelX + 10, panelY + 10, 'BUILD ROOMS', {
-            fontSize: '16px', fill: '#00FFFF', fontStyle: 'bold', fontFamily: 'monospace'
+        this.add.text(stripX + 12, stripY + 8, 'BUILD ROOMS', {
+            fontSize: '15px', fill: '#00FFFF', fontStyle: 'bold', fontFamily: 'monospace'
         });
 
         this.buildButtons = [];
-        let y = panelY + 38;
-        Object.entries(this.roomTypes).forEach(([key, def]) => {
-            if (def.cost === 0) return;
-            const btn = this.createBuildButton(panelX + 130, y, `${def.icon} ${def.name}`, def.cost, key, () => {
+        const buildables = Object.entries(this.roomTypes).filter(([_, def]) => def.cost > 0);
+        const mid = Math.ceil(buildables.length / 2);
+
+        // Left column
+        let y = stripY + 34;
+        buildables.slice(0, mid).forEach(([key, def]) => {
+            const btn = this.createBuildButton(stripX + 175, y, `${def.icon} ${def.name}`, def.cost, key, () => {
                 this.selectedRoom = key;
                 this.buildMode = true;
                 this.selectedRoomCell = null;
                 this.drawShipGrid();
                 this.hideRoomControls();
-                this.buildStatusText.setText(`Building: ${def.icon} ${def.name}\nHover grid to preview, click to place`);
+                this.buildStatusText.setText(`Building: ${def.icon} ${def.name} — hover grid, click to place`);
             });
             this.buildButtons.push(btn);
-            y += 30;
+            y += 34;
         });
 
-        this.buildStatusText = this.add.text(panelX + 10, panelY + 310, 'Select a room to build', {
-            fontSize: '12px', fill: '#aaaaaa', fontFamily: 'monospace'
+        // Right column
+        y = stripY + 34;
+        buildables.slice(mid).forEach(([key, def]) => {
+            const btn = this.createBuildButton(stripX + 175 + 355, y, `${def.icon} ${def.name}`, def.cost, key, () => {
+                this.selectedRoom = key;
+                this.buildMode = true;
+                this.selectedRoomCell = null;
+                this.drawShipGrid();
+                this.hideRoomControls();
+                this.buildStatusText.setText(`Building: ${def.icon} ${def.name} — hover grid, click to place`);
+            });
+            this.buildButtons.push(btn);
+            y += 34;
         });
 
-        // Cancel build button
-        const cancelBtn = this.createButton(panelX + 130, panelY + 335, 'CANCEL BUILD', () => {
+        // Status text at bottom of strip
+        this.buildStatusText = this.add.text(stripX + 12, stripY + stripH - 22, 'Select a room to build', {
+            fontSize: '11px', fill: '#aaaaaa', fontFamily: 'monospace'
+        });
+
+        // Cancel build button — small, inside the strip bottom-right
+        const cancelBtn = this.createButton(stripX + stripW - 80, stripY + stripH - 16, 'CANCEL', () => {
             this.buildMode = false;
             this.selectedRoom = null;
             this.ghostGraphics.clear();
             if (this.ghostIcon) { this.ghostIcon.destroy(); this.ghostIcon = null; }
             this.buildStatusText.setText('Select a room to build');
-        }, 240, 26);
+        }, 140, 24);
     }
 
     createBuildButton(x, y, text, cost, roomKey, callback) {
@@ -989,17 +1002,16 @@ class ShipScene extends Phaser.Scene {
 
         const netPower = this.powerGen - this.powerUse;
         this.powerText.setText(
-            `Power Gen: ${this.powerGen}\n` +
-            `Power Use: ${this.powerUse}\n` +
-            `Net: ${netPower > 0 ? '+' : ''}${netPower}\n` +
-            `Stored: ${this.powerStored}/${this.powerCapacity}`
+            `Power: ${this.powerGen}gen / ${this.powerUse}use / ${this.powerStored}/${this.powerCapacity}stored`
         );
 
-        this.fuelText.setText(
-            `Fuel: ${this.shipFuel.toFixed(1)}L / ${this.shipFuelCapacity.toFixed(1)}L\n` +
-            `Runs: ~${Math.floor(this.shipFuel / 25)}`
+        // Compact status bar under title
+        this.statusBarFuel.setText(
+            `⛽ ${this.shipFuel.toFixed(1)}L / ${this.shipFuelCapacity.toFixed(1)}L  (~${Math.floor(this.shipFuel / 25)} runs)`
         );
-        this.creditsText.setText(`Credits: ${this.credits}`);
+        this.statusBarCredits.setText(
+            `💰 ${this.credits.toLocaleString()} cr`
+        );
     }
 
     calculatePower() {
