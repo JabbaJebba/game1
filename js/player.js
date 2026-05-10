@@ -439,6 +439,10 @@ class Player {
         this.addToInventory(tile);
         this.scene.updateTile(tileX, tileY);
         
+        // Track run statistics
+        this.scene.runStats.tilesMined++;
+        this.scene.runStats.fuelUsed += cost;
+        
         // Flash effect on mined tile
         this.scene.spawnMineFlash(tileX, tileY);
 

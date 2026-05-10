@@ -1,5 +1,16 @@
 # Game Improvement Log
 
+## 2026-05-11 — Run Statistics Panel
+- **QoL/UI:** Added a compact RUN STATS panel in the top-right corner of the mining screen
+  - Tracks tiles mined, fuel consumed, and time spent on current planet
+  - Updates live — every successful mine increments the counter, every fuel cost adds to the total
+  - Time formatted as `Xs` under a minute, `Xm Xs` after that
+  - Positioned at x=1100, y=55, right-aligned so it stays tidy in the corner
+  - Monospace font with dark stroke for readability against any background
+  - Helps players optimize their runs — see exactly how much fuel each dive costs and how long it took
+  - Resets automatically on each new planet launch (fresh stats per run)
+- Status: ✅ Pushed. Commit: `TBD`
+
 ## 2026-05-11 — Metal Ore Spark Particles
 - **QoL/Game Feel:** Added bright metallic spark particles when mining copper, iron, or gold ore tiles
   - 3–5 tiny white/yellow sparks spawn at the mined tile and shoot outward in random directions

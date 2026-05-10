@@ -136,6 +136,14 @@ class GameScene extends Phaser.Scene {
 
         this.timeOfDay = 0;
         this.stars = this.add.graphics();
+
+        // Run statistics — track efficiency of current mining run
+        this.runStats = { tilesMined: 0, fuelUsed: 0, startTime: Date.now() };
+        this.runStatsText = this.add.text(1100, 55, '', {
+            fontSize: '12px', fill: '#aabbcc', fontFamily: 'monospace',
+            stroke: '#000000', strokeThickness: 2
+        }).setOrigin(1, 0).setScrollFactor(0);
+
         this.generateStars();
     }
 
@@ -263,6 +271,17 @@ class GameScene extends Phaser.Scene {
             this.fuelBarBg.setStrokeStyle(2, 0x444466);
             this.fuelBarText.setColor('#ffffff');
         }
+
+        // Run stats display — compact corner panel tracking session efficiency
+        const elapsedMin = Math.floor((Date.now() - this.runStats.startTime) / 60000);
+        const elapsedSec = Math.floor((Date.now() - this.runStats.startTime) / 1000) % 60;
+        const timeStr = elapsedMin > 0 ? `${elapsedMin}m ${elapsedSec}s` : `${elapsedSec}s`;
+        this.runStatsText.setText(
+            `RUN STATS\n` +
+            `Mined: ${this.runStats.tilesMined}\n` +
+            `Fuel: ${this.runStats.fuelUsed.toFixed(2)}L\n` +
+            `Time: ${timeStr}`
+        );
     }
 
     getTileVariedColor(baseColor, x, y) {
