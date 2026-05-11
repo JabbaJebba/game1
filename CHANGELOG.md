@@ -1,5 +1,16 @@
 # Game Improvement Log
 
+## 2026-05-11 — Save Confirmation Flash
+- **QoL/UI:** Added a "💾 SAVED" flash notification that appears whenever the game auto-saves
+  - Shows in bottom-right corner of both mining scene and ship scene
+  - Green monospace text with black stroke for readability against any background
+  - Fades in (200ms), holds (800ms), fades out (200ms) — total ~1.2s visible
+  - On teleport back from mining: flash appears, then 400ms delay before scene transition so players actually see it
+  - On ship save (launch, build, buy fuel, sell gems, queue jobs): flash appears immediately
+  - Gives players confidence that their progress is safely persisted — no more silent saves
+  - Zero gameplay changes, zero new assets, zero performance impact
+- Status: ✅ Pushed. Commit: TBD
+
 ## 2026-05-11 — Ship Scene Visual Fuel Bar
 - **QoL/UI:** Added a visual horizontal fuel bar to the ship command screen
   - Positioned just below the status text at the top-left (x=80, y=76)

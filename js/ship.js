@@ -450,6 +450,22 @@ class ShipScene extends Phaser.Scene {
         }
     }
 
+    showSaveFlash() {
+        const flash = this.add.text(1220, 690, '\uD83D\uDCBE SAVED', {
+            fontSize: '11px', fill: '#44aa66', fontFamily: 'monospace', stroke: '#000000', strokeThickness: 2
+        }).setOrigin(1, 1).setScrollFactor(0).setDepth(100);
+        flash.setAlpha(0);
+        this.tweens.add({
+            targets: flash,
+            alpha: { from: 0, to: 1 },
+            duration: 200,
+            ease: 'Power1',
+            yoyo: true,
+            hold: 800,
+            onComplete: () => flash.destroy()
+        });
+    }
+
     saveGame() {
         const saveData = {
             shipGrid: this.shipGrid,
@@ -463,6 +479,7 @@ class ShipScene extends Phaser.Scene {
             launchTime: this.launchTime,
         };
         localStorage.setItem('miners_save', JSON.stringify(saveData));
+        this.showSaveFlash();
     }
 
     placeStarterRooms() {

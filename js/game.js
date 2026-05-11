@@ -171,6 +171,22 @@ class GameScene extends Phaser.Scene {
         this.generateStars();
     }
 
+    showSaveFlash() {
+        const flash = this.add.text(1220, 690, '\uD83D\uDCBE SAVED', {
+            fontSize: '11px', fill: '#44aa66', fontFamily: 'monospace', stroke: '#000000', strokeThickness: 2
+        }).setOrigin(1, 1).setScrollFactor(0).setDepth(100);
+        flash.setAlpha(0);
+        this.tweens.add({
+            targets: flash,
+            alpha: { from: 0, to: 1 },
+            duration: 200,
+            ease: 'Power1',
+            yoyo: true,
+            hold: 800,
+            onComplete: () => flash.destroy()
+        });
+    }
+
     teleportBack() {
         // Merge player inventory into ship inventory (convert tile IDs to names)
         for (const [tileId, count] of Object.entries(this.player.inventory)) {
@@ -201,17 +217,23 @@ class GameScene extends Phaser.Scene {
         };
         localStorage.setItem('miners_save', JSON.stringify(saveData));
 
-        // Return to ship scene
-        this.scene.start('ShipScene', {
-            shipGrid: this.shipGrid,
-            shipInventory: this.shipInventory,
-            credits: this.credits,
-            shipFuel: this.shipFuel,
-            shipFuelCapacity: this.shipFuelCapacity,
-            rockCompositions: this.rockCompositions,
-            techState: this.techState,
-            processingQueues: this.processingQueues,
-            launchTime: this.launchTime,
+        // Show save confirmation flash
+        this.showSaveFlash();
+
+        // Brief delay so the flash is visible before transition
+        this.time.delayedCall(400, () => {
+            // Return to ship scene
+            this.scene.start('ShipScene', {
+                shipGrid: this.shipGrid,
+                shipInventory: this.shipInventory,
+                credits: this.credits,
+                shipFuel: this.shipFuel,
+                shipFuelCapacity: this.shipFuelCapacity,
+                rockCompositions: this.rockCompositions,
+                techState: this.techState,
+                processingQueues: this.processingQueues,
+                launchTime: this.launchTime,
+            });
         });
     }
 
