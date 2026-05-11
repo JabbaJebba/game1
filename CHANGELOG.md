@@ -1,3 +1,13 @@
+## 2026-05-12 — Directional Debris + Velocity Inheritance
+- **QoL/Game Feel:** Mining debris now flies in a coherent direction — opposite to the swing, with player velocity inheritance
+  - Left mine → debris bursts rightward; right mine → debris bursts leftward; down mine → debris sprays upward
+  - Debris cone is ±60° around the opposite direction, keeping randomness but adding physical coherence
+  - Inherits 35% of player velocity (`vx`, `vy`) — running fast and mining makes debris carry your momentum
+  - Drones keep fully random debris (no swing direction), which feels correct for floating autonomous tools
+  - Same particle count, lifetime, and fade — purely a trajectory change, zero performance impact
+  - Pairs with existing screen shake + recoil + tile flash to make each mine hit feel physically grounded
+- Status: ✅ Pushed. Commit: `TBD`
+
 ## 2026-05-12 — Ambient Dust Particles
 - **QoL/Atmosphere:** Added 35 tiny drifting dust motes to the mining scene
   - Motes are 0.5–2px white circles with very low alpha (5%–20%), creating subtle atmospheric depth

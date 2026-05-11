@@ -194,7 +194,7 @@ class Player {
             const mineX = left - 1; // one tile left of player's left edge
             let minedAny = false;
             for (let y = top; y <= bottom; y++) {
-                if (this.tryMine(mineX, y)) minedAny = true;
+                if (this.tryMine(mineX, y, -1, 0)) minedAny = true;
             }
             if (minedAny) {
                 this.showMineIndicator(mineX * 32 + 16, (top + bottom) / 2 * 32 + 16, 32, 96);
@@ -210,7 +210,7 @@ class Player {
             const mineX = right + 1; // one tile right of player's right edge
             let minedAny = false;
             for (let y = top; y <= bottom; y++) {
-                if (this.tryMine(mineX, y)) minedAny = true;
+                if (this.tryMine(mineX, y, 1, 0)) minedAny = true;
             }
             if (minedAny) {
                 this.showMineIndicator(mineX * 32 + 16, (top + bottom) / 2 * 32 + 16, 32, 96);
@@ -227,7 +227,7 @@ class Player {
             let minedAny = false;
             // Mine exactly the tiles under the character's width
             for (let x = left; x <= right; x++) {
-                if (this.tryMine(x, mineY)) minedAny = true;
+                if (this.tryMine(x, mineY, 0, 1)) minedAny = true;
             }
             if (minedAny) {
                 this.showMineIndicator((left + right) / 2 * 32 + 16, mineY * 32 + 16, 64, 32);
@@ -486,7 +486,7 @@ class Player {
         }
     }
 
-    tryMine(tileX, tileY) {
+    tryMine(tileX, tileY, swingDirX = 0, swingDirY = 0) {
         const tile = this.world.getTile(tileX, tileY);
         if (tile === this.world.TILE_AIR || tile === this.world.TILE_BEDROCK) {
             if (tile === this.world.TILE_BEDROCK) this.scene.playDenialSound('bedrock');
@@ -516,9 +516,9 @@ class Player {
         // Screen shake on successful mine
         this.scene.cameras.main.shake(60, 0.004);
 
-        // Debris particles
+        // Debris particles — directional, inheriting player velocity
         const tileColor = this.scene.tileColors[tile] || 0xffffff;
-        this.scene.spawnDebris(tileX, tileY, tileColor);
+        this.scene.spawnDebris(tileX, tileY, tileColor, swingDirX, swingDirY, this.vx, this.vy);
 
         // Floating loot text
         const itemName = this.getItemName(tile);

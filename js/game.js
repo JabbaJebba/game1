@@ -705,20 +705,29 @@ class GameScene extends Phaser.Scene {
         }
     }
 
-    spawnDebris(tileX, tileY, color) {
+    spawnDebris(tileX, tileY, color, swingDirX = 0, swingDirY = 0, playerVx = 0, playerVy = 0) {
         const px = tileX * 32 + 16;
         const py = tileY * 32 + 16;
         const count = 4 + Math.floor(Math.random() * 3);
+
+        // Base angle opposite to swing direction — debris flies away from the drill
+        let baseAngle;
+        if (swingDirX !== 0 || swingDirY !== 0) {
+            baseAngle = Math.atan2(-swingDirY, -swingDirX);
+        } else {
+            baseAngle = Math.random() * Math.PI * 2;
+        }
 
         for (let i = 0; i < count; i++) {
             const size = 3 + Math.floor(Math.random() * 4);
             const particle = this.add.rectangle(px, py, size, size, color);
             particle.setDepth(5);
 
-            const angle = Math.random() * Math.PI * 2;
+            // Directional spread: ±60° around base angle
+            const angle = baseAngle + (Math.random() - 0.5) * Math.PI * 0.7;
             const speed = 60 + Math.random() * 100;
-            const vx = Math.cos(angle) * speed;
-            const vy = Math.sin(angle) * speed - 50;
+            const vx = Math.cos(angle) * speed + playerVx * 0.35;
+            const vy = Math.sin(angle) * speed - 50 + playerVy * 0.35;
 
             this.tweens.add({
                 targets: particle,
