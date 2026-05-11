@@ -7,7 +7,7 @@
   - Updated on-screen controls hint to include `T=Teleport` so players discover it naturally
   - Uses `Phaser.Input.Keyboard.JustDown` so it only fires once per keypress, never accidental double-teleports
   - Zero gameplay changes — purely a convenience shortcut for an existing function
-- Status: ✅ Pushed. Commit: `TBD`
+- Status: ✅ Pushed. Commit: `f1a0b19`
 
 ## 2026-05-11 — Low-Fuel Teleport Button Urgency Pulse
 - **QoL/UI:** Added a pulsing red glow behind the TELEPORT button when player fuel drops below 5L
