@@ -1846,7 +1846,11 @@ class ShipScene extends Phaser.Scene {
     }
 
     openMechConfigModal() {
-        if (!this.mechModal) this.createMechConfigModal();
+        if (this.mechModal) {
+            this.mechModal.destroy();
+            this.mechModal = null;
+        }
+        this.createMechConfigModal();
         this.renderMechConfig();
         this.mechModal.setVisible(true);
     }
