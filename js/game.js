@@ -733,6 +733,49 @@ class GameScene extends Phaser.Scene {
         });
     }
 
+    playDenialSound(reason) {
+        if (!this.audioCtx) return;
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume().catch(() => {});
+        }
+        const ctx = this.audioCtx;
+        const now = ctx.currentTime;
+        if (reason === 'bedrock') {
+            // Sharp metallic clink — hitting impenetrable rock
+            const osc = ctx.createOscillator();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(180, now);
+            osc.frequency.exponentialRampToValueAtTime(80, now + 0.06);
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.08);
+        } else {
+            // Dull low thud — no fuel, machinery dead
+            const bufferSize = Math.floor(ctx.sampleRate * 0.1);
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+            }
+            const noise = ctx.createBufferSource();
+            noise.buffer = buffer;
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 120;
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+            noise.start(now);
+        }
+    }
+
     playMineSound(tile) {
         if (!this.audioCtx) return;
         if (this.audioCtx.state === 'suspended') {
@@ -743,7 +786,6 @@ class GameScene extends Phaser.Scene {
                       tile === this.world.TILE_EMERALD || tile === this.world.TILE_DIAMOND ||
                       tile === this.world.TILE_AMETHYST;
         const isMetal = tile === this.world.TILE_COPPER || tile === this.world.TILE_IRON || tile === this.world.TILE_GOLD;
-
         const dur = isGem ? 0.12 : 0.08;
         const bufferSize = Math.floor(ctx.sampleRate * dur);
         const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);

@@ -1,5 +1,14 @@
 # Game Improvement Log
 
+## 2026-05-11 — Denial Sound Effects
+- **Audio/Game Feel:** Added distinct audio feedback for failed mining attempts using the existing Web Audio synthesizer
+  - **Bedrock hit:** Sharp metallic clink (triangle wave, 180→80Hz, 80ms) — hitting impenetrable rock feels like striking metal, not muffled silence
+  - **No fuel:** Dull low thud (lowpass noise at 120Hz, 100ms) — the drill is dead, machinery won't spin up
+  - Both sounds are very low amplitude (0.08–0.1 gain) so they never grate; they provide clear audio contrast to successful mining sounds
+  - Fires alongside existing visual feedback ("NO FUEL" floating text) so players get both channels of failure communication
+  - Zero gameplay changes, zero new assets, zero performance impact
+- Status: ✅ Pushed. Commit: TBD
+
 ## 2026-05-11 — Save Confirmation Flash
 - **QoL/UI:** Added a "💾 SAVED" flash notification that appears whenever the game auto-saves
   - Shows in bottom-right corner of both mining scene and ship scene

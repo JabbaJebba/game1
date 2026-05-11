@@ -425,11 +425,13 @@ class Player {
     tryMine(tileX, tileY) {
         const tile = this.world.getTile(tileX, tileY);
         if (tile === this.world.TILE_AIR || tile === this.world.TILE_BEDROCK) {
+            if (tile === this.world.TILE_BEDROCK) this.scene.playDenialSound('bedrock');
             return false;
         }
         
         const cost = this.fuelCosts[tile] || 0.05;
         if (this.fuel < cost) {
+            this.scene.playDenialSound('nofuel');
             this.scene.showFloatText(tileX * 32 + 16, tileY * 32 - 24, 'NO FUEL', '#ff3333');
             return false;
         }
