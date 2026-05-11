@@ -6,7 +6,7 @@
   - Automatically dim at night (scaled by dayProgress) so they complement the torch lighting rather than cluttering it
   - Positioned at depth 2, behind tiles but above the background, so they feel embedded in the world
   - Pairs with existing starfield, torch system, and day/night cycle to make the world feel genuinely atmospheric
-- Status: 🔄 Implemented. Awaiting commit.
+- Status: ✅ Pushed. Commit: `89cc2ab`
 
 ## 2026-05-11 — Chassis-Colored Player Sprites
 - **QoL/Visual:** Each mech chassis now has a distinct body color so your loadout choice is visible during gameplay
