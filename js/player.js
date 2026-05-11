@@ -94,6 +94,9 @@ class Player {
         // Falling wind trail — when dropping fast, streaks spawn behind the player
         this.fallTrailTimer = 0;
 
+        // Speed lines — streaks when running fast horizontally
+        this.speedLineTimer = 0;
+
         // Mining target preview outlines
         this.minePreview = scene.add.graphics();
         this.minePreview.setDepth(5);
@@ -313,6 +316,17 @@ class Player {
             }
         } else {
             this.walkDustTimer = 0;
+        }
+
+        // Speed lines when running fast horizontally
+        if (this.onGround && Math.abs(this.vx) > 120) {
+            this.speedLineTimer -= delta;
+            if (this.speedLineTimer <= 0) {
+                this.scene.spawnSpeedLines(this.x, this.y - this.height * 0.3, this.facingRight);
+                this.speedLineTimer = 50 + Math.random() * 60;
+            }
+        } else {
+            this.speedLineTimer = 0;
         }
 
         // Falling wind trail — streaks when dropping fast

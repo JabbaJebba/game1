@@ -1,5 +1,16 @@
 # Game Improvement Log
 
+## 2026-05-11 — Horizontal Speed Lines
+- **QoL/Game Feel:** Added thin white speed lines when running fast horizontally
+  - Triggers when |vx| > 120 (about 2/3 of max run speed) and player is on ground
+  - 2–3 thin horizontal streaks spawn behind the player, drifting opposite to facing direction
+  - Very short lifetime (100–180ms) with fast fade — subtle but adds a sense of momentum
+  - Spawn interval: 50–110ms while running fast, stops immediately when slowing or leaving ground
+  - Pairs with existing walk dust (at feet, gray) — speed lines are at body level and purely horizontal
+  - Purely visual: no gameplay, collision, or movement changes
+  - Follows the same pattern as the existing fall trail system for consistency
+- Status: ✅ Pushed. Commit: TBD
+
 ## 2026-05-11 — Run Stats: Max Depth Reached Tracker
 - **QoL/UI:** Added live max depth tracking to the run stats panel
   - Tracks the deepest point the player has reached during the current mining run

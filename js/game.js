@@ -800,6 +800,30 @@ class GameScene extends Phaser.Scene {
         }
     }
 
+    spawnSpeedLines(x, y, facingRight) {
+        // Thin horizontal streaks when running fast — sense of momentum
+        const count = 2 + Math.floor(Math.random() * 2);
+        for (let i = 0; i < count; i++) {
+            const w = 6 + Math.random() * 14;
+            const h = 1 + Math.random() * 2;
+            const drift = facingRight ? -1 : 1;
+            const py = y + (Math.random() - 0.5) * 24;
+            const px = x + drift * (18 + Math.random() * 12);
+            const particle = this.add.rectangle(px, py, w, h, 0xffffff);
+            particle.setDepth(1);
+            particle.setAlpha(0.18 + Math.random() * 0.12);
+            this.tweens.add({
+                targets: particle,
+                x: px + drift * (25 + Math.random() * 20),
+                alpha: 0,
+                scaleX: 0.1,
+                duration: 100 + Math.random() * 80,
+                ease: 'Power1',
+                onComplete: () => particle.destroy()
+            });
+        }
+    }
+
     spawnFallTrail(x, y, facingRight) {
         // Thin white streaks that drift opposite to facing direction
         const sizeW = 2 + Math.floor(Math.random() * 3);
