@@ -6,7 +6,7 @@
   - Drones keep fully random debris (no swing direction), which feels correct for floating autonomous tools
   - Same particle count, lifetime, and fade — purely a trajectory change, zero performance impact
   - Pairs with existing screen shake + recoil + tile flash to make each mine hit feel physically grounded
-- Status: ✅ Pushed. Commit: `TBD`
+- Status: ✅ Pushed. Commit: `8a698c2`
 
 ## 2026-05-12 — Ambient Dust Particles
 - **QoL/Atmosphere:** Added 35 tiny drifting dust motes to the mining scene
