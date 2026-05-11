@@ -1,5 +1,14 @@
 # Game Improvement Log
 
+## 2026-05-11 — Teleport Hotkey (T)
+- **QoL/UI:** Added keyboard shortcut 'T' to teleport back to ship from the mining scene
+  - Press 'T' at any time during a mining run to instantly return to the ship — no mouse required
+  - Useful when deep underground and needing a quick escape, or when fuel runs low
+  - Updated on-screen controls hint to include `T=Teleport` so players discover it naturally
+  - Uses `Phaser.Input.Keyboard.JustDown` so it only fires once per keypress, never accidental double-teleports
+  - Zero gameplay changes — purely a convenience shortcut for an existing function
+- Status: ✅ Pushed. Commit: `TBD`
+
 ## 2026-05-11 — Low-Fuel Teleport Button Urgency Pulse
 - **QoL/UI:** Added a pulsing red glow behind the TELEPORT button when player fuel drops below 5L
   - Red rectangle (142×40px) positioned behind the button with subtle pulsing alpha (0→25% fill, 0→70% stroke)
@@ -357,6 +366,7 @@
 - Status: ✅ Pushed. Commit: `acf60da`
 
 ## Completed
+- [x] Teleport hotkey — press T to instantly teleport back to ship from mining scene
 - [x] Falling wind trail — thin white streaks spawn behind the player when falling fast (vy > 250), drifting opposite to facing direction, 40-90ms spawn rate, 180-300ms fade
 - [x] Mine cooldown ring — circular arc around player showing mining cooldown progress, color shifts orange→green
 - [x] Idle breathing animation — character subtly bobs up/down when standing still on ground (±1.2px, ~3s cycle)

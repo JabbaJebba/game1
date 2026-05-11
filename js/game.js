@@ -61,6 +61,7 @@ class GameScene extends Phaser.Scene {
             mineLeft: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
             mineDown: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
             mineRight: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
+            teleport: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.T),
         };
 
         let spawnX = Math.floor(this.worldWidth / 2);
@@ -264,6 +265,11 @@ class GameScene extends Phaser.Scene {
             this.tileTooltip.setVisible(false);
         }
 
+        // Teleport hotkey
+        if (Phaser.Input.Keyboard.JustDown(this.keys.teleport)) {
+            this.teleportBack();
+        }
+
         this.timeOfDay += delta * 0.0001;
         const dayProgress = (Math.sin(this.timeOfDay) + 1) / 2;
         const darkness = 1 - dayProgress * 0.7;
@@ -289,7 +295,7 @@ class GameScene extends Phaser.Scene {
         this.stars.setAlpha(1 - dayProgress);
 
         this.infoText.setText(
-            `Controls: Arrows=Move, Space/W=Jump, A/D=Mine, S=Mine Down\n` +
+            `Controls: Arrows=Move, Space/W=Jump, A/D=Mine, S=Mine Down, T=Teleport\n` +
             `Time: ${dayProgress > 0.3 ? 'Day' : 'Night'} | ` +
             `Depth: ${depth}m | ` +
             `Fuel: ${this.player.fuel.toFixed(2)}L / ${this.player.maxFuel.toFixed(2)}L | ` +
