@@ -9,7 +9,7 @@
   - On ship save (launch, build, buy fuel, sell gems, queue jobs): flash appears immediately
   - Gives players confidence that their progress is safely persisted — no more silent saves
   - Zero gameplay changes, zero new assets, zero performance impact
-- Status: ✅ Pushed. Commit: TBD
+- Status: ✅ Pushed. Commit: `154d5c6`
 
 ## 2026-05-11 — Ship Scene Visual Fuel Bar
 - **QoL/UI:** Added a visual horizontal fuel bar to the ship command screen
