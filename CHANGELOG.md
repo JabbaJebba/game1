@@ -9,7 +9,7 @@
   - Pairs with existing landing dust particles to complete the jump arc: takeoff dust → fall trail → impact shake/thud/dust
   - Captures `impactVy` before velocity is zeroed so the true fall speed is preserved
   - Zero gameplay changes, zero new assets, zero collision changes
-- Status: ⏳ Commit pending
+- Status: ✅ Pushed. Commit: `842be25`
 
 ## 2026-05-11 — Teleport Hotkey (T)
 - **QoL/UI:** Added keyboard shortcut 'T' to teleport back to ship from the mining scene
