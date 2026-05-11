@@ -7,7 +7,7 @@
   - Both sounds are very low amplitude (0.08–0.1 gain) so they never grate; they provide clear audio contrast to successful mining sounds
   - Fires alongside existing visual feedback ("NO FUEL" floating text) so players get both channels of failure communication
   - Zero gameplay changes, zero new assets, zero performance impact
-- Status: ✅ Pushed. Commit: TBD
+- Status: ✅ Pushed. Commit: `c52ff5e`
 
 ## 2026-05-11 — Save Confirmation Flash
 - **QoL/UI:** Added a "💾 SAVED" flash notification that appears whenever the game auto-saves
