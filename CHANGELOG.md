@@ -1,3 +1,13 @@
+## 2026-05-12 — Ambient Dust Particles
+- **QoL/Atmosphere:** Added 35 tiny drifting dust motes to the mining scene
+  - Motes are 0.5–2px white circles with very low alpha (5%–20%), creating subtle atmospheric depth
+  - Each mote drifts slowly in its own random direction (horizontal bias), wrapping around world edges for an infinite field
+  - Alpha breathes via sine wave so motes softly appear and disappear — never static
+  - Automatically dim at night (scaled by dayProgress) so they complement the torch lighting rather than cluttering it
+  - Positioned at depth 2, behind tiles but above the background, so they feel embedded in the world
+  - Pairs with existing starfield, torch system, and day/night cycle to make the world feel genuinely atmospheric
+- Status: 🔄 Implemented. Awaiting commit.
+
 ## 2026-05-11 — Chassis-Colored Player Sprites
 - **QoL/Visual:** Each mech chassis now has a distinct body color so your loadout choice is visible during gameplay
   - **Scout:** Blue (`0x3498db`) — the original color, stays familiar for new players

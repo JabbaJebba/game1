@@ -216,6 +216,21 @@ class GameScene extends Phaser.Scene {
         this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         this.generateStars();
+
+        // Ambient dust particles — tiny motes drifting through the air
+        this.ambientDust = [];
+        for (let i = 0; i < 35; i++) {
+            const dx = Math.random() * this.worldWidth * this.tileSize;
+            const dy = Math.random() * this.worldHeight * this.tileSize;
+            const size = Math.random() * 1.5 + 0.5;
+            const mote = this.add.circle(dx, dy, size, 0xffffff, Math.random() * 0.15 + 0.05);
+            mote.setDepth(2);
+            mote.driftX = (Math.random() - 0.5) * 0.15;
+            mote.driftY = (Math.random() - 0.5) * 0.08;
+            mote.phase = Math.random() * Math.PI * 2;
+            mote.baseAlpha = Math.random() * 0.15 + 0.05;
+            this.ambientDust.push(mote);
+        }
     }
 
     showSaveFlash() {
@@ -337,6 +352,20 @@ class GameScene extends Phaser.Scene {
         this.cameras.main.setBackgroundColor(`rgb(${r},${g},${b})`);
 
         this.stars.setAlpha(1 - dayProgress);
+
+        // Ambient dust — drift, wrap, breathe, dim at night
+        this.ambientDust.forEach(mote => {
+            mote.x += mote.driftX;
+            mote.y += mote.driftY;
+            const worldW = this.worldWidth * this.tileSize;
+            const worldH = this.worldHeight * this.tileSize;
+            if (mote.x < 0) mote.x += worldW;
+            if (mote.x > worldW) mote.x -= worldW;
+            if (mote.y < 0) mote.y += worldH;
+            if (mote.y > worldH) mote.y -= worldH;
+            const breathe = Math.sin(time * 0.001 + mote.phase) * 0.5 + 0.5;
+            mote.setAlpha(mote.baseAlpha * breathe * (0.4 + 0.6 * dayProgress));
+        });
 
         this.infoText.setText(
             `Controls: Arrows=Move, Space/W=Jump, A/D=Mine, S=Mine Down, T=Teleport\n` +
