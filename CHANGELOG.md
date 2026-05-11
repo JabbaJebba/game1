@@ -1,5 +1,16 @@
 # Game Improvement Log
 
+## 2026-05-11 — Hard Landing Impact Feedback
+- **QoL/Game Feel:** Added camera shake + procedural thud sound when landing from a high fall
+  - Triggers when impact velocity exceeds 450 px/s — falls from ~4+ tiles or fast drops
+  - Camera shake: 80ms duration at 0.005 intensity — a brief, weighty jolt that sells the impact
+  - Procedural sound: lowpass-filtered noise at 120–400Hz, scaled by fall intensity (0.08–0.18s duration)
+  - Volume scales with fall speed: gentle drops barely whisper, long falls thud satisfyingly
+  - Pairs with existing landing dust particles to complete the jump arc: takeoff dust → fall trail → impact shake/thud/dust
+  - Captures `impactVy` before velocity is zeroed so the true fall speed is preserved
+  - Zero gameplay changes, zero new assets, zero collision changes
+- Status: ⏳ Commit pending
+
 ## 2026-05-11 — Teleport Hotkey (T)
 - **QoL/UI:** Added keyboard shortcut 'T' to teleport back to ship from the mining scene
   - Press 'T' at any time during a mining run to instantly return to the ship — no mouse required

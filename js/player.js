@@ -402,11 +402,16 @@ class Player {
         if (this.vy > 0) {
             for (let tx = left; tx <= right; tx++) {
                 if (this.world.isSolid(tx, feetRow)) {
+                    const impactVy = this.vy;
                     this.y = feetRow * 32;
                     this.vy = 0;
                     this.onGround = true;
                     if (!wasOnGround) {
                         this.scene.spawnLandingDust(this.x, this.y);
+                        if (impactVy > 450) {
+                            this.scene.cameras.main.shake(80, 0.005);
+                            this.scene.playLandingSound(impactVy);
+                        }
                     }
                     break;
                 }

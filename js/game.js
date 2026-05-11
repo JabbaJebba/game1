@@ -754,6 +754,35 @@ class GameScene extends Phaser.Scene {
         });
     }
 
+    playLandingSound(vy) {
+        if (!this.audioCtx) return;
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume().catch(() => {});
+        }
+        const ctx = this.audioCtx;
+        const now = ctx.currentTime;
+        const intensity = Math.min(1, (vy - 450) / 500);
+        const dur = 0.08 + intensity * 0.1;
+        const bufferSize = Math.floor(ctx.sampleRate * dur);
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize) * intensity;
+        }
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 120 + intensity * 280;
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.1 * intensity, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        noise.start();
+    }
+
     playDenialSound(reason) {
         if (!this.audioCtx) return;
         if (this.audioCtx.state === 'suspended') {
