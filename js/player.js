@@ -42,8 +42,15 @@ class Player {
         this.mineCooldown = 180;
         this.lastMineTime = 0;
 
+        const chassisColors = {
+            scout: 0x3498db,
+            miner: 0x27ae60,
+            heavy: 0xe74c3c,
+        };
+        const bodyColor = chassisColors[chassis] || chassisColors.scout;
+
         // Create graphics
-        this.sprite = scene.add.rectangle(this.x, this.y, this.width, this.height, 0x3498db);
+        this.sprite = scene.add.rectangle(this.x, this.y, this.width, this.height, bodyColor);
         this.sprite.setOrigin(0.5, 1);
 
         // Eyes to show direction

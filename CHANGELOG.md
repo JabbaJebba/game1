@@ -1,3 +1,12 @@
+## 2026-05-11 — Chassis-Colored Player Sprites
+- **QoL/Visual:** Each mech chassis now has a distinct body color so your loadout choice is visible during gameplay
+  - **Scout:** Blue (`0x3498db`) — the original color, stays familiar for new players
+  - **Miner:** Green (`0x27ae60`) — earthy, industrial feel fitting for a dedicated mining rig
+  - **Heavy:** Red (`0xe74c3c`) — aggressive, heavy-machinery vibe for the bulky chassis
+  - Eyes remain white/black across all chassis so facial expressions (blink, look direction) stay readable
+  - Purely visual — no gameplay, collision, or movement changes
+- Status: 🔄 In progress
+
 ## 2026-05-11 — Drone Mining: Full Feedback Suite
 - **QoL/Game Feel:** Drone mining now has the same visual and audio feedback as player mining
   - **Fixed:** `spawnMineFlash` was receiving pixel coordinates instead of tile coordinates — the flash now appears at the correct tile position
