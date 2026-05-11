@@ -18,6 +18,11 @@ class Player {
         this.width = size.w;
         this.height = size.h;
 
+        // Align 1-tile-wide characters to tile centers so they don't straddle boundaries
+        if (this.width === 32) {
+            this.x += 16;
+        }
+
         // Velocity
         this.vx = 0;
         this.vy = 0;
@@ -277,7 +282,9 @@ class Player {
         // Only snap when on ground, nearly stopped, and not holding movement keys
         const holdingMoveKey = keys.mineLeft.isDown || keys.left.isDown || keys.mineRight.isDown || keys.right.isDown;
         if (this.onGround && !holdingMoveKey && Math.abs(this.vx) < 5) {
-            const snapX = Math.round(this.x / 32) * 32;
+            // 1-tile characters snap to tile centers (+16), 2-tile to tile boundaries
+            const offset = this.width === 32 ? 16 : 0;
+            const snapX = Math.round((this.x - offset) / 32) * 32 + offset;
             if (Math.abs(snapX - this.x) > 0.5) {
                 const oldX = this.x;
                 this.x = snapX;
