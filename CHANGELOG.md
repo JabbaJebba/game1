@@ -8,7 +8,7 @@
   - Items arranged horizontally with 48px spacing; bar only appears when inventory is non-empty
   - Updates only when inventory actually changes (hash-based diffing) — no per-frame recreation waste
   - Clears the infoText from 3 cluttered lines down to 2 clean lines: controls + status
-- Status: ✅ Pushed. Commit: TBD
+- Status: ✅ Pushed. Commit: `0917b28`
 
 ## 2026-05-11 — Procedural Mining Sound Effects
 - **Audio/Game Feel:** Added synthesized mining sounds via Web Audio API (no external assets)
