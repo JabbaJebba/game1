@@ -7,7 +7,7 @@
   - Uses Phaser's built-in `cameras.main.fadeIn/fadeOut` with `camerafadeoutcomplete` event — zero custom animation code
   - Purely visual polish — no gameplay, collision, or timing changes; scenes remain functionally identical
   - Makes the game feel significantly more cohesive and professional by eliminating jarring instant cuts
-- Status: ✅ Pushed. Commit: `TBD`
+- Status: ✅ Pushed. Commit: `b9d8d9f`
 
 ## 2026-05-12 — Ship Scene Science Counter
 - **QoL/UI:** Added a live science total display to the ship command status bar
