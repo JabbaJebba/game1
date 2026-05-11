@@ -8,7 +8,7 @@
   - Completely invisible when fuel is healthy; only appears when it matters
   - Helps prevent players from getting stranded deep underground in the tight fuel economy
   - Zero gameplay changes, zero new assets, zero performance impact
-- Status: 🔄 Implementing
+- Status: ✅ Pushed. Commit: `c993abe`
 
 ## 2026-05-11 — Denial Sound Effects
 - **Audio/Game Feel:** Added distinct audio feedback for failed mining attempts using the existing Web Audio synthesizer
