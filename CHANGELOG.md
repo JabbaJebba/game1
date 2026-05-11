@@ -7,7 +7,7 @@
   - No indicator on empty/non-processing rooms — keeps the grid clean
   - Updates every frame, tied to the existing `update()` loop with zero extra overhead
   - Helps players see at a glance which machines are working without opening each room's panel
-- Status: 🔄 Pushing. Commit: TBD
+- Status: ✅ Pushed. Commit: `807586b`
 
 ## 2026-05-11 — Ship Room Hover Tooltips
 - **QoL/UI:** Added room name tooltips that appear when hovering over ship grid cells
