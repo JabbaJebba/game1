@@ -9,7 +9,7 @@
   - Pairs with existing walk dust (at feet, gray) — speed lines are at body level and purely horizontal
   - Purely visual: no gameplay, collision, or movement changes
   - Follows the same pattern as the existing fall trail system for consistency
-- Status: ✅ Pushed. Commit: TBD
+- Status: ✅ Pushed. Commit: `31bc748`
 
 ## 2026-05-11 — Run Stats: Max Depth Reached Tracker
 - **QoL/UI:** Added live max depth tracking to the run stats panel
