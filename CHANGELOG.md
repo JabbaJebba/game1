@@ -5,7 +5,7 @@
   - **Heavy:** Red (`0xe74c3c`) — aggressive, heavy-machinery vibe for the bulky chassis
   - Eyes remain white/black across all chassis so facial expressions (blink, look direction) stay readable
   - Purely visual — no gameplay, collision, or movement changes
-- Status: 🔄 In progress
+- Status: ✅ Pushed. Commit: `533127c`
 
 ## 2026-05-11 — Drone Mining: Full Feedback Suite
 - **QoL/Game Feel:** Drone mining now has the same visual and audio feedback as player mining
