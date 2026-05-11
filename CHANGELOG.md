@@ -7,7 +7,7 @@
   - Streak follows the player's position every frame so it stays anchored above the character
   - Purely visual — no gameplay, score, or reward mechanics attached; just satisfaction feedback
   - Pairs with existing cooldown ring, recoil, screen shake, and debris to make rapid mining feel genuinely rhythmic
-- Status: 🔄 Ready to push.
+- Status: ✅ Pushed. Commit: `d7e7b5d`
 
 # Game Improvement Log
 
