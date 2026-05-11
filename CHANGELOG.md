@@ -1,5 +1,15 @@
 # Game Improvement Log
 
+## 2026-05-11 — Ship Scene Visual Fuel Bar
+- **QoL/UI:** Added a visual horizontal fuel bar to the ship command screen
+  - Positioned just below the status text at the top-left (x=80, y=76)
+  - 220×10px bar with dark background and orange→red fill gradient matching the mining scene fuel bar
+  - Fill width scales with `shipFuel / shipFuelCapacity` — full tank = bright orange, nearly empty = deep red
+  - Updates live via `updateUI()` every time fuel or credits change (build, buy, return from mining)
+  - Pairs with the existing text readout (`⛽ 50.0 / 100.0L`) so players get both precise numbers and at-a-glance visual feedback
+  - Zero gameplay changes — purely informational consistency between mining and ship scenes
+- Status: ✅ Pushed. Commit: TBD
+
 ## 2026-05-11 — Processing Machine Status Indicators
 - **QoL/UI:** Added live status indicators on processing rooms (smelter, crusher, refinery) in the ship grid
   - Active jobs show a small green progress bar at the bottom of the room tile (fills in real-time)

@@ -103,6 +103,15 @@ class ShipScene extends Phaser.Scene {
             fontSize: '13px', fill: '#c9a84c', fontFamily: 'monospace'
         }).setOrigin(1, 0.5);
 
+        // Ship fuel bar — visual horizontal bar matching the mining scene fuel bar
+        const sBarX = 80;
+        const sBarY = 76;
+        const sBarW = 220;
+        const sBarH = 10;
+        this.shipFuelBarBg = this.add.rectangle(sBarX + sBarW / 2, sBarY, sBarW, sBarH, 0x1a1a2e).setOrigin(0.5);
+        this.shipFuelBarBg.setStrokeStyle(1, 0x444466);
+        this.shipFuelBarFill = this.add.rectangle(sBarX + 1, sBarY, sBarW - 2, sBarH - 2, 0xFF8C00).setOrigin(0, 0.5);
+
         // Thin separator
         const sep = this.add.graphics();
         sep.lineStyle(1, 0x111122, 1);
@@ -1713,6 +1722,13 @@ class ShipScene extends Phaser.Scene {
     updateUI() {
         this.statusFuel.setText(`⛽ ${this.shipFuel.toFixed(1)} / ${this.shipFuelCapacity.toFixed(1)}L  (~${Math.floor(this.shipFuel / 25)} runs)`);
         this.statusCredits.setText(`${this.credits.toLocaleString()} cr 💰`);
+        // Update ship fuel bar fill
+        const fuelPct = Math.max(0, Math.min(1, this.shipFuel / this.shipFuelCapacity));
+        const maxFillW = 218;
+        this.shipFuelBarFill.width = maxFillW * fuelPct;
+        const r = Math.floor(255);
+        const g = Math.floor(140 * fuelPct);
+        this.shipFuelBarFill.setFillStyle(Phaser.Display.Color.GetColor(r, g, 0));
     }
 
     calculatePower() {
