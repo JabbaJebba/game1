@@ -1,3 +1,14 @@
+## 2026-05-12 — Chassis Max Depth Gauge Marker
+- **QoL/UI:** Added a visual max-depth limit marker to the depth gauge
+  - Shows the operational depth limit of the current mech chassis as an orange tick mark on the depth gauge
+  - Positioned at `chassisMaxDepth / worldDepthRange` — a percentage marker, not an absolute block
+  - Small triangle arrow pointing right at the marker line for visibility
+  - When the player exceeds their chassis limit, the marker turns red and brightens — clear "you're past the safe zone" signal
+  - Only appears when the chassis limit is shallower than the world bottom (relevant for Scout/Miner; Heavy usually reaches bedrock)
+  - Zero gameplay enforcement — purely informational; the mech doesn't stop working, you just know you're outside design specs
+  - Renamed local `maxDepth` variable to `worldDepthRange` to avoid shadowing the chassis property
+- Status: 🔄 Committed, pushing...
+
 ## 2026-05-12 — Scene Transition Fades
 - **QoL/Polish:** Added smooth camera fade transitions between all scenes
   - **Fade in:** Every scene (Ship, Galaxy, Game) now fades in from black over 150ms when entering

@@ -396,8 +396,8 @@ class GameScene extends Phaser.Scene {
         }
 
         // Depth gauge — vertical bar on left edge showing depth progress
-        const maxDepth = Math.max(1, this.worldHeight - surfaceY);
-        const depthPct = Math.min(1, Math.max(0, depth / maxDepth));
+        const worldDepthRange = Math.max(1, this.worldHeight - surfaceY);
+        const depthPct = Math.min(1, Math.max(0, depth / worldDepthRange));
         this.depthGauge.clear();
         const gx = 16, gy = 200, gh = 280, gw = 10;
         // Background
@@ -414,6 +414,17 @@ class GameScene extends Phaser.Scene {
         const markerY = gy + gh - fillH;
         this.depthGauge.fillStyle(0xffffff, 1);
         this.depthGauge.fillRect(gx - 4, markerY - 1, gw + 8, 3);
+        // Chassis max depth limit marker
+        const chassisMaxDepth = this.maxDepth || 9999;
+        if (chassisMaxDepth < worldDepthRange) {
+            const maxPct = Math.min(1, Math.max(0, chassisMaxDepth / worldDepthRange));
+            const maxMarkerY = gy + gh - (gh * maxPct);
+            const exceeded = depth > chassisMaxDepth;
+            this.depthGauge.lineStyle(2, exceeded ? 0xff4444 : 0xffaa44, exceeded ? 0.9 : 0.6);
+            this.depthGauge.lineBetween(gx - 6, maxMarkerY, gx + gw + 6, maxMarkerY);
+            this.depthGauge.fillStyle(exceeded ? 0xff4444 : 0xffaa44, exceeded ? 0.9 : 0.6);
+            this.depthGauge.fillTriangle(gx - 6, maxMarkerY - 3, gx - 6, maxMarkerY + 3, gx + 2, maxMarkerY);
+        }
         // Hide label when at surface
         this.depthGaugeLabel.setAlpha(depth > 0 ? 1 : 0.3);
 
