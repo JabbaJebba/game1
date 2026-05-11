@@ -7,7 +7,7 @@
   - Duration scales with impact too: 100ms for tiny hops, up to ~200ms for heavy falls
   - Placed right after landing dust and before hard-landing shake/sound — completes the feedback chain
   - Zero gameplay changes, zero collision changes, purely visual animation on the existing body sprite
-- Status: ⏳ Pending push
+- Status: ✅ Pushed. Commit: `2fac621`
 
 ## 2026-05-12 — Directional Debris + Velocity Inheritance
 - **QoL/Game Feel:** Mining debris now flies in a coherent direction — opposite to the swing, with player velocity inheritance
