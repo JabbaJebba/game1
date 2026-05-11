@@ -183,6 +183,9 @@ class ShipScene extends Phaser.Scene {
         }).setOrigin(0.5, 1).setScrollFactor(0).setDepth(100);
         this.roomTooltip.setVisible(false);
 
+        // Processing status indicators — small animated dots on working machines
+        this.procIndicators = this.add.graphics().setDepth(3);
+
         this.calculatePower();
         this.updateUI();
         // Add modal click guard — prevents scene-level grid clicks from firing when clicking on popups
@@ -397,6 +400,32 @@ class ShipScene extends Phaser.Scene {
                 if (!room || room.masterX !== x || room.masterY !== y) continue;
                 if (!this.recipes[room.type]) continue;
                 this.processJobTick(room, now);
+            }
+        }
+
+        // Draw processing status indicators on working machines
+        this.procIndicators.clear();
+        for (let x = 0; x < this.gridW; x++) {
+            for (let y = 0; y < this.gridH; y++) {
+                const room = this.shipGrid[x][y];
+                if (!room || room.masterX !== x || room.masterY !== y) continue;
+                if (!this.recipes[room.type]) continue;
+                const queue = this.getQueue(room);
+                const px = this.gridOffsetX + x * this.tileSize;
+                const py = this.gridOffsetY + y * this.tileSize;
+                if (queue.currentJob) {
+                    const progress = Math.min(1, (now - queue.currentJob.startTime) / queue.currentJob.recipe.time);
+                    const barW = this.tileSize - 8;
+                    const barH = 3;
+                    this.procIndicators.fillStyle(0x1a1a2a, 0.7);
+                    this.procIndicators.fillRect(px + 4, py + this.tileSize - 8, barW, barH);
+                    this.procIndicators.fillStyle(0x44ff88, 0.9);
+                    this.procIndicators.fillRect(px + 4, py + this.tileSize - 8, barW * progress, barH);
+                } else if (queue.pending.length > 0) {
+                    const dotPulse = Math.abs(Math.sin(time * 0.003)) * 0.4 + 0.6;
+                    this.procIndicators.fillStyle(0xffcc44, dotPulse);
+                    this.procIndicators.fillCircle(px + this.tileSize - 8, py + 8, 3);
+                }
             }
         }
 

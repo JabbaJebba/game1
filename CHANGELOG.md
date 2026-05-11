@@ -1,5 +1,14 @@
 # Game Improvement Log
 
+## 2026-05-11 — Processing Machine Status Indicators
+- **QoL/UI:** Added live status indicators on processing rooms (smelter, crusher, refinery) in the ship grid
+  - Active jobs show a small green progress bar at the bottom of the room tile (fills in real-time)
+  - Queued-but-idle machines show a pulsing yellow dot in the top-right corner
+  - No indicator on empty/non-processing rooms — keeps the grid clean
+  - Updates every frame, tied to the existing `update()` loop with zero extra overhead
+  - Helps players see at a glance which machines are working without opening each room's panel
+- Status: 🔄 Pushing. Commit: TBD
+
 ## 2026-05-11 — Ship Room Hover Tooltips
 - **QoL/UI:** Added room name tooltips that appear when hovering over ship grid cells
   - Tooltip shows the room's icon + name (e.g., "☀ Solar Panel", "⚙ Refinery") positioned just above the hovered cell
