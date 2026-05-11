@@ -8,7 +8,7 @@
   - Helps players gauge their exploration progress and compare runs across different planets/chassis
   - Pairs nicely with the existing depth gauge — gauge shows current depth, run stats show the record for this session
   - Zero gameplay changes, zero new assets, zero performance impact
-- Status: ✅ Pushed. Commit: TBD
+- Status: ✅ Pushed. Commit: `af623d8`
 
 ## 2026-05-11 — Mech Configuration System + Drones + Science
 - **Major Feature:** Complete mech outfit system replacing direct galaxy launch
