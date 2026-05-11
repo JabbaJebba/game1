@@ -935,14 +935,17 @@ class ShipScene extends Phaser.Scene {
 
         } else if (room.type === 'crusher') {
             this.renderProcessingPanel(room, 'crusher', y);
+            this.roomPanel.setVisible(true);
             return;
 
         } else if (room.type === 'smelter') {
             this.renderProcessingPanel(room, 'smelter', y);
+            this.roomPanel.setVisible(true);
             return;
 
         } else if (room.type === 'refinery') {
             this.renderProcessingPanel(room, 'refinery', y);
+            this.roomPanel.setVisible(true);
             return;
 
         } else if (room.type === 'drill') {
