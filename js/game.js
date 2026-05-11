@@ -12,7 +12,7 @@ class GameScene extends Phaser.Scene {
         this.shipFuelCapacity = data.shipFuelCapacity !== undefined ? data.shipFuelCapacity : 100;
         this.rockType = data.rockType || { name: 'Stone' };
         this.rockCompositions = data.rockCompositions || {};
-        this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0 };
+        this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0, droneRangeLevel: 0 };
         this.processingQueues = data.processingQueues || {};
         this.mechState = data.mechState || {
             unlockedChassis: ['scout'],
@@ -403,22 +403,23 @@ class GameScene extends Phaser.Scene {
         }
 
         // ── Drone Update ──
+        const droneRange = 2 + (this.techState.droneRangeLevel || 0);
         this.droneSprites.forEach((drone, i) => {
             const angle = time * 0.002 + (i * Math.PI * 2 / this.droneSprites.length);
             const orbitRadius = 50 + Math.sin(time * 0.001 + i) * 10;
             drone.x = this.player.x + Math.cos(angle) * orbitRadius;
             drone.y = this.player.y - this.player.height / 2 + Math.sin(angle) * orbitRadius * 0.5;
 
-            // Drone mining logic — only if enough fuel (keep 2L reserve)
+            // Drone mining logic — mine around the player character, not the drone itself
             if (this.droneTimers[i] <= 0 && this.player.fuel > 2.0) {
-                const droneTileX = Math.floor(drone.x / 32);
-                const droneTileY = Math.floor(drone.y / 32);
+                const playerTileX = Math.floor(this.player.x / 32);
+                const playerTileY = Math.floor(this.player.y / 32);
                 let mined = false;
-                // Search within 5 tiles for valuable targets
-                for (let dy = -5; dy <= 5 && !mined; dy++) {
-                    for (let dx = -5; dx <= 5 && !mined; dx++) {
-                        const tx = droneTileX + dx;
-                        const ty = droneTileY + dy;
+                // Search within droneRange cells of the player for valuable targets
+                for (let dy = -droneRange; dy <= droneRange && !mined; dy++) {
+                    for (let dx = -droneRange; dx <= droneRange && !mined; dx++) {
+                        const tx = playerTileX + dx;
+                        const ty = playerTileY + dy;
                         if (tx < 0 || tx >= this.worldWidth || ty < 0 || ty >= this.worldHeight) continue;
                         const tile = this.world.getTile(tx, ty);
                         // Target gems and metal ores only, skip rock and air

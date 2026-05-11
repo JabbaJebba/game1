@@ -11,7 +11,7 @@ class GalaxyScene extends Phaser.Scene {
         this.shipFuelCapacity = data.shipFuelCapacity !== undefined ? data.shipFuelCapacity : 100;
         this.engineLevel = this.calculateEngineLevel();
         this.rockCompositions = data.rockCompositions || {};
-        this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0 };
+        this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0, droneRangeLevel: 0 };
         this.processingQueues = data.processingQueues || {};
         this.mechState = data.mechState || {
             unlockedChassis: ['scout'],

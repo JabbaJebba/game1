@@ -17,7 +17,7 @@ class ShipScene extends Phaser.Scene {
         this.shipFuel = data.shipFuel !== undefined ? data.shipFuel : 100;
         this.shipFuelCapacity = data.shipFuelCapacity !== undefined ? data.shipFuelCapacity : 100;
         this.rockCompositions = data.rockCompositions || {};
-        this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0 };
+        this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0, droneRangeLevel: 0 };
         this.processingQueues = data.processingQueues || {};
         this.mechState = data.mechState || {
             unlockedChassis: ['scout'],
@@ -162,6 +162,13 @@ class ShipScene extends Phaser.Scene {
                 { level: 8, cost: { credits: 128000 }, bonus: 1 },
                 { level: 9, cost: { credits: 256000 }, bonus: 1 },
                 { level: 10, cost: { credits: 512000 }, bonus: 1 },
+            ],
+            droneRange: [
+                { level: 1, cost: { credits: 5000 }, bonus: 1 },
+                { level: 2, cost: { credits: 10000 }, bonus: 1 },
+                { level: 3, cost: { credits: 20000 }, bonus: 1 },
+                { level: 4, cost: { credits: 40000 }, bonus: 1 },
+                { level: 5, cost: { credits: 80000 }, bonus: 1 },
             ]
         };
 
@@ -966,7 +973,8 @@ class ShipScene extends Phaser.Scene {
         } else if (room.type === 'drill') {
             this.roomPanelContent.setText(
                 `Fuel Tank Level: ${this.techState.fuelTankLevel || 0} / 6\n` +
-                `Efficiency Level: ${this.techState.efficiencyLevel || 0} / 10`
+                `Efficiency Level: ${this.techState.efficiencyLevel || 0} / 10\n` +
+                `Drone Range Level: ${this.techState.droneRangeLevel || 0} / 5`
             );
             const btn = this.createPanelButton(0, -ph / 2 + 190, 'OPEN TECH TREE', () => {
                 this.closeRoomControlsPanel();
@@ -1422,12 +1430,16 @@ class ShipScene extends Phaser.Scene {
             fontSize: '20px', fill: '#00d4aa', fontFamily: 'monospace', letterSpacing: 2
         }).setOrigin(0.5);
 
-        this.techFuelTab = this.add.rectangle(-90, -182, 160, 26, 0x1a1a28).setInteractive();
-        this.techFuelTabText = this.add.text(-90, -182, 'FUEL TANK', {
+        this.techFuelTab = this.add.rectangle(-150, -182, 130, 26, 0x1a1a28).setInteractive();
+        this.techFuelTabText = this.add.text(-150, -182, 'FUEL TANK', {
             fontSize: '11px', fill: '#cccccc', fontFamily: 'monospace'
         }).setOrigin(0.5);
-        this.techEffTab = this.add.rectangle(90, -182, 160, 26, 0x111118).setInteractive();
-        this.techEffTabText = this.add.text(90, -182, 'EFFICIENCY', {
+        this.techEffTab = this.add.rectangle(0, -182, 130, 26, 0x111118).setInteractive();
+        this.techEffTabText = this.add.text(0, -182, 'EFFICIENCY', {
+            fontSize: '11px', fill: '#666666', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+        this.techDroneTab = this.add.rectangle(150, -182, 130, 26, 0x111118).setInteractive();
+        this.techDroneTabText = this.add.text(150, -182, 'DRONE RANGE', {
             fontSize: '11px', fill: '#666666', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
@@ -1438,6 +1450,10 @@ class ShipScene extends Phaser.Scene {
         this.techEffTab.on('pointerdown', () => {
             this.justClickedModal = true;
             this.switchTechTab('efficiency');
+        });
+        this.techDroneTab.on('pointerdown', () => {
+            this.justClickedModal = true;
+            this.switchTechTab('droneRange');
         });
 
         this.techSubtitle = this.add.text(0, -152, '', {
@@ -1459,6 +1475,7 @@ class ShipScene extends Phaser.Scene {
         this.techPopup.add([
             this.techBg, this.techTitle, this.techSubtitle, this.techContent,
             this.techFuelTab, this.techFuelTabText, this.techEffTab, this.techEffTabText,
+            this.techDroneTab, this.techDroneTabText,
             closeBtn, closeTxt
         ]);
         this.techTab = 'fuelTank';
@@ -1466,17 +1483,20 @@ class ShipScene extends Phaser.Scene {
 
     switchTechTab(tab) {
         this.techTab = tab;
-        if (tab === 'fuelTank') {
-            this.techFuelTab.setFillStyle(0x1a1a28);
-            this.techFuelTabText.setFill('#cccccc');
-            this.techEffTab.setFillStyle(0x111118);
-            this.techEffTabText.setFill('#666666');
-        } else {
-            this.techFuelTab.setFillStyle(0x111118);
-            this.techFuelTabText.setFill('#666666');
-            this.techEffTab.setFillStyle(0x1a1a28);
-            this.techEffTabText.setFill('#cccccc');
-        }
+        const tabs = {
+            fuelTank: { btn: this.techFuelTab, text: this.techFuelTabText },
+            efficiency: { btn: this.techEffTab, text: this.techEffTabText },
+            droneRange: { btn: this.techDroneTab, text: this.techDroneTabText },
+        };
+        Object.entries(tabs).forEach(([key, { btn, text }]) => {
+            if (key === tab) {
+                btn.setFillStyle(0x1a1a28);
+                text.setFill('#cccccc');
+            } else {
+                btn.setFillStyle(0x111118);
+                text.setFill('#666666');
+            }
+        });
         this.openTechTreePopup();
     }
 
@@ -1491,10 +1511,14 @@ class ShipScene extends Phaser.Scene {
             const baseFuel = 25;
             const currentMax = baseFuel + currentLevel;
             this.techSubtitle.setText(`Fuel Tank: ${currentMax}L (base ${baseFuel}L + ${currentLevel})`);
-        } else {
+        } else if (branch === 'efficiency') {
             const baseCost = 50;
             const currentCost = Math.max(40, baseCost - currentLevel);
             this.techSubtitle.setText(`Efficiency: ${currentCost}ml/tile (base ${baseCost}ml − ${currentLevel})`);
+        } else if (branch === 'droneRange') {
+            const baseRange = 2;
+            const currentRange = baseRange + currentLevel;
+            this.techSubtitle.setText(`Drone Range: ${currentRange} cells (base ${baseRange} + ${currentLevel})`);
         }
 
         let y = -128;
@@ -1508,7 +1532,7 @@ class ShipScene extends Phaser.Scene {
 
             const statusText = isUnlocked ? '✓' : (isNext ? '→' : '−');
             const textColor = isUnlocked ? '#44aa66' : (isNext ? '#cccccc' : '#444444');
-            const bonusLabel = branch === 'fuelTank' ? `+${lvl.bonus}L` : `−${lvl.bonus}ml`;
+            const bonusLabel = branch === 'fuelTank' ? `+${lvl.bonus}L` : branch === 'efficiency' ? `−${lvl.bonus}ml` : `+${lvl.bonus} cell`;
 
             const label = this.add.text(-210, y, `Lv${lvl.level}  ${bonusLabel}`, {
                 fontSize: '12px', fill: textColor, fontFamily: 'monospace'
