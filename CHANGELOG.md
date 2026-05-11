@@ -1,3 +1,14 @@
+## 2026-05-12 — Player Ground Shadow
+- **QoL/Visual:** Added a subtle elliptical shadow beneath the player character to ground them in the world
+  - Shadow is a dark ellipse (`0x000000`, 22% alpha) sized to ~80% of character width
+  - Stays pinned to the ground at the player's feet while walking/standing
+  - When airborne, shadow shrinks in scale, fades in alpha, and drops slightly below — creating a sense of height
+  - `airFactor` scales from 1.0 (ground) down to ~0.35 at high jumps, making the shadow respond to vertical distance
+  - Follows mining recoil so it stays synced with body kickback
+  - Set to depth 0 so it renders behind tiles and the player sprite, avoiding visual clutter
+  - Purely visual — no gameplay, collision, or movement changes
+- Status: ✅ Pushed. Commit: `TBD`
+
 ## 2026-05-12 — Depth Milestone Notifications
 - **QoL/Game Feel:** Added floating text notifications when reaching depth milestones for the first time in a run
   - Milestones: 50m, 100m, 150m, 200m — each triggers once per mining run

@@ -53,6 +53,11 @@ class Player {
         this.sprite = scene.add.rectangle(this.x, this.y, this.width, this.height, bodyColor);
         this.sprite.setOrigin(0.5, 1);
 
+        // Shadow — small dark ellipse under the player for grounding
+        this.shadow = scene.add.ellipse(this.x, this.y + 2, this.width * 0.8, 8, 0x000000, 0.22);
+        this.shadow.setOrigin(0.5, 0.5);
+        this.shadow.setDepth(0); // behind everything
+
         // Eyes to show direction
         this.eyeLeft = scene.add.circle(this.x - 12, this.y - this.height + 18, 5, 0xffffff);
         this.eyeRight = scene.add.circle(this.x + 12, this.y - this.height + 18, 5, 0xffffff);
@@ -245,6 +250,21 @@ class Player {
         // Update sprite position
         this.sprite.x = this.x + this.mineRecoilX;
         this.sprite.y = this.y + breathY + this.mineRecoilY;
+
+        // Update shadow — stays at ground level, shrinks when airborne
+        this.shadow.x = this.x + this.mineRecoilX;
+        if (this.onGround) {
+            this.shadow.y = this.y + 2;
+            this.shadow.setAlpha(0.22);
+            this.shadow.scaleX = 1;
+        } else {
+            // Shadow shrinks and fades as player rises; offset follows height
+            const height = Math.max(0, -this.vy * 0.02); // rough height above ground
+            const airFactor = Math.max(0.35, 1 - height * 0.03);
+            this.shadow.y = this.y + 2 + height * 0.15;
+            this.shadow.setAlpha(0.22 * airFactor);
+            this.shadow.scaleX = airFactor;
+        }
 
         // Update eyes
         const eyeOffsetX = this.facingRight ? 3 : -3;
