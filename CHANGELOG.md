@@ -9,7 +9,7 @@
   - Does not interfere with build mode ghost preview — build mode takes priority and the tooltip is suppressed
   - Works on any tile of a multi-tile room (2×2 rooms show the same tooltip on all 4 cells)
   - Helps players quickly identify rooms without clicking, especially useful before learning the color/icon mapping
-- Status: ✅ Pushed. Commit: TBD
+- Status: ✅ Pushed. Commit: `d7578f6`
 
 ## 2026-05-11 — Compact Inventory Hotbar
 - **QoL/UI:** Replaced the cluttered `Inventory: ...` text line in infoText with a compact visual inventory hotbar at the bottom-left (x=10, y=655)
