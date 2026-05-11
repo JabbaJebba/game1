@@ -6,7 +6,7 @@
   - Updates in real-time via `updateUI()` — refreshes whenever any ship action triggers a UI refresh
   - Fills a genuine UI gap: science was being collected during runs with floating "+X SCIENCE" text but had no persistent visibility in the ship scene
   - Zero gameplay changes — purely informational, no new assets, zero performance impact
-- Status: ✅ Pushed. Commit: TBD
+- Status: ✅ Pushed. Commit: `3b0eaa8`
 
 ## 2026-05-12 — Player Ground Shadow
 - **QoL/Visual:** Added a subtle elliptical shadow beneath the player character to ground them in the world
