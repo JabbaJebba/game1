@@ -1,5 +1,15 @@
 # Game Improvement Log
 
+## 2026-05-11 — Compact Inventory Hotbar
+- **QoL/UI:** Replaced the cluttered `Inventory: ...` text line in infoText with a compact visual inventory hotbar at the bottom-left (x=10, y=655)
+  - Small 18×18 colored squares matching each item's tile color (copper = orange, iron = silver, gems = respective colors)
+  - 2-letter uppercase abbreviation below each square (CU, FE, AU, RU, SA, EM, DI, AM, plus rock type abbreviation)
+  - White count number to the right of each colored square, with dark stroke for readability
+  - Items arranged horizontally with 48px spacing; bar only appears when inventory is non-empty
+  - Updates only when inventory actually changes (hash-based diffing) — no per-frame recreation waste
+  - Clears the infoText from 3 cluttered lines down to 2 clean lines: controls + status
+- Status: ✅ Pushed. Commit: TBD
+
 ## 2026-05-11 — Procedural Mining Sound Effects
 - **Audio/Game Feel:** Added synthesized mining sounds via Web Audio API (no external assets)
   - Rock/Grass: low filtered noise crunch (~80ms, 500Hz lowpass, tapering amplitude)

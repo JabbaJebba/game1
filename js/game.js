@@ -157,6 +157,10 @@ class GameScene extends Phaser.Scene {
             stroke: '#000000', strokeThickness: 2
         }).setOrigin(1, 0).setScrollFactor(0);
 
+        // Inventory hotbar — compact visual item display at bottom-left
+        this.invBar = this.add.container(10, 655).setScrollFactor(0).setDepth(10);
+        this.lastInvHash = '';
+
         this.gemPrices = {
             'Ruby': 50, 'Sapphire': 75, 'Emerald': 100, 'Diamond': 200, 'Amethyst': 80,
         };
@@ -262,9 +266,15 @@ class GameScene extends Phaser.Scene {
             `Time: ${dayProgress > 0.3 ? 'Day' : 'Night'} | ` +
             `Depth: ${depth}m | ` +
             `Fuel: ${this.player.fuel.toFixed(2)}L / ${this.player.maxFuel.toFixed(2)}L | ` +
-            `Cost: ${((this.player.fuelCosts[this.world.TILE_ROCK] || 0.05) * 1000).toFixed(0)}ml\n` +
-            `Inventory: ${inventoryText || 'Empty'}`
+            `Cost: ${((this.player.fuelCosts[this.world.TILE_ROCK] || 0.05) * 1000).toFixed(0)}ml`
         );
+
+        // Update inventory hotbar if inventory changed
+        const invHash = this.getInventoryHash();
+        if (invHash !== this.lastInvHash) {
+            this.lastInvHash = invHash;
+            this.updateInventoryBar();
+        }
 
         // Depth gauge — vertical bar on left edge showing depth progress
         const maxDepth = Math.max(1, this.worldHeight - surfaceY);
@@ -322,6 +332,40 @@ class GameScene extends Phaser.Scene {
             `Value: ${runValue}cr\n` +
             `Time: ${timeStr}`
         );
+    }
+
+    getInventoryHash() {
+        return Object.entries(this.player.inventory)
+            .filter(([k, v]) => v > 0)
+            .map(([k, v]) => `${k}:${v}`)
+            .join('|');
+    }
+
+    updateInventoryBar() {
+        this.invBar.removeAll(true);
+        let x = 0;
+        const entries = Object.entries(this.player.inventory).filter(([k, v]) => v > 0);
+        if (entries.length === 0) return;
+        entries.forEach(([tileId, count]) => {
+            const tile = parseInt(tileId);
+            const color = this.tileColors[tile] || 0xffffff;
+            const name = this.getTileName(tile);
+            const short = name.replace(' Ore', '').substring(0, 2).toUpperCase();
+            // Item color square
+            const bg = this.add.rectangle(x + 8, 6, 18, 18, color).setOrigin(0);
+            bg.setStrokeStyle(1, 0x000000, 0.3);
+            // Count text to the right of the square
+            const countTxt = this.add.text(x + 28, 6, String(count), {
+                fontSize: '10px', fill: '#ffffff', fontFamily: 'monospace',
+                stroke: '#000000', strokeThickness: 2
+            }).setOrigin(0, 0);
+            // Abbreviation below the square
+            const label = this.add.text(x + 8, 26, short, {
+                fontSize: '8px', fill: '#aaaaaa', fontFamily: 'monospace'
+            }).setOrigin(0, 0);
+            this.invBar.add([bg, countTxt, label]);
+            x += 48;
+        });
     }
 
     getTileVariedColor(baseColor, x, y) {
