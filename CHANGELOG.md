@@ -1,5 +1,15 @@
 # Game Improvement Log
 
+## 2026-05-11 — Procedural Mining Sound Effects
+- **Audio/Game Feel:** Added synthesized mining sounds via Web Audio API (no external assets)
+  - Rock/Grass: low filtered noise crunch (~80ms, 500Hz lowpass, tapering amplitude)
+  - Metal ores (Cu, Fe, Au): bandpass noise at 1800Hz with sharp Q + descending triangle ping (1200→600Hz)
+  - Gems (Ruby, Sapphire, Emerald, Diamond, Amethyst): highpass noise at 2500Hz + bright ascending sine chime (880→1600Hz)
+  - Audio context auto-resumes if suspended (browser autoplay policy safe)
+  - Tied to every successful mine hit — sound fires before particles so the audio feedback is immediate
+  - Very low amplitude (0.06–0.14 gain) so it never dominates; subtle tactile reinforcement
+- Status: ✅ Pushed. Commit: TBD
+
 ## 2026-05-11 — Rock Type Subtitle + Tile Hover Tooltip
 - **QoL/UI:** Added rock type name subtitle under the planet name on the mining screen
   - Shows the current planet's rock type (Basalt, Granite, Obsidian, etc.) in small gray monospace text below the gold planet name

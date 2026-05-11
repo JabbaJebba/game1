@@ -438,6 +438,7 @@ class Player {
         this.world.setTile(tileX, tileY, this.world.TILE_AIR);
         this.addToInventory(tile);
         this.scene.updateTile(tileX, tileY);
+        this.scene.playMineSound(tile);
         
         // Track run statistics
         this.scene.runStats.tilesMined++;

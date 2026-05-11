@@ -161,6 +161,9 @@ class GameScene extends Phaser.Scene {
             'Ruby': 50, 'Sapphire': 75, 'Emerald': 100, 'Diamond': 200, 'Amethyst': 80,
         };
 
+        // Web Audio synthesizer for procedural sound effects (no external assets)
+        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
         this.generateStars();
     }
 
@@ -235,6 +238,15 @@ class GameScene extends Phaser.Scene {
         const darkness = 1 - dayProgress * 0.7;
         this.tileAlpha = 0.6 + dayProgress * 0.4; // tiles dim at night (0.6→1.0)
 
+        const inventoryText = Object.entries(this.player.inventory)
+            .map(([k, v]) => `${this.getTileName(parseInt(k))}: ${v}`)
+            .join(' | ');
+
+        const playerTileX = Math.max(0, Math.min(this.worldWidth - 1, Math.floor(this.player.x / 32)));
+        const surfaceY = this.world.getSurfaceY(playerTileX) || 0;
+        const depth = Math.max(0, Math.floor(this.player.y / 32) - surfaceY);
+        const depthColor = depth < 20 ? '#88ff88' : depth < 80 ? '#ffff44' : depth < 150 ? '#ffaa44' : '#ff4444';
+
         // Depth-based sky darkening — background fades to near-black as you go deeper underground
         const depthFactor = Math.min(1, depth / 200);
         const depthMult = 1 - depthFactor * 0.92;
@@ -244,15 +256,6 @@ class GameScene extends Phaser.Scene {
         this.cameras.main.setBackgroundColor(`rgb(${r},${g},${b})`);
 
         this.stars.setAlpha(1 - dayProgress);
-
-        const inventoryText = Object.entries(this.player.inventory)
-            .map(([k, v]) => `${this.getTileName(parseInt(k))}: ${v}`)
-            .join(' | ');
-
-        const playerTileX = Math.max(0, Math.min(this.worldWidth - 1, Math.floor(this.player.x / 32)));
-        const surfaceY = this.world.getSurfaceY(playerTileX) || 0;
-        const depth = Math.max(0, Math.floor(this.player.y / 32) - surfaceY);
-        const depthColor = depth < 20 ? '#88ff88' : depth < 80 ? '#ffff44' : depth < 150 ? '#ffaa44' : '#ff4444';
 
         this.infoText.setText(
             `Controls: Arrows=Move, Space/W=Jump, A/D=Mine, S=Mine Down\n` +
@@ -662,6 +665,68 @@ class GameScene extends Phaser.Scene {
             ease: 'Power1',
             onComplete: () => label.destroy()
         });
+    }
+
+    playMineSound(tile) {
+        if (!this.audioCtx) return;
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume().catch(() => {});
+        }
+        const ctx = this.audioCtx;
+        const isGem = tile === this.world.TILE_RUBY || tile === this.world.TILE_SAPPHIRE ||
+                      tile === this.world.TILE_EMERALD || tile === this.world.TILE_DIAMOND ||
+                      tile === this.world.TILE_AMETHYST;
+        const isMetal = tile === this.world.TILE_COPPER || tile === this.world.TILE_IRON || tile === this.world.TILE_GOLD;
+
+        const dur = isGem ? 0.12 : 0.08;
+        const bufferSize = Math.floor(ctx.sampleRate * dur);
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize); // tapering noise
+        }
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = isGem ? 'highpass' : (isMetal ? 'bandpass' : 'lowpass');
+        filter.frequency.value = isGem ? 2500 : (isMetal ? 1800 : 500);
+        filter.Q.value = isMetal ? 6 : 0.7;
+
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(isGem ? 0.14 : (isMetal ? 0.11 : 0.13), ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        noise.start();
+
+        if (isGem) {
+            const osc = ctx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1600, ctx.currentTime + 0.08);
+            const oscGain = ctx.createGain();
+            oscGain.gain.setValueAtTime(0.07, ctx.currentTime);
+            oscGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+            osc.connect(oscGain);
+            oscGain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.12);
+        } else if (isMetal) {
+            const osc = ctx.createOscillator();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(1200, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.06);
+            const oscGain = ctx.createGain();
+            oscGain.gain.setValueAtTime(0.06, ctx.currentTime);
+            oscGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+            osc.connect(oscGain);
+            oscGain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.08);
+        }
     }
 
     getTileName(tile) {
