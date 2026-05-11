@@ -6,7 +6,7 @@
   - Uses existing `showFloatText()` with optional fontSize parameter (added for this feature)
   - Purely visual — no gameplay, scoring, or reward mechanics; just celebrates deep diving
   - Pairs with existing depth gauge and run stats max-depth tracker to make exploration feel progressive
-- Status: ⏳ Pending push
+- Status: ✅ Pushed. Commit: `d6cd5db`
 
 ## 2026-05-12 — Landing Squash-and-Stretch
 - **QoL/Game Feel:** Added sprite squash-and-stretch animation on landing to sell the physical impact
