@@ -1,3 +1,13 @@
+## 2026-05-11 — Drone Mining: Full Feedback Suite
+- **QoL/Game Feel:** Drone mining now has the same visual and audio feedback as player mining
+  - **Fixed:** `spawnMineFlash` was receiving pixel coordinates instead of tile coordinates — the flash now appears at the correct tile position
+  - **Floating loot text:** `+1 Ruby`, `+1 Copper Ore`, etc. appears above tiles mined by drones, color-coded by resource type
+  - **Gem sparkles:** Drones trigger upward-floating colored sparkles when mining gem tiles
+  - **Metal sparks:** Bright white flash particles spawn on copper/iron/gold hits from drones
+  - **Procedural sound:** Mining sounds now fire for drone hits — gems chime, metals ping, everything crunches
+  - Zero gameplay changes — purely making drones feel as satisfying as swinging the drill yourself
+- Status: ✅ Pushed. Commit: `4d88e9c`
+
 ## 2026-05-11 — Mining Streak Counter
 - **QoL/Game Feel:** Added a combo streak counter that appears above the player when mining tiles in rapid succession
   - Counts consecutive mine swings within 800ms of each other — each swing increments by 1 regardless of how many tiles are mined
@@ -387,7 +397,7 @@
 - Particles match the tile color (rock, metal, gem)
 - 350-600ms lifetime with random trajectory and rotation
 - Commit: da365ff
-- Status: ✅ Pushed. Mining now has tactile visual feedback. Next: save/load system, sound, or auto-collect radius.
+- Status: ✅ Pushed. Mining now has tactile visual feedback. Next: debris particles, sound effects, or save system.
 
 ## 2026-05-09 — First Automated Update
 - Added screen shake on mining (60ms, intensity 0.004)

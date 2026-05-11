@@ -432,9 +432,19 @@ class GameScene extends Phaser.Scene {
                             const droneCost = 0.030;
                             this.player.fuel -= droneCost;
                             this.runStats.fuelUsed += droneCost;
-                            // Visual feedback
-                            this.spawnMineFlash(tx * 32 + 16, ty * 32 + 16);
+                            // Visual feedback — same full suite as player mining
+                            this.spawnMineFlash(tx, ty);
                             this.spawnDebris(tx, ty, this.tileColors[tile]);
+                            this.playMineSound(tile);
+                            const itemName = this.getTileName(tile);
+                            const itemColor = this.player.getItemColor(tile);
+                            this.showFloatText(tx * 32 + 16, ty * 32 - 8, `+1 ${itemName}`, itemColor);
+                            const isGem = tile === this.world.TILE_RUBY || tile === this.world.TILE_SAPPHIRE ||
+                                          tile === this.world.TILE_EMERALD || tile === this.world.TILE_DIAMOND ||
+                                          tile === this.world.TILE_AMETHYST;
+                            if (isGem) this.spawnGemSparkle(tx * 32 + 16, ty * 32 + 16, this.tileColors[tile]);
+                            const isMetal = tile === this.world.TILE_COPPER || tile === this.world.TILE_IRON || tile === this.world.TILE_GOLD;
+                            if (isMetal) this.spawnMetalSparks(tx, ty);
                             mined = true;
                         }
                     }
