@@ -467,6 +467,19 @@ class Player {
                     this.onGround = true;
                     if (!wasOnGround) {
                         this.scene.spawnLandingDust(this.x, this.y);
+                        // Squash-and-stretch on landing — more intense for harder impacts
+                        const squash = Math.min(0.3, Math.max(0, (impactVy - 150) / 1200));
+                        if (squash > 0.03) {
+                            this.sprite.scaleY = 1 - squash;
+                            this.sprite.scaleX = 1 + squash * 0.5;
+                            this.scene.tweens.add({
+                                targets: this.sprite,
+                                scaleY: 1,
+                                scaleX: 1,
+                                duration: 100 + squash * 300,
+                                ease: 'Back.easeOut',
+                            });
+                        }
                         if (impactVy > 450) {
                             this.scene.cameras.main.shake(80, 0.005);
                             this.scene.playLandingSound(impactVy);

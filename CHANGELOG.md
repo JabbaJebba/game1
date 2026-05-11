@@ -1,3 +1,14 @@
+## 2026-05-12 — Landing Squash-and-Stretch
+- **QoL/Game Feel:** Added sprite squash-and-stretch animation on landing to sell the physical impact
+  - Squash amount scales with impact velocity: gentle hops barely compress, hard falls noticeably squash
+  - Formula: `squash = min(0.3, max(0, (impactVy - 150) / 1200))` — starts at ~150 px/s, caps at 0.3× compression
+  - Horizontal stretch paired with vertical squash (scaleX = 1 + squash×0.5) preserves perceived volume
+  - Uses `Back.easeOut` tween so the sprite bounces back with a slight overshoot — springy, physical feel
+  - Duration scales with impact too: 100ms for tiny hops, up to ~200ms for heavy falls
+  - Placed right after landing dust and before hard-landing shake/sound — completes the feedback chain
+  - Zero gameplay changes, zero collision changes, purely visual animation on the existing body sprite
+- Status: ⏳ Pending push
+
 ## 2026-05-12 — Directional Debris + Velocity Inheritance
 - **QoL/Game Feel:** Mining debris now flies in a coherent direction — opposite to the swing, with player velocity inheritance
   - Left mine → debris bursts rightward; right mine → debris bursts leftward; down mine → debris sprays upward
