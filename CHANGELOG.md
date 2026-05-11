@@ -1,3 +1,14 @@
+## 2026-05-12 — Scene Transition Fades
+- **QoL/Polish:** Added smooth camera fade transitions between all scenes
+  - **Fade in:** Every scene (Ship, Galaxy, Game) now fades in from black over 150ms when entering
+  - **Fade out:** Every scene transition now fades to black over 150ms before switching
+  - Covers all 4 transition paths: Ship→Galaxy (mech config launch), Galaxy→Ship (back button), Galaxy→Game (planet launch), Game→Ship (teleport back)
+  - Teleport back preserves its existing 400ms save-flash delay — the fade begins after the flash is visible, then transitions
+  - Uses Phaser's built-in `cameras.main.fadeIn/fadeOut` with `camerafadeoutcomplete` event — zero custom animation code
+  - Purely visual polish — no gameplay, collision, or timing changes; scenes remain functionally identical
+  - Makes the game feel significantly more cohesive and professional by eliminating jarring instant cuts
+- Status: ✅ Pushed. Commit: `TBD`
+
 ## 2026-05-12 — Ship Scene Science Counter
 - **QoL/UI:** Added a live science total display to the ship command status bar
   - Positioned between fuel (left) and credits (right) at the top of the ship screen

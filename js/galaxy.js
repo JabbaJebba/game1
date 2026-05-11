@@ -40,17 +40,20 @@ class GalaxyScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         this.createButton(100, 40, '← BACK TO SHIP', () => {
-            this.scene.start('ShipScene', {
-                shipGrid: this.shipGrid,
-                shipInventory: this.shipInventory,
-                credits: this.credits,
-                shipFuel: this.shipFuel,
-                shipFuelCapacity: this.shipFuelCapacity,
-                rockCompositions: this.rockCompositions,
-                techState: this.techState,
-                processingQueues: this.processingQueues,
-                mechState: this.mechState,
-                launchTime: this.launchTime,
+            this.cameras.main.fadeOut(150, 0, 0, 0);
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                this.scene.start('ShipScene', {
+                    shipGrid: this.shipGrid,
+                    shipInventory: this.shipInventory,
+                    credits: this.credits,
+                    shipFuel: this.shipFuel,
+                    shipFuelCapacity: this.shipFuelCapacity,
+                    rockCompositions: this.rockCompositions,
+                    techState: this.techState,
+                    processingQueues: this.processingQueues,
+                    mechState: this.mechState,
+                    launchTime: this.launchTime,
+                });
             });
         }, 180, 36);
 
@@ -123,6 +126,8 @@ class GalaxyScene extends Phaser.Scene {
         this.infoPanel = this.add.text(860, 280, 'Select a planet', {
             fontSize: '14px', fill: '#aaaaaa', wordWrap: { width: 300 }
         });
+
+        this.cameras.main.fadeIn(150, 0, 0, 0);
     }
 
     selectPlanet(planet) {
@@ -149,19 +154,22 @@ class GalaxyScene extends Phaser.Scene {
             }
             // Store composition for this rock type
             this.rockCompositions[rt.name] = { ...rt };
-            this.scene.start('GameScene', {
-                planet: planet,
-                shipGrid: this.shipGrid,
-                shipInventory: this.shipInventory,
-                credits: this.credits,
-                shipFuel: this.shipFuel,
-                shipFuelCapacity: this.shipFuelCapacity,
-                rockType: rt,
-                rockCompositions: this.rockCompositions,
-                techState: this.techState,
-                processingQueues: this.processingQueues,
-                mechState: this.mechState,
-                launchTime: this.launchTime,
+            this.cameras.main.fadeOut(150, 0, 0, 0);
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                this.scene.start('GameScene', {
+                    planet: planet,
+                    shipGrid: this.shipGrid,
+                    shipInventory: this.shipInventory,
+                    credits: this.credits,
+                    shipFuel: this.shipFuel,
+                    shipFuelCapacity: this.shipFuelCapacity,
+                    rockType: rt,
+                    rockCompositions: this.rockCompositions,
+                    techState: this.techState,
+                    processingQueues: this.processingQueues,
+                    mechState: this.mechState,
+                    launchTime: this.launchTime,
+                });
             });
         }, 200, 50);
     }

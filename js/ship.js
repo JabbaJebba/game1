@@ -96,6 +96,8 @@ class ShipScene extends Phaser.Scene {
         this.frameGraphics.lineBetween(fx + fw - 20, fy + fh, fx + fw, fy + fh);
         this.frameGraphics.lineBetween(fx + fw, fy + fh - 20, fx + fw, fy + fh);
 
+        this.cameras.main.fadeIn(150, 0, 0, 0);
+
         // Title
         this.add.text(640, 28, 'SHIP COMMAND', {
             fontSize: '16px', fill: '#445566', fontFamily: 'monospace', letterSpacing: 6
@@ -2048,14 +2050,17 @@ class ShipScene extends Phaser.Scene {
             this.closeMechConfigModal();
             this.launchTime = Date.now();
             this.saveGame();
-            this.scene.start('GalaxyScene', {
-                shipGrid: this.shipGrid, shipInventory: this.shipInventory,
-                credits: this.credits, shipFuel: this.shipFuel, shipFuelCapacity: this.shipFuelCapacity,
-                rockCompositions: this.rockCompositions,
-                techState: this.techState,
-                processingQueues: this.processingQueues,
-                mechState: this.mechState,
-                launchTime: this.launchTime,
+            this.cameras.main.fadeOut(150, 0, 0, 0);
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                this.scene.start('GalaxyScene', {
+                    shipGrid: this.shipGrid, shipInventory: this.shipInventory,
+                    credits: this.credits, shipFuel: this.shipFuel, shipFuelCapacity: this.shipFuelCapacity,
+                    rockCompositions: this.rockCompositions,
+                    techState: this.techState,
+                    processingQueues: this.processingQueues,
+                    mechState: this.mechState,
+                    launchTime: this.launchTime,
+                });
             });
         });
         this.mechContent.add([launchBtn, launchTxt]);

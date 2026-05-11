@@ -231,6 +231,8 @@ class GameScene extends Phaser.Scene {
             mote.baseAlpha = Math.random() * 0.15 + 0.05;
             this.ambientDust.push(mote);
         }
+
+        this.cameras.main.fadeIn(150, 0, 0, 0);
     }
 
     showSaveFlash() {
@@ -285,18 +287,20 @@ class GameScene extends Phaser.Scene {
 
         // Brief delay so the flash is visible before transition
         this.time.delayedCall(400, () => {
-            // Return to ship scene
-            this.scene.start('ShipScene', {
-                shipGrid: this.shipGrid,
-                shipInventory: this.shipInventory,
-                credits: this.credits,
-                shipFuel: this.shipFuel,
-                shipFuelCapacity: this.shipFuelCapacity,
-                rockCompositions: this.rockCompositions,
-                techState: this.techState,
-                processingQueues: this.processingQueues,
-                mechState: this.mechState,
-                launchTime: this.launchTime,
+            this.cameras.main.fadeOut(150, 0, 0, 0);
+            this.cameras.main.once('camerafadeoutcomplete', () => {
+                this.scene.start('ShipScene', {
+                    shipGrid: this.shipGrid,
+                    shipInventory: this.shipInventory,
+                    credits: this.credits,
+                    shipFuel: this.shipFuel,
+                    shipFuelCapacity: this.shipFuelCapacity,
+                    rockCompositions: this.rockCompositions,
+                    techState: this.techState,
+                    processingQueues: this.processingQueues,
+                    mechState: this.mechState,
+                    launchTime: this.launchTime,
+                });
             });
         });
     }
