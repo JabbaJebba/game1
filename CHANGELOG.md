@@ -1,5 +1,26 @@
 # Game Improvement Log
 
+## 2026-05-11 — Mech Configuration System + Drones + Science
+- **Major Feature:** Complete mech outfit system replacing direct galaxy launch
+  - Clicking LAUNCH now opens a **Mech Configuration** modal before departure
+  - Three chassis types with distinct stats:
+    - **Scout** (1×2 tiles, 15L fuel, 180m max depth, 2 module slots) — free starting chassis
+    - **Miner** (2×2 tiles, 25L fuel, 350m max depth, 3 slots) — unlock for 500cr
+    - **Heavy** (2×3 tiles, 40L fuel, 700m max depth, 4 slots) — unlock for 500cr
+  - **Modules:** Fuel Tank (+10L capacity) and Drone (auto-mines within 5 tiles, 30ml/cost)
+  - Loadout persists across sessions via `mechState` in save data
+- **Drones:** Small orbiting robots that automatically mine gems and ore near the player
+  - One drone per module slot consumed; invincible (no health system)
+  - Respects 2L fuel reserve — stops mining if player fuel drops too low
+  - Visual: light blue 8×8 squares orbiting the player at varying radius
+- **Science Collection:** Per-planet-type research at depth milestones
+  - 30m = 5 science, 60m = 8 science, 100m = 12 science
+  - Each planet/asteroid type tracks its own science pool
+  - Visual notification: floating green "+X SCIENCE" text when milestones reached
+- **Chassis affects gameplay:** Player sprite size, fuel burn rate (30/50/75ml per tile), and max depth all change based on selected chassis
+- **Files touched:** `js/ship.js` (modal UI + launch flow), `js/game.js` (drones + science), `js/player.js` (chassis size + fuel burn), `js/galaxy.js` (pass mechState)
+- Status: ✅ Pushed. Commit: `4c23bb9`
+
 ## 2026-05-11 — Hard Landing Impact Feedback
 - **QoL/Game Feel:** Added camera shake + procedural thud sound when landing from a high fall
   - Triggers when impact velocity exceeds 450 px/s — falls from ~4+ tiles or fast drops
