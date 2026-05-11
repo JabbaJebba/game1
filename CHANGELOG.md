@@ -7,7 +7,7 @@
   - Only appears when the chassis limit is shallower than the world bottom (relevant for Scout/Miner; Heavy usually reaches bedrock)
   - Zero gameplay enforcement — purely informational; the mech doesn't stop working, you just know you're outside design specs
   - Renamed local `maxDepth` variable to `worldDepthRange` to avoid shadowing the chassis property
-- Status: 🔄 Committed, pushing...
+- Status: ✅ Pushed. Commit: `8906e42`
 
 ## 2026-05-12 — Scene Transition Fades
 - **QoL/Polish:** Added smooth camera fade transitions between all scenes
