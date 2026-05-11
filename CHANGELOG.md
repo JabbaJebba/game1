@@ -8,7 +8,7 @@
   - Updates live via `updateUI()` every time fuel or credits change (build, buy, return from mining)
   - Pairs with the existing text readout (`⛽ 50.0 / 100.0L`) so players get both precise numbers and at-a-glance visual feedback
   - Zero gameplay changes — purely informational consistency between mining and ship scenes
-- Status: ✅ Pushed. Commit: TBD
+- Status: ✅ Pushed. Commit: `787397f`
 
 ## 2026-05-11 — Processing Machine Status Indicators
 - **QoL/UI:** Added live status indicators on processing rooms (smelter, crusher, refinery) in the ship grid
