@@ -1,3 +1,14 @@
+## 2026-05-11 — Mining Streak Counter
+- **QoL/Game Feel:** Added a combo streak counter that appears above the player when mining tiles in rapid succession
+  - Counts consecutive mine swings within 800ms of each other — each swing increments by 1 regardless of how many tiles are mined
+  - Displays as `×2`, `×3`, etc. above the character, growing slightly larger and shifting from white → yellow → orange → red as the streak builds
+  - Text scales up to 1.5× at high streaks and gets a warm color shift to reward rapid drilling rhythm
+  - Fades out 150ms before the 900ms streak window expires, giving a soft disappearance
+  - Streak follows the player's position every frame so it stays anchored above the character
+  - Purely visual — no gameplay, score, or reward mechanics attached; just satisfaction feedback
+  - Pairs with existing cooldown ring, recoil, screen shake, and debris to make rapid mining feel genuinely rhythmic
+- Status: 🔄 Ready to push.
+
 # Game Improvement Log
 
 ## 2026-05-11 — Horizontal Speed Lines

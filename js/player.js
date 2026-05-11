@@ -102,6 +102,12 @@ class Player {
         // Speed lines — streaks when running fast horizontally
         this.speedLineTimer = 0;
 
+        // Mining streak counter
+        this.miningStreak = 0;
+        this.streakText = null;
+        this.streakTimer = 0;
+        this.streakedThisSwing = false;
+
         // Mining target preview outlines
         this.minePreview = scene.add.graphics();
         this.minePreview.setDepth(5);
@@ -186,6 +192,7 @@ class Player {
             if (minedAny) {
                 this.showMineIndicator(mineX * 32 + 16, (top + bottom) / 2 * 32 + 16, 32, 96);
                 this.lastMineTime = now;
+                this.streakedThisSwing = false;
                 this.isMining = true;
             }
         }
@@ -201,6 +208,7 @@ class Player {
             if (minedAny) {
                 this.showMineIndicator(mineX * 32 + 16, (top + bottom) / 2 * 32 + 16, 32, 96);
                 this.lastMineTime = now;
+                this.streakedThisSwing = false;
                 this.isMining = true;
             }
         }
@@ -217,6 +225,7 @@ class Player {
             if (minedAny) {
                 this.showMineIndicator((left + right) / 2 * 32 + 16, mineY * 32 + 16, 64, 32);
                 this.lastMineTime = now;
+                this.streakedThisSwing = false;
                 this.isMining = true;
             }
         }
@@ -390,6 +399,21 @@ class Player {
             this.cooldownRing.arc(cx, cy, radius, startAngle, endAngle);
             this.cooldownRing.strokePath();
         }
+
+        // Mining streak — fade out and follow player
+        this.streakTimer -= delta;
+        if (this.streakTimer <= 0) {
+            this.miningStreak = 0;
+            this.streakedThisSwing = false;
+            if (this.streakText) {
+                this.streakText.destroy();
+                this.streakText = null;
+            }
+        } else if (this.streakText) {
+            this.streakText.x = this.x;
+            this.streakText.y = this.y - this.height - 24;
+            this.streakText.setAlpha(Math.min(1, this.streakTimer / 150));
+        }
     }
 
     getTileBounds() {
@@ -507,7 +531,28 @@ class Player {
         if (isMetal) {
             this.scene.spawnMetalSparks(tileX, tileY);
         }
-        
+
+        // Streak tracking — only count once per swing
+        if (!this.streakedThisSwing) {
+            const t = this.scene.time.now;
+            if (t - this.lastMineTime < 800) {
+                this.miningStreak++;
+            } else {
+                this.miningStreak = 1;
+            }
+            this.streakTimer = 900;
+            if (this.streakText) this.streakText.destroy();
+            if (this.miningStreak > 1) {
+                const s = Math.min(1.5, 1 + (this.miningStreak - 1) * 0.05);
+                const colors = ['#ffffff', '#ffffcc', '#ffdd66', '#ffaa44', '#ff6644', '#ff2244'];
+                const c = colors[Math.min(this.miningStreak - 2, colors.length - 1)];
+                this.streakText = this.scene.add.text(this.x, this.y - this.height - 24, `×${this.miningStreak}`, {
+                    fontSize: `${12 * s}px`, fill: c, fontFamily: 'monospace', stroke: '#000000', strokeThickness: 2
+                }).setOrigin(0.5).setDepth(10);
+            }
+            this.streakedThisSwing = true;
+        }
+
         return true;
     }
 
