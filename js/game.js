@@ -120,6 +120,11 @@ class GameScene extends Phaser.Scene {
         this.teleportBtn.on('pointerover', () => this.teleportBtn.setStyle({ fill: '#FF6666' }));
         this.teleportBtn.on('pointerout', () => this.teleportBtn.setStyle({ fill: '#FF4444' }));
 
+        // Low-fuel urgency pulse behind teleport button
+        this.teleportBtnPulse = this.add.rectangle(1100, 20, 142, 40, 0xff0000, 0).setScrollFactor(0);
+        this.teleportBtnPulse.setStrokeStyle(0);
+        this.teleportBtn.setDepth(1);
+
         // Planet name display
         this.planetText = this.add.text(640, 20, this.planet.name.toUpperCase(), {
             fontSize: '18px',
@@ -335,6 +340,16 @@ class GameScene extends Phaser.Scene {
         } else {
             this.fuelBarBg.setStrokeStyle(2, 0x444466);
             this.fuelBarText.setColor('#ffffff');
+        }
+
+        // Low-fuel teleport button urgency glow
+        if (this.player.fuel < 5) {
+            const tpPulse = Math.abs(Math.sin(time * 0.008));
+            this.teleportBtnPulse.setFillStyle(0xff2200, tpPulse * 0.25);
+            this.teleportBtnPulse.setStrokeStyle(2, 0xff4444, tpPulse * 0.7);
+        } else {
+            this.teleportBtnPulse.setFillStyle(0xff2200, 0);
+            this.teleportBtnPulse.setStrokeStyle(0);
         }
 
         // Run stats display — compact corner panel tracking session efficiency

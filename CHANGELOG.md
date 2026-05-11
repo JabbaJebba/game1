@@ -1,5 +1,15 @@
 # Game Improvement Log
 
+## 2026-05-11 — Low-Fuel Teleport Button Urgency Pulse
+- **QoL/UI:** Added a pulsing red glow behind the TELEPORT button when player fuel drops below 5L
+  - Red rectangle (142×40px) positioned behind the button with subtle pulsing alpha (0→25% fill, 0→70% stroke)
+  - Activates at <5L fuel — a clear visual nudge before the critical <2L fuel-bar pulse kicks in
+  - Sine-wave timing (speed=0.008) for a smooth, organic heartbeat feel — not jarring
+  - Completely invisible when fuel is healthy; only appears when it matters
+  - Helps prevent players from getting stranded deep underground in the tight fuel economy
+  - Zero gameplay changes, zero new assets, zero performance impact
+- Status: 🔄 Implementing
+
 ## 2026-05-11 — Denial Sound Effects
 - **Audio/Game Feel:** Added distinct audio feedback for failed mining attempts using the existing Web Audio synthesizer
   - **Bedrock hit:** Sharp metallic clink (triangle wave, 180→80Hz, 80ms) — hitting impenetrable rock feels like striking metal, not muffled silence
