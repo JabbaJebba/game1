@@ -1,5 +1,15 @@
 # Game Improvement Log
 
+## 2026-05-11 — Run Stats: Max Depth Reached Tracker
+- **QoL/UI:** Added live max depth tracking to the run stats panel
+  - Tracks the deepest point the player has reached during the current mining run
+  - Updates in real-time — every frame checks current depth and updates the max if deeper
+  - Displayed as `Max: Xm` on the fourth line of the run stats panel (top-right corner)
+  - Helps players gauge their exploration progress and compare runs across different planets/chassis
+  - Pairs nicely with the existing depth gauge — gauge shows current depth, run stats show the record for this session
+  - Zero gameplay changes, zero new assets, zero performance impact
+- Status: ✅ Pushed. Commit: TBD
+
 ## 2026-05-11 — Mech Configuration System + Drones + Science
 - **Major Feature:** Complete mech outfit system replacing direct galaxy launch
   - Clicking LAUNCH now opens a **Mech Configuration** modal before departure

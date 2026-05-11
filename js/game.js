@@ -198,7 +198,7 @@ class GameScene extends Phaser.Scene {
         this.stars = this.add.graphics();
 
         // Run statistics — track efficiency of current mining run
-        this.runStats = { tilesMined: 0, fuelUsed: 0, startTime: Date.now() };
+        this.runStats = { tilesMined: 0, fuelUsed: 0, startTime: Date.now(), maxDepthReached: 0 };
         this.runStatsText = this.add.text(1100, 55, '', {
             fontSize: '12px', fill: '#aabbcc', fontFamily: 'monospace',
             stroke: '#000000', strokeThickness: 2
@@ -326,6 +326,7 @@ class GameScene extends Phaser.Scene {
         const surfaceY = this.world.getSurfaceY(playerTileX) || 0;
         const depth = Math.max(0, Math.floor(this.player.y / 32) - surfaceY);
         const depthColor = depth < 20 ? '#88ff88' : depth < 80 ? '#ffff44' : depth < 150 ? '#ffaa44' : '#ff4444';
+        this.runStats.maxDepthReached = Math.max(this.runStats.maxDepthReached, depth);
 
         // Depth-based sky darkening — background fades to near-black as you go deeper underground
         const depthFactor = Math.min(1, depth / 200);
@@ -476,6 +477,7 @@ class GameScene extends Phaser.Scene {
             `Mined: ${this.runStats.tilesMined}\n` +
             `Fuel: ${this.runStats.fuelUsed.toFixed(2)}L\n` +
             `Value: ${runValue}cr\n` +
+            `Max: ${this.runStats.maxDepthReached}m\n` +
             `Time: ${timeStr}`
         );
     }
