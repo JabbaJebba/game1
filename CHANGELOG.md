@@ -1,3 +1,13 @@
+## 2026-05-12 — Ship Scene Science Counter
+- **QoL/UI:** Added a live science total display to the ship command status bar
+  - Positioned between fuel (left) and credits (right) at the top of the ship screen
+  - Sums all per-planet-type science collected in `mechState.science` into a single readable number
+  - Cyan/teal (`#00d4aa`) color with 🔬 icon for clear visual distinction from fuel (orange) and credits (gold)
+  - Updates in real-time via `updateUI()` — refreshes whenever any ship action triggers a UI refresh
+  - Fills a genuine UI gap: science was being collected during runs with floating "+X SCIENCE" text but had no persistent visibility in the ship scene
+  - Zero gameplay changes — purely informational, no new assets, zero performance impact
+- Status: ✅ Pushed. Commit: TBD
+
 ## 2026-05-12 — Player Ground Shadow
 - **QoL/Visual:** Added a subtle elliptical shadow beneath the player character to ground them in the world
   - Shadow is a dark ellipse (`0x000000`, 22% alpha) sized to ~80% of character width

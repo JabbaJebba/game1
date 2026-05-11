@@ -105,6 +105,9 @@ class ShipScene extends Phaser.Scene {
         this.statusFuel = this.add.text(80, 60, '', {
             fontSize: '13px', fill: '#cc8844', fontFamily: 'monospace'
         }).setOrigin(0, 0.5);
+        this.statusScience = this.add.text(640, 60, '', {
+            fontSize: '13px', fill: '#00d4aa', fontFamily: 'monospace'
+        }).setOrigin(0.5, 0.5);
         this.statusCredits = this.add.text(1200, 60, '', {
             fontSize: '13px', fill: '#c9a84c', fontFamily: 'monospace'
         }).setOrigin(1, 0.5);
@@ -1763,6 +1766,8 @@ class ShipScene extends Phaser.Scene {
 
     updateUI() {
         this.statusFuel.setText(`⛽ ${this.shipFuel.toFixed(1)} / ${this.shipFuelCapacity.toFixed(1)}L  (~${Math.floor(this.shipFuel / 25)} runs)`);
+        const totalScience = Object.values(this.mechState.science || {}).reduce((a, b) => a + (b || 0), 0);
+        this.statusScience.setText(`🔬 ${totalScience} SCIENCE`);
         this.statusCredits.setText(`${this.credits.toLocaleString()} cr 💰`);
         // Update ship fuel bar fill
         const fuelPct = Math.max(0, Math.min(1, this.shipFuel / this.shipFuelCapacity));
