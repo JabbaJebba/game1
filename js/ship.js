@@ -175,6 +175,14 @@ class ShipScene extends Phaser.Scene {
         this.createGhostGraphics();
         this.createResetConfirmPopup();
 
+        // Room hover tooltip — shows room name when hovering over ship grid cells
+        this.roomTooltip = this.add.text(0, 0, '', {
+            fontSize: '11px', fill: '#ffffff', fontFamily: 'monospace',
+            stroke: '#000000', strokeThickness: 2, backgroundColor: '#00000088',
+            padding: { x: 4, y: 2 }
+        }).setOrigin(0.5, 1).setScrollFactor(0).setDepth(100);
+        this.roomTooltip.setVisible(false);
+
         this.calculatePower();
         this.updateUI();
         // Add modal click guard — prevents scene-level grid clicks from firing when clicking on popups
@@ -508,36 +516,57 @@ class ShipScene extends Phaser.Scene {
     }
 
     handleGridHover(pointer) {
-        if (!this.buildMode || !this.selectedRoom) return;
-        const gx = Math.floor((pointer.x - this.gridOffsetX) / this.tileSize);
-        const gy = Math.floor((pointer.y - this.gridOffsetY) / this.tileSize);
-        this.ghostGraphics.clear();
-        if (this.ghostIcon) { this.ghostIcon.destroy(); this.ghostIcon = null; }
-        if (gx < 0 || gx >= this.gridW || gy < 0 || gy >= this.gridH) return;
+        if (this.buildMode && this.selectedRoom) {
+            const gx = Math.floor((pointer.x - this.gridOffsetX) / this.tileSize);
+            const gy = Math.floor((pointer.y - this.gridOffsetY) / this.tileSize);
+            this.ghostGraphics.clear();
+            if (this.ghostIcon) { this.ghostIcon.destroy(); this.ghostIcon = null; }
+            if (gx < 0 || gx >= this.gridW || gy < 0 || gy >= this.gridH) return;
 
-        const def = this.roomTypes[this.selectedRoom];
-        const size = def.size;
-        let valid = true;
-        if (gx + size > this.gridW || gy + size > this.gridH) valid = false;
-        else {
-            for (let dx = 0; dx < size; dx++) {
-                for (let dy = 0; dy < size; dy++) {
-                    if (this.shipGrid[gx + dx][gy + dy]) valid = false;
+            const def = this.roomTypes[this.selectedRoom];
+            const size = def.size;
+            let valid = true;
+            if (gx + size > this.gridW || gy + size > this.gridH) valid = false;
+            else {
+                for (let dx = 0; dx < size; dx++) {
+                    for (let dy = 0; dy < size; dy++) {
+                        if (this.shipGrid[gx + dx][gy + dy]) valid = false;
+                    }
                 }
             }
-        }
-        if (!valid) return;
+            if (!valid) return;
 
-        const px = this.gridOffsetX + gx * this.tileSize;
-        const py = this.gridOffsetY + gy * this.tileSize;
-        this.ghostGraphics.fillStyle(def.color, 0.25);
-        this.ghostGraphics.fillRect(px, py, size * this.tileSize, size * this.tileSize);
-        this.ghostGraphics.lineStyle(2, def.color, 0.8);
-        this.ghostGraphics.strokeRect(px, py, size * this.tileSize, size * this.tileSize);
-        this.ghostIcon = this.add.text(px + size * this.tileSize / 2, py + size * this.tileSize / 2,
-            def.icon, { fontSize: '24px', fill: '#ffffff' }).setOrigin(0.5);
-        this.ghostIcon.setAlpha(0.5);
-        this.ghostIcon.setDepth(3);
+            const px = this.gridOffsetX + gx * this.tileSize;
+            const py = this.gridOffsetY + gy * this.tileSize;
+            this.ghostGraphics.fillStyle(def.color, 0.25);
+            this.ghostGraphics.fillRect(px, py, size * this.tileSize, size * this.tileSize);
+            this.ghostGraphics.lineStyle(2, def.color, 0.8);
+            this.ghostGraphics.strokeRect(px, py, size * this.tileSize, size * this.tileSize);
+            this.ghostIcon = this.add.text(px + size * this.tileSize / 2, py + size * this.tileSize / 2,
+                def.icon, { fontSize: '24px', fill: '#ffffff' }).setOrigin(0.5);
+            this.ghostIcon.setAlpha(0.5);
+            this.ghostIcon.setDepth(3);
+            return;
+        }
+
+        // Room name tooltip on hover (non-build mode)
+        const gx = Math.floor((pointer.x - this.gridOffsetX) / this.tileSize);
+        const gy = Math.floor((pointer.y - this.gridOffsetY) / this.tileSize);
+        if (gx >= 0 && gx < this.gridW && gy >= 0 && gy < this.gridH) {
+            const room = this.shipGrid[gx][gy];
+            if (room) {
+                const def = this.roomTypes[room.type];
+                this.roomTooltip.setText(`${def.icon} ${def.name}`);
+                const px = this.gridOffsetX + gx * this.tileSize + this.tileSize / 2;
+                const py = this.gridOffsetY + gy * this.tileSize - 6;
+                this.roomTooltip.setPosition(px, py);
+                this.roomTooltip.setVisible(true);
+            } else {
+                this.roomTooltip.setVisible(false);
+            }
+        } else {
+            this.roomTooltip.setVisible(false);
+        }
     }
 
     handleGridClick(pointer) {
