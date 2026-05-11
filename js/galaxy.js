@@ -13,6 +13,12 @@ class GalaxyScene extends Phaser.Scene {
         this.rockCompositions = data.rockCompositions || {};
         this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0 };
         this.processingQueues = data.processingQueues || {};
+        this.mechState = data.mechState || {
+            unlockedChassis: ['scout'],
+            activeChassis: 'scout',
+            modules: [],
+            science: {},
+        };
         this.launchTime = data.launchTime || null;
     }
 
@@ -43,6 +49,7 @@ class GalaxyScene extends Phaser.Scene {
                 rockCompositions: this.rockCompositions,
                 techState: this.techState,
                 processingQueues: this.processingQueues,
+                mechState: this.mechState,
                 launchTime: this.launchTime,
             });
         }, 180, 36);
@@ -153,6 +160,7 @@ class GalaxyScene extends Phaser.Scene {
                 rockCompositions: this.rockCompositions,
                 techState: this.techState,
                 processingQueues: this.processingQueues,
+                mechState: this.mechState,
                 launchTime: this.launchTime,
             });
         }, 200, 50);

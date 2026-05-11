@@ -19,6 +19,12 @@ class ShipScene extends Phaser.Scene {
         this.rockCompositions = data.rockCompositions || {};
         this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0 };
         this.processingQueues = data.processingQueues || {};
+        this.mechState = data.mechState || {
+            unlockedChassis: ['scout'],
+            activeChassis: 'scout',
+            modules: [],
+            science: {},
+        };
         // Offline processing: if we were away, catch up
         const savedLaunchTime = data.launchTime || this.launchTime || null;
         if (savedLaunchTime) {
@@ -476,6 +482,7 @@ class ShipScene extends Phaser.Scene {
             rockCompositions: this.rockCompositions,
             techState: this.techState,
             processingQueues: this.processingQueues,
+            mechState: this.mechState,
             launchTime: this.launchTime,
         };
         localStorage.setItem('miners_save', JSON.stringify(saveData));
@@ -682,16 +689,7 @@ class ShipScene extends Phaser.Scene {
         this.createDockButton(startX + btnW + gap, y, 'INVENTORY', () => this.openInventoryModal(), btnW, btnH, 0x151525, '#8888aa');
         this.createDockButton(startX + 2 * (btnW + gap), y, 'BUILD', () => this.openBuildModal(), btnW, btnH, 0x152525, '#44aa88');
         this.createDockButton(startX + 3 * (btnW + gap), y, 'LAUNCH', () => {
-            this.launchTime = Date.now();
-            this.saveGame();
-            this.scene.start('GalaxyScene', {
-                shipGrid: this.shipGrid, shipInventory: this.shipInventory,
-                credits: this.credits, shipFuel: this.shipFuel, shipFuelCapacity: this.shipFuelCapacity,
-                rockCompositions: this.rockCompositions,
-                techState: this.techState,
-                processingQueues: this.processingQueues,
-                launchTime: this.launchTime,
-            });
+            this.openMechConfigModal();
         }, btnW, btnH, 0x1a2a2a, '#44aa88');
     }
 
@@ -1809,6 +1807,239 @@ class ShipScene extends Phaser.Scene {
             }
         }
         return true;
+    }
+
+    // ─── MECH CONFIGURATION ───
+
+    getChassisDefs() {
+        return {
+            scout: { name: 'Scout', size: '1×2', baseFuel: 15, fuelBurn: 0.030, maxDepth: 180, slots: 2, cost: 0, desc: 'Light and nimble' },
+            miner: { name: 'Miner', size: '2×2', baseFuel: 25, fuelBurn: 0.050, maxDepth: 350, slots: 3, cost: 500, desc: 'Balanced workhorse' },
+            heavy: { name: 'Heavy', size: '2×3', baseFuel: 40, fuelBurn: 0.075, maxDepth: 700, slots: 4, cost: 500, desc: 'Deep diver' },
+        };
+    }
+
+    createMechConfigModal() {
+        this.mechModal = this.add.container(640, 360);
+        this.mechModal.setVisible(false);
+        this.mechModal.setDepth(20);
+
+        const bg = this.add.rectangle(0, 0, 560, 520, 0x0c0c18, 0.98).setOrigin(0.5);
+        bg.setStrokeStyle(2, 0x00d4aa);
+        const title = this.add.text(0, -240, 'MECH CONFIGURATION', {
+            fontSize: '20px', fill: '#00d4aa', fontFamily: 'monospace', letterSpacing: 3
+        }).setOrigin(0.5);
+
+        this.mechContent = this.add.container(0, 0);
+        this.mechModal.add([bg, title, this.mechContent]);
+
+        // Close button
+        const closeBtn = this.add.rectangle(250, -240, 40, 20, 0x1a1a28).setInteractive();
+        const closeTxt = this.add.text(250, -240, '✕', { fontSize: '12px', fill: '#666666' }).setOrigin(0.5);
+        closeBtn.on('pointerover', () => closeBtn.setFillStyle(0x333344));
+        closeBtn.on('pointerout', () => closeBtn.setFillStyle(0x1a1a28));
+        closeBtn.on('pointerdown', () => {
+            this.justClickedModal = true;
+            this.closeMechConfigModal();
+        });
+        this.mechModal.add([closeBtn, closeTxt]);
+    }
+
+    openMechConfigModal() {
+        if (!this.mechModal) this.createMechConfigModal();
+        this.renderMechConfig();
+        this.mechModal.setVisible(true);
+    }
+
+    closeMechConfigModal() {
+        if (this.mechModal) this.mechModal.setVisible(false);
+    }
+
+    renderMechConfig() {
+        this.mechContent.removeAll(true);
+        const defs = this.getChassisDefs();
+        const state = this.mechState;
+        const active = state.activeChassis;
+
+        let y = -200;
+
+        // ── Chassis Selection ──
+        const chassisTitle = this.add.text(0, y, 'CHASSIS', {
+            fontSize: '12px', fill: '#555555', fontFamily: 'monospace', letterSpacing: 2
+        }).setOrigin(0.5);
+        this.mechContent.add(chassisTitle);
+        y += 30;
+
+        Object.entries(defs).forEach(([key, def], i) => {
+            const x = -180 + i * 180;
+            const unlocked = state.unlockedChassis.includes(key);
+            const isActive = active === key;
+            const canAfford = this.credits >= def.cost;
+
+            const card = this.add.rectangle(x, y, 160, 90, isActive ? 0x1a2a2a : 0x151520).setInteractive();
+            card.setStrokeStyle(2, isActive ? 0x00d4aa : 0x222233);
+
+            const name = this.add.text(x, y - 28, def.name, {
+                fontSize: '13px', fill: isActive ? '#00d4aa' : '#aaaaaa', fontFamily: 'monospace'
+            }).setOrigin(0.5);
+
+            const stats = this.add.text(x, y - 2, `${def.size} | ${def.baseFuel}L | ${def.maxDepth}m`, {
+                fontSize: '10px', fill: '#666666', fontFamily: 'monospace'
+            }).setOrigin(0.5);
+
+            const desc = this.add.text(x, y + 16, def.desc, {
+                fontSize: '9px', fill: '#444444', fontFamily: 'monospace'
+            }).setOrigin(0.5);
+
+            let statusText;
+            if (isActive) {
+                statusText = this.add.text(x, y + 36, 'SELECTED', { fontSize: '10px', fill: '#00d4aa' }).setOrigin(0.5);
+            } else if (!unlocked) {
+                statusText = this.add.text(x, y + 36, `BUY ${def.cost}cr`, {
+                    fontSize: '10px', fill: canAfford ? '#c9a84c' : '#554433'
+                }).setOrigin(0.5);
+            } else {
+                statusText = this.add.text(x, y + 36, 'CLICK TO SELECT', {
+                    fontSize: '10px', fill: '#666666'
+                }).setOrigin(0.5);
+            }
+
+            card.on('pointerover', () => {
+                if (!isActive) card.setFillStyle(0x1a1a2a);
+            });
+            card.on('pointerout', () => {
+                card.setFillStyle(isActive ? 0x1a2a2a : 0x151520);
+            });
+            card.on('pointerdown', () => {
+                this.justClickedModal = true;
+                if (isActive) return;
+                if (!unlocked) {
+                    if (canAfford) {
+                        this.credits -= def.cost;
+                        state.unlockedChassis.push(key);
+                        state.activeChassis = key;
+                        state.modules = []; // reset modules on chassis change
+                        this.updateUI();
+                        this.saveGame();
+                        this.renderMechConfig();
+                    }
+                    return;
+                }
+                state.activeChassis = key;
+                state.modules = []; // reset modules on chassis change
+                this.saveGame();
+                this.renderMechConfig();
+            });
+
+            this.mechContent.add([card, name, stats, desc, statusText]);
+        });
+
+        y += 70;
+
+        // ── Module Slots ──
+        const activeDef = defs[active];
+        const slotCount = activeDef.slots;
+        const modTitle = this.add.text(0, y, `MODULES (${state.modules.length}/${slotCount})`, {
+            fontSize: '12px', fill: '#555555', fontFamily: 'monospace', letterSpacing: 2
+        }).setOrigin(0.5);
+        this.mechContent.add(modTitle);
+        y += 30;
+
+        // Module slot boxes
+        for (let i = 0; i < slotCount; i++) {
+            const x = -120 + i * 80;
+            const mod = state.modules[i];
+            const hasMod = !!mod;
+
+            const slot = this.add.rectangle(x, y, 70, 50, hasMod ? 0x1a251a : 0x151515).setInteractive();
+            slot.setStrokeStyle(2, hasMod ? 0x44aa44 : 0x222233);
+
+            const label = this.add.text(x, y, hasMod ? (mod === 'fuel' ? '+10L' : 'DRONE') : 'EMPTY', {
+                fontSize: hasMod ? '11px' : '10px',
+                fill: hasMod ? '#88cc88' : '#333333',
+                fontFamily: 'monospace'
+            }).setOrigin(0.5);
+
+            if (hasMod) {
+                slot.on('pointerdown', () => {
+                    this.justClickedModal = true;
+                    state.modules.splice(i, 1);
+                    this.saveGame();
+                    this.renderMechConfig();
+                });
+                slot.on('pointerover', () => slot.setFillStyle(0x2a352a));
+                slot.on('pointerout', () => slot.setFillStyle(0x1a251a));
+            }
+
+            this.mechContent.add([slot, label]);
+        }
+
+        y += 45;
+
+        // ── Add Module Buttons ──
+        if (state.modules.length < slotCount) {
+            const fuelBtn = this.createMechModuleButton(-80, y, '⛽ FUEL TANK +10L', () => {
+                state.modules.push('fuel');
+                this.saveGame();
+                this.renderMechConfig();
+            }, 0x1a1a15, '#cc8844');
+            const droneBtn = this.createMechModuleButton(80, y, '🤖 DRONE', () => {
+                state.modules.push('drone');
+                this.saveGame();
+                this.renderMechConfig();
+            }, 0x15151a, '#8888cc');
+            this.mechContent.add([fuelBtn.rect, fuelBtn.text, droneBtn.rect, droneBtn.text]);
+        }
+        y += 45;
+
+        // ── Stats Summary ──
+        const totalFuel = activeDef.baseFuel + state.modules.filter(m => m === 'fuel').length * 10;
+        const droneCount = state.modules.filter(m => m === 'drone').length;
+        const summary = this.add.text(0, y,
+            `Fuel Capacity: ${totalFuel}L  |  Drones: ${droneCount}  |  Burn: ${(activeDef.fuelBurn * 1000).toFixed(0)}ml/tile`, {
+            fontSize: '11px', fill: '#888888', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+        this.mechContent.add(summary);
+        y += 50;
+
+        // ── Launch Button ──
+        const launchBtn = this.add.rectangle(0, y, 200, 40, 0x1a2a2a).setInteractive();
+        const launchTxt = this.add.text(0, y, 'PROCEED TO GALAXY', {
+            fontSize: '13px', fill: '#44aa88', fontFamily: 'monospace', letterSpacing: 2
+        }).setOrigin(0.5);
+        launchBtn.setStrokeStyle(2, 0x44aa88);
+        launchBtn.on('pointerover', () => launchBtn.setFillStyle(0x2a3a3a));
+        launchBtn.on('pointerout', () => launchBtn.setFillStyle(0x1a2a2a));
+        launchBtn.on('pointerdown', () => {
+            this.justClickedModal = true;
+            this.closeMechConfigModal();
+            this.launchTime = Date.now();
+            this.saveGame();
+            this.scene.start('GalaxyScene', {
+                shipGrid: this.shipGrid, shipInventory: this.shipInventory,
+                credits: this.credits, shipFuel: this.shipFuel, shipFuelCapacity: this.shipFuelCapacity,
+                rockCompositions: this.rockCompositions,
+                techState: this.techState,
+                processingQueues: this.processingQueues,
+                mechState: this.mechState,
+                launchTime: this.launchTime,
+            });
+        });
+        this.mechContent.add([launchBtn, launchTxt]);
+    }
+
+    createMechModuleButton(x, y, text, callback, color, textColor) {
+        const rect = this.add.rectangle(x, y, 140, 32, color).setInteractive();
+        const label = this.add.text(x, y, text, {
+            fontSize: '10px', fill: textColor, fontFamily: 'monospace'
+        }).setOrigin(0.5);
+        rect.on('pointerover', () => rect.setFillStyle(color + 0x111111));
+        rect.on('pointerout', () => rect.setFillStyle(color));
+        rect.on('pointerdown', () => {
+            this.justClickedModal = true;
+            callback();
+        });
+        return { rect, text: label };
     }
 }
 

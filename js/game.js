@@ -14,6 +14,12 @@ class GameScene extends Phaser.Scene {
         this.rockCompositions = data.rockCompositions || {};
         this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0 };
         this.processingQueues = data.processingQueues || {};
+        this.mechState = data.mechState || {
+            unlockedChassis: ['scout'],
+            activeChassis: 'scout',
+            modules: [],
+            science: {},
+        };
         this.launchTime = data.launchTime || null;
     }
 
@@ -67,11 +73,46 @@ class GameScene extends Phaser.Scene {
         let spawnX = Math.floor(this.worldWidth / 2);
         let spawnY = this.world.getSurfaceY(spawnX) - 5;
 
-        const baseFuel = 25;
-        const maxPlayerFuel = baseFuel + (this.techState.fuelTankLevel || 0);
+        // ── Mech Configuration ──
+        const chassisDefs = {
+            scout: { size: '1×2', baseFuel: 15, fuelBurn: 0.030, maxDepth: 180, slots: 2 },
+            miner: { size: '2×2', baseFuel: 25, fuelBurn: 0.050, maxDepth: 350, slots: 3 },
+            heavy: { size: '2×3', baseFuel: 40, fuelBurn: 0.075, maxDepth: 700, slots: 4 },
+        };
+        const mech = this.mechState;
+        const chassisDef = chassisDefs[mech.activeChassis] || chassisDefs.scout;
+        const fuelModBonus = mech.modules.filter(m => m === 'fuel').length * 10;
+        const maxPlayerFuel = chassisDef.baseFuel + fuelModBonus;
         let fuelForRun = Math.min(maxPlayerFuel, this.shipFuel);
         this.shipFuel -= fuelForRun; // Deduct from ship tank
-        this.player = new Player(this, spawnX, spawnY, { fuel: fuelForRun, efficiencyLevel: this.techState.efficiencyLevel || 0 });
+        this.player = new Player(this, spawnX, spawnY, {
+            fuel: fuelForRun,
+            efficiencyLevel: this.techState.efficiencyLevel || 0,
+            chassis: mech.activeChassis,
+            fuelBurn: chassisDef.fuelBurn,
+        });
+        this.maxDepth = chassisDef.maxDepth;
+        this.fuelBurnRate = chassisDef.fuelBurn;
+        this.droneCount = mech.modules.filter(m => m === 'drone').length;
+        this.drones = [];
+
+        // ── Science Tracking ──
+        this.scienceCollected = false;
+        this.scienceMilestones = [30, 60, 100];
+        this.scienceAwarded = [];
+        this.planetTypeName = this.rockType.name || 'Unknown';
+        this.mechState.science[this.planetTypeName] = this.mechState.science[this.planetTypeName] || 0;
+
+        // ── Drone Creation ──
+        this.droneSprites = [];
+        this.droneTimers = [];
+        for (let i = 0; i < this.droneCount; i++) {
+            const drone = this.add.rectangle(0, 0, 8, 8, 0x88ccff);
+            drone.setStrokeStyle(1, 0xffffff);
+            drone.setDepth(5);
+            this.droneSprites.push(drone);
+            this.droneTimers.push(0);
+        }
 
         this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1);
         this.cameras.main.setBounds(0, 0, this.worldWidth * this.tileSize, this.worldHeight * this.tileSize);
@@ -87,7 +128,7 @@ class GameScene extends Phaser.Scene {
         this.fuelBarBg = this.add.rectangle(barX, barY, barW, barH, 0x1a1a2e).setScrollFactor(0);
         this.fuelBarBg.setStrokeStyle(2, 0x444466);
         this.fuelBarFill = this.add.rectangle(this.fuelBarX, barY, this.fuelBarMaxW, barH - 4, 0xFF8C00).setOrigin(0, 0.5).setScrollFactor(0);
-        this.fuelBarText = this.add.text(barX, barY, 'FUEL: 25.00L / 25.00L', {
+        this.fuelBarText = this.add.text(barX, barY, `FUEL: ${fuelForRun.toFixed(2)}L / ${maxPlayerFuel.toFixed(2)}L`, {
             fontSize: '13px', fill: '#ffffff', fontFamily: 'monospace', stroke: '#000000', strokeThickness: 2
         }).setOrigin(0.5).setScrollFactor(0);
 
@@ -219,6 +260,7 @@ class GameScene extends Phaser.Scene {
             rockCompositions: this.rockCompositions,
             techState: this.techState,
             processingQueues: this.processingQueues,
+            mechState: this.mechState,
             launchTime: this.launchTime,
         };
         localStorage.setItem('miners_save', JSON.stringify(saveData));
@@ -238,6 +280,7 @@ class GameScene extends Phaser.Scene {
                 rockCompositions: this.rockCompositions,
                 techState: this.techState,
                 processingQueues: this.processingQueues,
+                mechState: this.mechState,
                 launchTime: this.launchTime,
             });
         });
@@ -357,6 +400,66 @@ class GameScene extends Phaser.Scene {
             this.teleportBtnPulse.setFillStyle(0xff2200, 0);
             this.teleportBtnPulse.setStrokeStyle(0);
         }
+
+        // ── Drone Update ──
+        this.droneSprites.forEach((drone, i) => {
+            const angle = time * 0.002 + (i * Math.PI * 2 / this.droneSprites.length);
+            const orbitRadius = 50 + Math.sin(time * 0.001 + i) * 10;
+            drone.x = this.player.x + Math.cos(angle) * orbitRadius;
+            drone.y = this.player.y - this.player.height / 2 + Math.sin(angle) * orbitRadius * 0.5;
+
+            // Drone mining logic — only if enough fuel (keep 2L reserve)
+            if (this.droneTimers[i] <= 0 && this.player.fuel > 2.0) {
+                const droneTileX = Math.floor(drone.x / 32);
+                const droneTileY = Math.floor(drone.y / 32);
+                let mined = false;
+                // Search within 5 tiles for valuable targets
+                for (let dy = -5; dy <= 5 && !mined; dy++) {
+                    for (let dx = -5; dx <= 5 && !mined; dx++) {
+                        const tx = droneTileX + dx;
+                        const ty = droneTileY + dy;
+                        if (tx < 0 || tx >= this.worldWidth || ty < 0 || ty >= this.worldHeight) continue;
+                        const tile = this.world.getTile(tx, ty);
+                        // Target gems and metal ores only, skip rock and air
+                        if (tile === this.world.TILE_COPPER || tile === this.world.TILE_IRON ||
+                            tile === this.world.TILE_GOLD || tile === this.world.TILE_RUBY ||
+                            tile === this.world.TILE_SAPPHIRE || tile === this.world.TILE_EMERALD ||
+                            tile === this.world.TILE_DIAMOND || tile === this.world.TILE_AMETHYST) {
+                            // Mine it
+                            this.world.setTile(tx, ty, this.world.TILE_AIR);
+                            this.updateTile(tx, ty);
+                            this.player.inventory[tile] = (this.player.inventory[tile] || 0) + 1;
+                            // Cost: 30ml per drone mine
+                            const droneCost = 0.030;
+                            this.player.fuel -= droneCost;
+                            this.runStats.fuelUsed += droneCost;
+                            // Visual feedback
+                            this.spawnMineFlash(tx * 32 + 16, ty * 32 + 16);
+                            this.spawnDebris(tx, ty, this.tileColors[tile]);
+                            mined = true;
+                        }
+                    }
+                }
+                this.droneTimers[i] = mined ? 120 : 60; // 2s or 1s cooldown
+            } else {
+                this.droneTimers[i] -= delta;
+            }
+        });
+
+        // ── Science Collection ──
+        const currentDepth = Math.max(0, Math.floor(this.player.y / 32) - (this.world.getSurfaceY(Math.floor(this.player.x / 32)) || 0));
+        this.scienceMilestones.forEach(milestone => {
+            if (currentDepth >= milestone && !this.scienceAwarded.includes(milestone)) {
+                this.scienceAwarded.push(milestone);
+                const scienceGain = milestone === 30 ? 5 : milestone === 60 ? 8 : 12;
+                this.mechState.science[this.planetTypeName] = (this.mechState.science[this.planetTypeName] || 0) + scienceGain;
+                // Visual notification
+                const note = this.add.text(this.player.x, this.player.y - 60, `+${scienceGain} SCIENCE`, {
+                    fontSize: '14px', fill: '#00d4aa', fontFamily: 'monospace', stroke: '#000000', strokeThickness: 2
+                }).setOrigin(0.5);
+                this.tweens.add({ targets: note, y: note.y - 40, alpha: 0, duration: 1500, ease: 'Power1', onComplete: () => note.destroy() });
+            }
+        });
 
         // Run stats display — compact corner panel tracking session efficiency
         const elapsedMin = Math.floor((Date.now() - this.runStats.startTime) / 60000);

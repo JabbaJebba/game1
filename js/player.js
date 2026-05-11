@@ -7,9 +7,16 @@ class Player {
         this.x = x * 32;
         this.y = y * 32;
 
-        // Size: 2 tiles wide, 3 tiles tall
-        this.width = 64;
-        this.height = 96;
+        // Size based on chassis
+        const chassis = data.chassis || 'scout';
+        const chassisSizes = {
+            scout: { w: 32, h: 64 },   // 1×2
+            miner: { w: 64, h: 64 },   // 2×2
+            heavy: { w: 64, h: 96 },  // 2×3
+        };
+        const size = chassisSizes[chassis] || chassisSizes.scout;
+        this.width = size.w;
+        this.height = size.h;
 
         // Velocity
         this.vx = 0;
@@ -49,7 +56,7 @@ class Player {
         this.maxFuel = data.fuel || 25;
         this.fuel = this.maxFuel;
         const effLevel = data.efficiencyLevel || 0;
-        const baseCost = 0.05;
+        const baseCost = data.fuelBurn || 0.05;
         const effReduction = effLevel * 0.001;
         const miningCost = Math.max(0.04, baseCost - effReduction);
         this.fuelCosts = {
