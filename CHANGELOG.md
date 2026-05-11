@@ -1,3 +1,13 @@
+## 2026-05-12 — Depth Milestone Notifications
+- **QoL/Game Feel:** Added floating text notifications when reaching depth milestones for the first time in a run
+  - Milestones: 50m, 100m, 150m, 200m — each triggers once per mining run
+  - Cyan (`#44ddff`) text at 18px font pops up above the player, larger than standard loot text for emphasis
+  - Tracked in `runStats.depthMilestonesReached` so re-crossing a depth doesn't re-trigger
+  - Uses existing `showFloatText()` with optional fontSize parameter (added for this feature)
+  - Purely visual — no gameplay, scoring, or reward mechanics; just celebrates deep diving
+  - Pairs with existing depth gauge and run stats max-depth tracker to make exploration feel progressive
+- Status: ⏳ Pending push
+
 ## 2026-05-12 — Landing Squash-and-Stretch
 - **QoL/Game Feel:** Added sprite squash-and-stretch animation on landing to sell the physical impact
   - Squash amount scales with impact velocity: gentle hops barely compress, hard falls noticeably squash

@@ -198,7 +198,7 @@ class GameScene extends Phaser.Scene {
         this.stars = this.add.graphics();
 
         // Run statistics — track efficiency of current mining run
-        this.runStats = { tilesMined: 0, fuelUsed: 0, startTime: Date.now(), maxDepthReached: 0 };
+        this.runStats = { tilesMined: 0, fuelUsed: 0, startTime: Date.now(), maxDepthReached: 0, depthMilestonesReached: [] };
         this.runStatsText = this.add.text(1100, 55, '', {
             fontSize: '12px', fill: '#aabbcc', fontFamily: 'monospace',
             stroke: '#000000', strokeThickness: 2
@@ -341,6 +341,15 @@ class GameScene extends Phaser.Scene {
         const surfaceY = this.world.getSurfaceY(playerTileX) || 0;
         const depth = Math.max(0, Math.floor(this.player.y / 32) - surfaceY);
         const depthColor = depth < 20 ? '#88ff88' : depth < 80 ? '#ffff44' : depth < 150 ? '#ffaa44' : '#ff4444';
+
+        // Depth milestone notifications — celebrate first-time reaches per run
+        [50, 100, 150, 200].forEach(m => {
+            if (depth >= m && !this.runStats.depthMilestonesReached.includes(m)) {
+                this.runStats.depthMilestonesReached.push(m);
+                this.showFloatText(this.player.x, this.player.y - 80, `${m}m`, '#44ddff', '18px');
+            }
+        });
+
         this.runStats.maxDepthReached = Math.max(this.runStats.maxDepthReached, depth);
 
         // Depth-based sky darkening — background fades to near-black as you go deeper underground
@@ -915,9 +924,9 @@ class GameScene extends Phaser.Scene {
         }
     }
 
-    showFloatText(x, y, text, color = '#ffffff') {
+    showFloatText(x, y, text, color = '#ffffff', fontSize = '14px') {
         const label = this.add.text(x, y, text, {
-            fontSize: '14px', fill: color, stroke: '#000000', strokeThickness: 2, fontFamily: 'monospace'
+            fontSize, fill: color, stroke: '#000000', strokeThickness: 2, fontFamily: 'monospace'
         }).setOrigin(0.5).setDepth(10);
         this.tweens.add({
             targets: label,
