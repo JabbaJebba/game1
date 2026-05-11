@@ -6,7 +6,7 @@
   - **Metal sparks:** Bright white flash particles spawn on copper/iron/gold hits from drones
   - **Procedural sound:** Mining sounds now fire for drone hits — gems chime, metals ping, everything crunches
   - Zero gameplay changes — purely making drones feel as satisfying as swinging the drill yourself
-- Status: ✅ Pushed. Commit: `4d88e9c`
+- Status: ✅ Pushed. Commit: `9e44e23`
 
 ## 2026-05-11 — Mining Streak Counter
 - **QoL/Game Feel:** Added a combo streak counter that appears above the player when mining tiles in rapid succession
