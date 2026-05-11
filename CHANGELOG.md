@@ -7,7 +7,7 @@
   - Follows mining recoil so it stays synced with body kickback
   - Set to depth 0 so it renders behind tiles and the player sprite, avoiding visual clutter
   - Purely visual — no gameplay, collision, or movement changes
-- Status: ✅ Pushed. Commit: `TBD`
+- Status: ✅ Pushed. Commit: `dbcb9ea`
 
 ## 2026-05-12 — Depth Milestone Notifications
 - **QoL/Game Feel:** Added floating text notifications when reaching depth milestones for the first time in a run
