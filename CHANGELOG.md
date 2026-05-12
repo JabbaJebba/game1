@@ -1,3 +1,13 @@
+## 2026-05-12 — Science Tracking in Run Stats
+- **QoL/UI:** Added live science tracking to the run stats panel
+  - `scienceGained` counter tracks total science collected during the current mining run
+  - Counter increments at each depth milestone (30m/60m/100m) alongside the floating "+X SCIENCE" text
+  - Displays as `Science: +X` on its own line in the run stats panel (top-right corner)
+  - Line only appears when science has been collected this run — panel stays compact when science is at zero
+  - Uses existing run stats infrastructure; zero new data structures or save changes
+  - Pairs with the existing floating science notifications to make research progression feel more tangible and trackable
+- Status: ✅ Pushed. Commit: `c0cb8e4`
+
 ## 2026-05-12 — Planet Atmosphere Colors
 - **QoL/Atmosphere:** Each planet now has a unique sky/atmosphere color that tints the mining scene background
   - Asteroid Alpha: cool pale blue-gray (`0x8899aa`) — familiar starter sky with a colder asteroid feel
