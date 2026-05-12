@@ -4,7 +4,7 @@
   - Color-coded by danger level: green (surface), yellow, orange, red (deep)
   - Makes exact depth instantly glanceable without reading the top info bar
   - Text uses monospace font with black stroke for readability against any background
-- Status: 🔄 Ready for commit
+- Status: ✅ Pushed. Commit: `744ff8d`
 
 ---
 
