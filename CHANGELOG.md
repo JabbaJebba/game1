@@ -6,7 +6,7 @@
   - Badge has a white stroke for contrast against dark planet colors
   - Persists in save data via `mechState.visitedPlanets` — zero new save keys, zero breaking changes
   - Marked automatically on LAUNCH, so even if the player abandons a run early, the planet still shows as visited
-- Status: ⏳ In progress
+- Status: ✅ Pushed. Commit: `f59d791`
 
 ## 2026-05-12 — Sell Celebration: Coin Sound + Credit Float Text
 - **Audio/Game Feel:** Added a satisfying procedural coin sound when selling gems at the trade terminal
