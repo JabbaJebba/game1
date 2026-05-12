@@ -68,12 +68,12 @@ class GalaxyScene extends Phaser.Scene {
         ];
 
         this.planets = [
-            { name: 'Asteroid Alpha', depth: 300, size: 200, richness: 0.8, engineReq: 0, color: 0x888888, desc: 'Small rocky body. Basalt composition.' },
-            { name: 'Asteroid Beta', depth: 400, size: 250, richness: 1.0, engineReq: 0, color: 0xAA8866, desc: 'Larger asteroid. Granite veins.' },
-            { name: 'Planet Gamma', depth: 500, size: 300, richness: 1.2, engineReq: 1, color: 0x448844, desc: 'Small planet. Obsidian core.' },
-            { name: 'Planet Delta', depth: 600, size: 300, richness: 1.3, engineReq: 1, color: 0x6644AA, desc: 'Dense core. Pumice mantle.' },
-            { name: 'Moon Epsilon', depth: 700, size: 350, richness: 1.5, engineReq: 2, color: 0xCCCCCC, desc: 'Large moon. Slate deposits.' },
-            { name: 'Gas Giant Ring', depth: 800, size: 400, richness: 1.8, engineReq: 2, color: 0xFFAA44, desc: 'Ancient ring debris. Marble.' },
+            { name: 'Asteroid Alpha', depth: 300, size: 200, richness: 0.8, engineReq: 0, color: 0x888888, skyColor: 0x8899aa, desc: 'Small rocky body. Basalt composition.' },
+            { name: 'Asteroid Beta', depth: 400, size: 250, richness: 1.0, engineReq: 0, color: 0xAA8866, skyColor: 0xbbccdd, desc: 'Larger asteroid. Granite veins.' },
+            { name: 'Planet Gamma', depth: 500, size: 300, richness: 1.2, engineReq: 1, color: 0x448844, skyColor: 0x99cc99, desc: 'Small planet. Obsidian core.' },
+            { name: 'Planet Delta', depth: 600, size: 300, richness: 1.3, engineReq: 1, color: 0x6644AA, skyColor: 0xbb99cc, desc: 'Dense core. Pumice mantle.' },
+            { name: 'Moon Epsilon', depth: 700, size: 350, richness: 1.5, engineReq: 2, color: 0xCCCCCC, skyColor: 0xccccdd, desc: 'Large moon. Slate deposits.' },
+            { name: 'Gas Giant Ring', depth: 800, size: 400, richness: 1.8, engineReq: 2, color: 0xFFAA44, skyColor: 0xddbb99, desc: 'Ancient ring debris. Marble.' },
         ];
 
         // Assign rock type to each planet

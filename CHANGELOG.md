@@ -1,3 +1,17 @@
+## 2026-05-12 — Planet Atmosphere Colors
+- **QoL/Atmosphere:** Each planet now has a unique sky/atmosphere color that tints the mining scene background
+  - Asteroid Alpha: cool pale blue-gray (`0x8899aa`) — familiar starter sky with a colder asteroid feel
+  - Asteroid Beta: warm pale gray (`0xbbccdd`) — dusty, larger body atmosphere
+  - Planet Gamma: muted alien green (`0x99cc99`) — living-world atmospheric tint
+  - Planet Delta: purple haze (`0xbb99cc`) — dense, exotic core world
+  - Moon Epsilon: pale lunar gray (`0xccccdd`) — crisp, airless moonlight
+  - Gas Giant Ring: amber dust (`0xddbb99`) — ancient debris field glow
+  - Sky color is passed from `GalaxyScene` planet definitions via `skyColor` property
+  - In `GameScene`, the base RGB is extracted from `this.planet.skyColor` (fallback to classic `#87CEEB` blue)
+  - Depth-darkening and day/night cycle still apply on top — atmosphere tints get darker at night and deeper underground just like before
+  - No gameplay changes, no save changes, no new assets — purely atmospheric identity per planet
+- Status: ✅ Pushed. Commit: `TBD`
+
 ## 2026-05-12 — Mining Preview Fuel Cost Tooltip
 - **QoL/UI:** Added projected fuel cost display to the mining target preview
   - When holding A/S/D, the preview now shows `−XML` (e.g. `−150ml`) above the first target tile

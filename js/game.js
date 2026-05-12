@@ -116,7 +116,13 @@ class GameScene extends Phaser.Scene {
 
         this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1);
         this.cameras.main.setBounds(0, 0, this.worldWidth * this.tileSize, this.worldHeight * this.tileSize);
-        this.cameras.main.setBackgroundColor('#87CEEB');
+
+        // Planet atmosphere — each planet has a unique sky tint
+        const sc = this.planet.skyColor || 0x87CEEB;
+        const sr = (sc >> 16) & 0xFF;
+        const sg = (sc >> 8) & 0xFF;
+        const sb = sc & 0xFF;
+        this.cameras.main.setBackgroundColor(`rgb(${sr},${sg},${sb})`);
 
         // FUEL BAR UI
         const barX = 640;
@@ -357,11 +363,15 @@ class GameScene extends Phaser.Scene {
         this.runStats.maxDepthReached = Math.max(this.runStats.maxDepthReached, depth);
 
         // Depth-based sky darkening — background fades to near-black as you go deeper underground
+        const sc = this.planet.skyColor || 0x87CEEB;
+        const baseR = (sc >> 16) & 0xFF;
+        const baseG = (sc >> 8) & 0xFF;
+        const baseB = sc & 0xFF;
         const depthFactor = Math.min(1, depth / 200);
         const depthMult = 1 - depthFactor * 0.92;
-        const r = Math.floor(135 * darkness * depthMult);
-        const g = Math.floor(206 * darkness * depthMult);
-        const b = Math.floor(235 * darkness * depthMult);
+        const r = Math.floor(baseR * darkness * depthMult);
+        const g = Math.floor(baseG * darkness * depthMult);
+        const b = Math.floor(baseB * darkness * depthMult);
         this.cameras.main.setBackgroundColor(`rgb(${r},${g},${b})`);
 
         this.stars.setAlpha(1 - dayProgress);
