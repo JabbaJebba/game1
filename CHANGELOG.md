@@ -5,7 +5,7 @@
   - Zero visual changes to the bar itself — same colored squares, counts, and abbreviations; only the order changes
   - Sorting is recomputed every time the inventory hash changes, so newly mined gems instantly jump to the front
   - Helps players monitor their most valuable loot at a glance during deep mining runs
-- Status: ✅ Pushed. Commit: TBD
+- Status: ✅ Pushed. Commit: `9cbf3ae`
 
 ## 2026-05-12 — Science Tracking in Run Stats
 - **QoL/UI:** Added live science tracking to the run stats panel
