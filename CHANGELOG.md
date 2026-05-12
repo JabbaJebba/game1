@@ -10,7 +10,7 @@
   - In `GameScene`, the base RGB is extracted from `this.planet.skyColor` (fallback to classic `#87CEEB` blue)
   - Depth-darkening and day/night cycle still apply on top — atmosphere tints get darker at night and deeper underground just like before
   - No gameplay changes, no save changes, no new assets — purely atmospheric identity per planet
-- Status: ✅ Pushed. Commit: `TBD`
+- Status: ✅ Pushed. Commit: `e27acde`
 
 ## 2026-05-12 — Mining Preview Fuel Cost Tooltip
 - **QoL/UI:** Added projected fuel cost display to the mining target preview
