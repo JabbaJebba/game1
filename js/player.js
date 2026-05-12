@@ -426,7 +426,7 @@ class Player {
             }
             const progress = Math.min(1, (now - this.lastMineTime) / this.mineCooldown);
             const alpha = 0.25 + progress * 0.45;
-            const color = progress < 1 ? 0xffaa44 : 0x44ff88;
+            const color = progress < 1 ? 0xffaa44 : (costForSwing > this.fuel ? 0xff4444 : 0x44ff88);
             this.minePreview.lineStyle(2, color, alpha);
             targetTiles.forEach(t => {
                 this.minePreview.strokeRect(t.x * 32, t.y * 32, 32, 32);
@@ -438,6 +438,7 @@ class Player {
                 this.mineCostText.setPosition(first.x * 32 + 16, first.y * 32 - 4);
                 this.mineCostText.setVisible(true);
                 this.mineCostText.setAlpha(alpha + 0.2);
+                this.mineCostText.setColor(progress < 1 ? '#ffaa44' : (costForSwing > this.fuel ? '#ff4444' : '#44ff88'));
             } else {
                 this.mineCostText.setVisible(false);
             }

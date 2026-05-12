@@ -1,3 +1,12 @@
+## 2026-05-13 — Insufficient-Fuel Warning on Mining Preview
+- **QoL/UI:** The mining target preview now turns red when you don't have enough fuel to mine all targeted tiles
+  - Previously the preview only showed orange (on cooldown) or green (ready) — there was no visual warning that a swing would fail due to low fuel
+  - Now when `costForSwing > currentFuel`, both the tile outline and the `−XML` cost text turn bright red (`#ff4444`)
+  - Players can see the warning **before** committing the swing, giving them time to teleport back instead of wasting a cooldown on a failed mine
+  - The red state takes priority over the green ready state but still yields to the orange cooldown state — cooldown is always shown first
+  - Zero gameplay changes — purely informational, no new assets, minimal performance impact
+- Status: ✅ Pushed. Commit: `TBD`
+
 ## 2026-05-12 — Larger Button Hit Areas (+/−, DESTROY, QUEUE)
 - **UI/UX:** Expanded click targets for all small quantity buttons in ship room panels
   - Processing modal `+` / `−` buttons: increased from 20×20 to 28×28 (crusher, refinery, smelter)
