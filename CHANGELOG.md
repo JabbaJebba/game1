@@ -1,3 +1,13 @@
+## 2026-05-12 — Galaxy Science Indicators
+- **QoL/UI:** Added per-planet science tracking display to the galaxy map
+  - When selecting a planet, the info panel now shows `Science: X 🔬` if science has been collected from that planet's rock type
+  - Planets with collected science get a blue (`0x44aaff`) selection ring instead of the default teal — at-a-glance visual distinction between "researched" and "new" destinations
+  - Uses existing `mechState.science[rockType]` data — zero new data structures or save changes
+  - Helps players avoid revisiting planet types they've already maxed out science from, making galaxy navigation more strategic
+  - Science line only appears when >0 science has been collected; panel stays clean for unexplored planet types
+  - Fills a genuine UI gap: science was tracked in ship scene but invisible when choosing your next mining destination
+- Status: 🔄 Pending push
+
 ## 2026-05-12 — Inventory Hotbar Value Sorting
 - **QoL/UI:** Inventory hotbar now sorts items by value, with the most valuable resources always appearing leftmost
   - Gems appear first (Diamond → Emerald → Amethyst → Ruby → Sapphire), followed by metals (Gold → Iron → Copper), then rock

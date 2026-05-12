@@ -150,6 +150,7 @@ class GalaxyScene extends Phaser.Scene {
     selectPlanet(planet) {
         this.selectedPlanet = planet;
         const rt = planet.rockType;
+        const scienceHere = this.mechState.science[rt.name] || 0;
         this.infoPanel.setText(
             `${planet.name}\n` +
             `Rock: ${rt.name}\n` +
@@ -157,6 +158,7 @@ class GalaxyScene extends Phaser.Scene {
             `  Au: ${(rt.gold * 100).toFixed(0)}% | Gems: ${(rt.gemChance * 100).toFixed(0)}%\n` +
             `Depth: ${planet.depth} tiles | Size: ${planet.size}\n` +
             `Richness: ${(planet.richness * 100).toFixed(0)}%\n` +
+            `${scienceHere > 0 ? `Science: ${scienceHere} 🔬\n` : ''}` +
             `\n${planet.desc}\n\nClick LAUNCH to begin mining run.`
         );
 
@@ -170,6 +172,7 @@ class GalaxyScene extends Phaser.Scene {
         if (entry) {
             this.selectionRing.setPosition(entry.x, entry.y);
             this.selectionRing.setVisible(true);
+            this.selectionRing.setStrokeStyle(2, scienceHere > 0 ? 0x44aaff : 0x00d4aa, 0.6);
         }
 
         this.launchBtn = this.createButton(960, 500, 'LAUNCH', () => {
