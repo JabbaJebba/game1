@@ -9,7 +9,7 @@
   - Gold color (`#c9a84c`) with black stroke for readability against the dark UI
   - Creates a satisfying sell feedback loop: mining has loot text, selling has profit text
   - Zero gameplay changes, zero new assets, zero save changes
-- Status: ✅ Pushed. Commit: `TBD`
+- Status: ✅ Pushed. Commit: `288ed7f`
 
 ## 2026-05-12 — Mining Streak Milestones
 - **QoL/Game Feel:** Added satisfying milestone celebrations for consecutive mining streaks
