@@ -1,3 +1,13 @@
+## 2026-05-12 — Science Collection Sound
+- **Audio/Game Feel:** Added a bright discovery chime when collecting science at depth milestones
+  - Two ascending sine waves: primary 523Hz → 880Hz, secondary 784Hz → 1319Hz
+  - Very low amplitude (0.06/0.04 gain) so it never becomes annoying during repeated deep runs
+  - Fires alongside the existing floating "+X SCIENCE" text at 30m/60m/100m milestones
+  - Completes the science feedback chain: visual notification + audio cue = milestone feels like a genuine achievement
+  - Uses existing Web Audio infrastructure; auto-resumes suspended context (browser-safe)
+  - Zero gameplay changes, zero visual changes, zero new assets
+- Status: ✅ Pushed. Commit: `cb5ee28`
+
 ## 2026-05-12 — Jump Takeoff Sound
 - **Audio/Game Feel:** Added a quick springy "whoosh" sound when the player jumps
   - Sine wave sweep: 320Hz → 580Hz → 180Hz over ~120ms — light, upward, energetic feel
