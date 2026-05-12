@@ -1533,6 +1533,70 @@ class ShipScene extends Phaser.Scene {
         osc.stop(now + 0.1);
     }
 
+    playDestroySound() {
+        if (!this.audioCtx) return;
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume().catch(() => {});
+        }
+        const ctx = this.audioCtx;
+        const now = ctx.currentTime;
+        const dur = 0.18;
+
+        // Low rumbling noise — structural collapse / debris falling
+        const bufferSize = Math.floor(ctx.sampleRate * dur);
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+        }
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+        const nf = ctx.createBiquadFilter();
+        nf.type = 'lowpass';
+        nf.frequency.setValueAtTime(400, now);
+        nf.frequency.exponentialRampToValueAtTime(150, now + dur);
+        const ng = ctx.createGain();
+        ng.gain.setValueAtTime(0.12, now);
+        ng.gain.exponentialRampToValueAtTime(0.001, now + dur);
+        noise.connect(nf);
+        nf.connect(ng);
+        ng.connect(ctx.destination);
+        noise.start(now);
+
+        // Descending sawtooth — metallic structure tearing / groaning
+        const osc = ctx.createOscillator();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(280, now);
+        osc.frequency.exponentialRampToValueAtTime(60, now + dur * 0.7);
+        const og = ctx.createGain();
+        og.gain.setValueAtTime(0.06, now);
+        og.gain.exponentialRampToValueAtTime(0.001, now + dur);
+        osc.connect(og);
+        og.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + dur);
+
+        // Short highpass noise burst —碎片 / spark scatter
+        const burstSize = Math.floor(ctx.sampleRate * 0.08);
+        const burstBuf = ctx.createBuffer(1, burstSize, ctx.sampleRate);
+        const burstData = burstBuf.getChannelData(0);
+        for (let i = 0; i < burstSize; i++) {
+            burstData[i] = (Math.random() * 2 - 1) * (1 - i / burstSize);
+        }
+        const burst = ctx.createBufferSource();
+        burst.buffer = burstBuf;
+        const burstF = ctx.createBiquadFilter();
+        burstF.type = 'highpass';
+        burstF.frequency.value = 2000;
+        const burstG = ctx.createGain();
+        burstG.gain.setValueAtTime(0.04, now);
+        burstG.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        burst.connect(burstF);
+        burstF.connect(burstG);
+        burstG.connect(ctx.destination);
+        burst.start(now);
+    }
+
     showSellFloatText(revenue) {
         const label = this.add.text(1200, 60, `+${revenue}cr`, {
             fontSize: '14px', fill: '#c9a84c', fontFamily: 'monospace',
@@ -1940,6 +2004,7 @@ class ShipScene extends Phaser.Scene {
         }
 
         this.credits += refund;
+        this.playDestroySound();
         this.selectedRoomCell = null;
         this.calculatePower();
         this.updateUI();

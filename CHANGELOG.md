@@ -1,3 +1,12 @@
+## 2026-05-13 — Room Destruction Sound
+- **Audio/Game Feel:** Added a satisfying structural collapse sound when destroying rooms in the ship grid
+  - Three-layer procedural synthesis: low rumbling noise (400Hz→150Hz lowpass) for heavy debris falling, descending sawtooth (280→60Hz) for metallic tearing/groaning, and a brief highpass noise burst (2000Hz) for spark/scatter detail
+  - Total duration ~180ms, low amplitude (0.06–0.12 gain) so it never becomes annoying during repeated restructuring
+  - Fires immediately after a successful `destroyRoom()` — the moment the room is torn down and credits are refunded
+  - Pairs with the existing construction sound to create a complete audio feedback loop: build = lock/clunk, destroy = collapse/tear
+  - Zero gameplay changes, zero visual changes, zero save changes
+- Status: ✅ Pushed. Commit: `TBD`
+
 ## 2026-05-13 — Room Construction Sound
 - **Audio/Game Feel:** Added a satisfying mechanical construction sound when placing rooms in the ship grid
   - Two-layer procedural synthesis: low filtered noise (600Hz lowpass) for a heavy mechanical thunk, plus a short descending triangle wave (320→120Hz) for a metallic lock/clunk feel
