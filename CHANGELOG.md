@@ -7,7 +7,7 @@
   - Fills a genuine audio gap: selling had a coin sound, but building — one of the most common ship actions — was completely silent
   - Pairs with the existing save confirmation flash to create a complete feedback loop: sound + flash = "your room is placed and saved"
   - Zero gameplay changes, zero visual changes, zero save changes
-- Status: ⏳ Pending push
+- Status: ✅ Pushed. Commit: `d0a6dcf`
 
 ## 2026-05-13 — Insufficient-Fuel Warning on Mining Preview
 - **QoL/UI:** The mining target preview now turns red when you don't have enough fuel to mine all targeted tiles
