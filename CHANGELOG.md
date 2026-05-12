@@ -1,3 +1,15 @@
+## 2026-05-12 — Mining Streak Milestones
+- **QoL/Game Feel:** Added satisfying milestone celebrations for consecutive mining streaks
+  - When the player reaches streak counts of 10, 25, or 50, a special celebration triggers
+  - Extra screen shake (90ms/140ms/220ms at increasing intensity) — stronger than normal mining shake
+  - Streak text briefly scales to 1.6× then bounces back with `Back.easeOut` tween for a juicy pop
+  - Gold/orange gem sparkles spawn above the player for visual flair
+  - Milestones only fire when the streak text is already showing (streak > 1), keeping the HUD clean
+  - Celebration is layered on top of existing streak system — colors, size growth, and fade behavior are unchanged
+  - Rewards players who find a mining rhythm and makes long streaks feel genuinely satisfying
+  - Zero gameplay changes, zero new assets, zero save changes
+- Status: 🔄 In progress
+
 ## 2026-05-12 — Walking Bob Animation
 - **QoL/Game Feel:** Added a subtle walk bob to the player character when moving on the ground
   - Body and eyes gently bob up and down based on horizontal position (`sin(x * 0.35) * 2.5px`)

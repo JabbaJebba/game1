@@ -627,6 +627,23 @@ class Player {
                 this.streakText = this.scene.add.text(this.x, this.y - this.height - 24, `×${this.miningStreak}`, {
                     fontSize: `${12 * s}px`, fill: c, fontFamily: 'monospace', stroke: '#000000', strokeThickness: 2
                 }).setOrigin(0.5).setDepth(10);
+
+                // Milestone celebration: extra shake + pulse + sparkles at 10/25/50
+                if (this.miningStreak === 10 || this.miningStreak === 25 || this.miningStreak === 50) {
+                    const intensity = this.miningStreak === 10 ? 0.006 : this.miningStreak === 25 ? 0.009 : 0.014;
+                    const duration = this.miningStreak === 10 ? 90 : this.miningStreak === 25 ? 140 : 220;
+                    this.scene.cameras.main.shake(duration, intensity);
+                    this.streakText.setScale(1.6);
+                    this.scene.tweens.add({
+                        targets: this.streakText,
+                        scaleX: 1,
+                        scaleY: 1,
+                        duration: 300,
+                        ease: 'Back.easeOut'
+                    });
+                    const sparkleColor = this.miningStreak >= 50 ? 0xffd700 : 0xffaa44;
+                    this.scene.spawnGemSparkle(this.x, this.y - this.height * 0.5, sparkleColor);
+                }
             }
             this.streakedThisSwing = true;
         }
