@@ -7,7 +7,7 @@
   - Shadow stays pinned to the ground (no bob) so it creates a clean "character moving over fixed shadow" effect
   - Zero gameplay changes: logical position (`this.x`/`this.y`) is untouched, collision and snapping are unaffected
   - Pairs with existing walk dust, speed lines, and idle breathing to make movement feel genuinely alive
-- Status: ⏳ In progress
+- Status: ✅ Pushed. Commit: `fe06c2b`
 
 ## 2026-05-12 — Science Collection Sound
 - **Audio/Game Feel:** Added a bright discovery chime when collecting science at depth milestones
