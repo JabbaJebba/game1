@@ -569,7 +569,18 @@ class GameScene extends Phaser.Scene {
     updateInventoryBar() {
         this.invBar.removeAll(true);
         let x = 0;
-        const entries = Object.entries(this.player.inventory).filter(([k, v]) => v > 0);
+        const entries = Object.entries(this.player.inventory)
+            .filter(([k, v]) => v > 0)
+            .sort((a, b) => {
+                const priority = {
+                    [this.world.TILE_DIAMOND]: 500, [this.world.TILE_EMERALD]: 400,
+                    [this.world.TILE_AMETHYST]: 300, [this.world.TILE_RUBY]: 200,
+                    [this.world.TILE_SAPPHIRE]: 100, [this.world.TILE_GOLD]: 50,
+                    [this.world.TILE_IRON]: 30, [this.world.TILE_COPPER]: 20,
+                    [this.world.TILE_ROCK]: 1, [this.world.TILE_GRASS]: 0,
+                };
+                return (priority[parseInt(b[0])] || 0) - (priority[parseInt(a[0])] || 0);
+            });
         if (entries.length === 0) return;
         entries.forEach(([tileId, count]) => {
             const tile = parseInt(tileId);
