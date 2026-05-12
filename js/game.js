@@ -589,6 +589,8 @@ class GameScene extends Phaser.Scene {
                     fontSize: '14px', fill: '#00d4aa', fontFamily: 'monospace', stroke: '#000000', strokeThickness: 2
                 }).setOrigin(0.5);
                 this.tweens.add({ targets: note, y: note.y - 40, alpha: 0, duration: 1500, ease: 'Power1', onComplete: () => note.destroy() });
+                // Audio notification — bright discovery chime
+                this.playScienceSound();
             }
         });
 
@@ -1211,6 +1213,41 @@ class GameScene extends Phaser.Scene {
             [this.world.TILE_AMETHYST]: 'Amethyst',
         };
         return names[tile] || 'Unknown';
+    }
+
+    playScienceSound() {
+        if (!this.audioCtx) return;
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume().catch(() => {});
+        }
+        const ctx = this.audioCtx;
+        const now = ctx.currentTime;
+
+        // Primary: bright ascending sine — discovery feel
+        const osc1 = ctx.createOscillator();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(523, now);
+        osc1.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+        const g1 = ctx.createGain();
+        g1.gain.setValueAtTime(0.06, now);
+        g1.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+        osc1.connect(g1);
+        g1.connect(ctx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.18);
+
+        // Secondary: higher harmonic for shimmer
+        const osc2 = ctx.createOscillator();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(784, now + 0.04);
+        osc2.frequency.exponentialRampToValueAtTime(1319, now + 0.14);
+        const g2 = ctx.createGain();
+        g2.gain.setValueAtTime(0.04, now + 0.04);
+        g2.gain.exponentialRampToValueAtTime(0.001, now + 0.20);
+        osc2.connect(g2);
+        g2.connect(ctx.destination);
+        osc2.start(now + 0.04);
+        osc2.stop(now + 0.20);
     }
 
     generateStars() {
