@@ -19,6 +19,7 @@ class GameScene extends Phaser.Scene {
             activeChassis: 'scout',
             modules: [],
             science: {},
+            visitedPlanets: {},
         };
         this.launchTime = data.launchTime || null;
     }

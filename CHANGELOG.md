@@ -1,3 +1,13 @@
+## 2026-05-12 — Galaxy Map: Visited Planet Indicators
+- **QoL/UI:** Added a subtle visited-planet badge to the galaxy map
+  - A small green dot (5px, `#44ff88`) appears at the top-right of any planet circle the player has physically launched to
+  - Helps distinguish which specific planets have been explored vs. which rock-types have had science collected
+  - Particularly useful once multiple planets share the same rock type (e.g., two Basalt worlds)
+  - Badge has a white stroke for contrast against dark planet colors
+  - Persists in save data via `mechState.visitedPlanets` — zero new save keys, zero breaking changes
+  - Marked automatically on LAUNCH, so even if the player abandons a run early, the planet still shows as visited
+- Status: ⏳ In progress
+
 ## 2026-05-12 — Sell Celebration: Coin Sound + Credit Float Text
 - **Audio/Game Feel:** Added a satisfying procedural coin sound when selling gems at the trade terminal
   - Two quick ascending sine pings: 880→1200Hz, then 1200→1600Hz, ~80ms each

@@ -18,6 +18,7 @@ class GalaxyScene extends Phaser.Scene {
             activeChassis: 'scout',
             modules: [],
             science: {},
+            visitedPlanets: {},
         };
         this.launchTime = data.launchTime || null;
     }
@@ -132,6 +133,12 @@ class GalaxyScene extends Phaser.Scene {
                 fontSize: '10px', fill: '#aaaaaa'
             }).setOrigin(0.5);
 
+            // Visited indicator
+            if (this.mechState.visitedPlanets[planet.name]) {
+                const badge = this.add.circle(px + 22, py - 22, 5, 0x44ff88, 0.9);
+                badge.setStrokeStyle(1, 0xffffff, 0.5);
+            }
+
             this.planetObjects.push({ planet, x: px, y: py, circle });
         });
 
@@ -184,6 +191,7 @@ class GalaxyScene extends Phaser.Scene {
             this.rockCompositions[rt.name] = { ...rt };
             this.cameras.main.fadeOut(150, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', () => {
+                this.mechState.visitedPlanets[planet.name] = true;
                 this.scene.start('GameScene', {
                     planet: planet,
                     shipGrid: this.shipGrid,

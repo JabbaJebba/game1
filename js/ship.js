@@ -24,6 +24,7 @@ class ShipScene extends Phaser.Scene {
             activeChassis: 'scout',
             modules: [],
             science: {},
+            visitedPlanets: {},
         };
         // Offline processing: if we were away, catch up
         const savedLaunchTime = data.launchTime || this.launchTime || null;
