@@ -8,7 +8,7 @@
   - Celebration is layered on top of existing streak system — colors, size growth, and fade behavior are unchanged
   - Rewards players who find a mining rhythm and makes long streaks feel genuinely satisfying
   - Zero gameplay changes, zero new assets, zero save changes
-- Status: 🔄 In progress
+- Status: ✅ Pushed. Commit: `59c6553`
 
 ## 2026-05-12 — Walking Bob Animation
 - **QoL/Game Feel:** Added a subtle walk bob to the player character when moving on the ground
