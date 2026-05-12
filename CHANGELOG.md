@@ -7,7 +7,7 @@
   - Only appears when there are mineable tiles with non-zero cost; hidden for empty swings or when no mine key is held
   - Helps players budget fuel in the tight economy — you see the cost before committing the swing
   - Zero gameplay changes — purely informational, no new assets, minimal performance impact
-- Status: ✅ Pushed. Commit: TBD
+- Status: ✅ Pushed. Commit: `292f961`
 
 ## 2026-05-12 — Run Stats Chassis Label
 - **QoL/UI:** Added active chassis name to the run stats panel header
