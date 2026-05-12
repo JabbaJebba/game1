@@ -88,6 +88,21 @@ class GalaxyScene extends Phaser.Scene {
 
         this.planetObjects = [];
 
+        // Selection ring — appears around the currently selected planet
+        this.selectionRing = this.add.ellipse(0, 0, 90, 90, 0xffffff, 0).setStrokeStyle(2, 0x00d4aa, 0.6);
+        this.selectionRing.setVisible(false);
+        this.selectionRing.setDepth(5);
+        this.tweens.add({
+            targets: this.selectionRing,
+            scaleX: 1.15,
+            scaleY: 1.15,
+            alpha: { from: 0.6, to: 0.2 },
+            duration: 900,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+
         this.planets.forEach((planet, i) => {
             const px = startX + (i % 3) * gapX;
             const py = startY + Math.floor(i / 3) * gapY;
@@ -116,6 +131,8 @@ class GalaxyScene extends Phaser.Scene {
             this.add.text(px, py + 66, planet.rockType.name, {
                 fontSize: '10px', fill: '#aaaaaa'
             }).setOrigin(0.5);
+
+            this.planetObjects.push({ planet, x: px, y: py, circle });
         });
 
         this.add.text(860, 120, 'SHIP STATUS', { fontSize: '18px', fill: '#00FF00' });
@@ -147,6 +164,14 @@ class GalaxyScene extends Phaser.Scene {
             this.launchBtn.rect.destroy();
             this.launchBtn.text.destroy();
         }
+
+        // Move selection ring to the selected planet
+        const entry = this.planetObjects.find(p => p.planet === planet);
+        if (entry) {
+            this.selectionRing.setPosition(entry.x, entry.y);
+            this.selectionRing.setVisible(true);
+        }
+
         this.launchBtn = this.createButton(960, 500, 'LAUNCH', () => {
             if (this.shipFuel < 25) {
                 this.infoPanel.setText('Not enough fuel! Need 25L to launch. Return to ship to buy fuel.');

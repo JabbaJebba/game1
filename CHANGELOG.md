@@ -1,3 +1,13 @@
+## 2026-05-12 — Galaxy Planet Selection Ring
+- **QoL/UI:** Added a visual selection ring around the currently selected planet in the galaxy map
+  - Teal (`0x00d4aa`) dashed-style ellipse at 90×90px, positioned around the chosen planet when clicked
+  - Gentle pulsing animation: scales 1.0 → 1.15 and alpha 0.6 → 0.2 over 900ms, looping infinitely with `Sine.easeInOut`
+  - Appears only after a planet is selected; hidden initially
+  - Planet objects are now stored in `this.planetObjects` array so the ring can lookup position by planet reference
+  - Pairs with the existing hover scale effect to give the galaxy map clear visual state: idle → hover (scale up) → selected (persistent ring)
+  - Purely visual — no gameplay, no data changes, no scene transition changes
+- Status: ✅ Pushed. Commit: TBD
+
 ## 2026-05-12 — Chassis Max Depth Gauge Marker
 - **QoL/UI:** Added a visual max-depth limit marker to the depth gauge
   - Shows the operational depth limit of the current mech chassis as an orange tick mark on the depth gauge
