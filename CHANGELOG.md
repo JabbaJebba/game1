@@ -718,6 +718,6 @@
   - Uses existing `runStats` data — zero new save keys, zero breaking changes
   - Extends teleport delay from 400ms to 2600ms so the summary is readable before scene transition
   - No gameplay changes — purely informational and satisfying closure for every mining run
-- Status: 🔄 Queued — pending testing
+- Status: ✅ Pushed. Commit: `7636fe5`
 
 ---
