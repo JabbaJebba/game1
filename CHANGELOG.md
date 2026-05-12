@@ -708,3 +708,16 @@
 - [x] Add debris particles on mining
 - [x] Add floating loot text
 - [x] Low fuel warning: "NO FUEL" float text when mining empty + red pulsing fuel bar border below 2L
+
+## 2026-05-13 — Run Summary Panel
+- **QoL/UI:** Post-run summary panel when teleporting back to ship
+  - "RUN COMPLETE" centered panel with dark background and teal border
+  - Shows: tiles mined, max depth, fuel consumed, science gained, time on surface, total gem value
+  - Only appears if you actually mined something or spent >5 seconds on the planet
+  - Panel fades in over 250ms, stays for 2 seconds, then fades out over 400ms
+  - Uses existing `runStats` data — zero new save keys, zero breaking changes
+  - Extends teleport delay from 400ms to 2600ms so the summary is readable before scene transition
+  - No gameplay changes — purely informational and satisfying closure for every mining run
+- Status: 🔄 Queued — pending testing
+
+---

@@ -315,6 +315,65 @@ class GameScene extends Phaser.Scene {
         noise.start(now);
     }
 
+    showRunSummary() {
+        const elapsedMs = Date.now() - this.runStats.startTime;
+        const elapsedSec = Math.floor(elapsedMs / 1000);
+        const runValue = this.runStatsText.text.split('\n').find(l => l.startsWith('Value:'))?.replace('Value: ', '') || '0cr';
+        let lines = [
+            `⛏  ${this.runStats.tilesMined} tiles mined`,
+            `📏  ${this.runStats.maxDepthReached}m max depth`,
+            `⛽  ${this.runStats.fuelUsed.toFixed(2)}L fuel consumed`,
+        ];
+        if (this.runStats.scienceGained > 0) lines.push(`🔬  +${this.runStats.scienceGained} science`);
+        lines.push(`⏱  ${elapsedSec}s on surface`);
+        lines.push(`💰  ${runValue} in gems`);
+
+        const panelW = 340;
+        const panelH = 32 + lines.length * 26 + 24;
+        const cx = 640;
+        const cy = 360;
+
+        const bg = this.add.rectangle(cx, cy, panelW, panelH, 0x0c0c18, 0.95).setOrigin(0.5).setScrollFactor(0).setDepth(101);
+        bg.setStrokeStyle(2, 0x00d4aa, 0.6);
+
+        const title = this.add.text(cx, cy - panelH / 2 + 28, 'RUN COMPLETE', {
+            fontSize: '18px', fill: '#00d4aa', fontFamily: 'monospace', letterSpacing: 3
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(102);
+
+        const sep = this.add.graphics().setScrollFactor(0).setDepth(101);
+        sep.lineStyle(1, 0x222233, 1);
+        sep.lineBetween(cx - panelW / 2 + 20, cy - panelH / 2 + 48, cx + panelW / 2 - 20, cy - panelH / 2 + 48);
+
+        const statsText = this.add.text(cx, cy - panelH / 2 + 60 + (lines.length * 26) / 2 - 13, lines.join('\n'), {
+            fontSize: '13px', fill: '#aabbcc', fontFamily: 'monospace', lineSpacing: 8, align: 'center'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(102);
+
+        // Fade in
+        [bg, title, statsText].forEach(obj => obj.setAlpha(0));
+        this.tweens.add({
+            targets: [bg, title, statsText],
+            alpha: 1,
+            duration: 250,
+            ease: 'Power1'
+        });
+
+        // Auto-fade out after 2 seconds
+        this.time.delayedCall(2000, () => {
+            this.tweens.add({
+                targets: [bg, title, statsText, sep],
+                alpha: 0,
+                duration: 400,
+                ease: 'Power1',
+                onComplete: () => {
+                    bg.destroy();
+                    title.destroy();
+                    statsText.destroy();
+                    sep.destroy();
+                }
+            });
+        });
+    }
+
     teleportBack() {
         this.playTeleportSound();
         // Merge player inventory into ship inventory (convert tile IDs to names)
@@ -350,8 +409,14 @@ class GameScene extends Phaser.Scene {
         // Show save confirmation flash
         this.showSaveFlash();
 
-        // Brief delay so the flash is visible before transition
-        this.time.delayedCall(400, () => {
+        // Show run summary if the player actually did something
+        const elapsedMs = Date.now() - this.runStats.startTime;
+        if (this.runStats.tilesMined > 0 || elapsedMs > 5000) {
+            this.showRunSummary();
+        }
+
+        // Delay so the flash + summary are visible before transition
+        this.time.delayedCall(2600, () => {
             this.cameras.main.fadeOut(150, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', () => {
                 this.scene.start('ShipScene', {
