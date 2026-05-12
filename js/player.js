@@ -328,9 +328,8 @@ class Player {
         }
 
         // --- SNAP TO TILE GRID ---
-        // Only snap when on ground, nearly stopped, and not holding movement keys
-        const holdingMoveKey = keys.mineLeft.isDown || keys.left.isDown || keys.mineRight.isDown || keys.right.isDown;
-        if (this.onGround && !holdingMoveKey && Math.abs(this.vx) < 5) {
+        // Snap when on ground and nearly stopped — 1-tile chars ALWAYS snap to centers
+        if (this.onGround && Math.abs(this.vx) < 5) {
             // 1-tile characters snap to tile centers (+16), 2-tile to tile boundaries
             const offset = this.width === 32 ? 16 : 0;
             const snapX = Math.round((this.x - offset) / 32) * 32 + offset;
@@ -349,6 +348,7 @@ class Player {
                     this.x = oldX;
                 } else {
                     this.sprite.x = this.x + this.mineRecoilX;
+                    this.shadow.x = this.x + this.mineRecoilX;
                     const eyeOffsetX = this.facingRight ? 3 : -3;
                     this.eyeLeft.x = this.x - 12 + eyeOffsetX + this.mineRecoilX;
                     this.eyeRight.x = this.x + 12 + eyeOffsetX + this.mineRecoilX;
