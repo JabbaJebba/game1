@@ -1,3 +1,13 @@
+## 2026-05-12 — Larger Button Hit Areas (+/−, DESTROY, QUEUE)
+- **UI/UX:** Expanded click targets for all small quantity buttons in ship room panels
+  - Processing modal `+` / `−` buttons: increased from 20×20 to 28×28 (crusher, refinery, smelter)
+  - Sell modal `+` / `−` buttons: increased from 28×28 to 36×36
+  - Custom sell `+` / `−` buttons: increased from 24×24 to 32×32
+  - All text labels on top of buttons are now also interactive — clicking the text itself fires the action
+  - `createPanelButton` helper now makes its text label interactive too (fixes QUEUE, DESTROY, BACK, SELL, UPGRADE, etc.)
+  - Zero gameplay changes, zero visual changes beyond slightly larger invisible hit boxes
+- Status: ⏳ In progress
+
 ## 2026-05-12 — Galaxy Map: Visited Planet Indicators
 - **QoL/UI:** Added a subtle visited-planet badge to the galaxy map
   - A small green dot (5px, `#44ff88`) appears at the top-right of any planet circle the player has physically launched to

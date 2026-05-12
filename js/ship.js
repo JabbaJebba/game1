@@ -882,22 +882,26 @@ class ShipScene extends Phaser.Scene {
                 }).setOrigin(0.5);
                 this.roomPanelButtons.add(customTxt);
 
-                const minusBtn = this.add.rectangle(-50, customY + 18, 28, 28, 0x1a1a28).setInteractive();
-                const minusTxt = this.add.text(-50, customY + 18, '-', { fontSize: '13px', fill: '#cccccc' }).setOrigin(0.5);
+                const minusBtn = this.add.rectangle(-50, customY + 18, 36, 36, 0x1a1a28).setInteractive();
+                const minusTxt = this.add.text(-50, customY + 18, '-', { fontSize: '13px', fill: '#cccccc' }).setOrigin(0.5).setInteractive();
                 const amtTxt = this.add.text(0, customY + 18, String(this.panelSellCustom), {
                     fontSize: '13px', fill: '#cccccc', fontFamily: 'monospace'
                 }).setOrigin(0.5);
-                const plusBtn = this.add.rectangle(50, customY + 18, 28, 28, 0x1a1a28).setInteractive();
-                const plusTxt = this.add.text(50, customY + 18, '+', { fontSize: '13px', fill: '#cccccc' }).setOrigin(0.5);
+                const plusBtn = this.add.rectangle(50, customY + 18, 36, 36, 0x1a1a28).setInteractive();
+                const plusTxt = this.add.text(50, customY + 18, '+', { fontSize: '13px', fill: '#cccccc' }).setOrigin(0.5).setInteractive();
 
-                minusBtn.on('pointerdown', () => {
+                const dec = () => {
                     this.justClickedModal = true;
                     if (this.panelSellCustom > 0) { this.panelSellCustom--; this.openRoomControlsPanel(room); }
-                });
-                plusBtn.on('pointerdown', () => {
+                };
+                const inc = () => {
                     this.justClickedModal = true;
                     if (this.panelSellCustom < count) { this.panelSellCustom++; this.openRoomControlsPanel(room); }
-                });
+                };
+                minusBtn.on('pointerdown', dec);
+                minusTxt.on('pointerdown', dec);
+                plusBtn.on('pointerdown', inc);
+                plusTxt.on('pointerdown', inc);
 
                 const sellCustomBtn = this.createPanelButton(0, customY + 58, `SELL ${this.panelSellCustom}`, () => {
                     this.justClickedModal = true;
@@ -1012,9 +1016,12 @@ class ShipScene extends Phaser.Scene {
         const label = this.add.text(x, y, text, {
             fontSize: '11px', fill: textColor, fontFamily: 'monospace'
         }).setOrigin(0.5);
+        const onClick = () => { this.justClickedModal = true; callback(); };
         rect.on('pointerover', () => { rect.setFillStyle(color + 0x111111); label.setFill('#ffffff'); });
         rect.on('pointerout', () => { rect.setFillStyle(color); label.setFill(textColor); });
-        rect.on('pointerdown', () => { this.justClickedModal = true; callback(); });
+        rect.on('pointerdown', onClick);
+        label.setInteractive();
+        label.on('pointerdown', onClick);
         this.roomPanelButtons.add([rect, label]);
         return { rect, text: label };
     }
@@ -1102,22 +1109,26 @@ class ShipScene extends Phaser.Scene {
                         fontSize: '9px', fill: '#555555', fontFamily: 'monospace'
                     }).setOrigin(0.5);
 
-                    const minBtn = this.add.rectangle(62, y, 20, 20, 0x1a1a28).setInteractive();
-                    const minTxt = this.add.text(62, y, '-', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5);
+                    const minBtn = this.add.rectangle(62, y, 28, 28, 0x1a1a28).setInteractive();
+                    const minTxt = this.add.text(62, y, '-', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5).setInteractive();
                     const amtTxt = this.add.text(84, y, String(amt), {
                         fontSize: '10px', fill: '#cccccc', fontFamily: 'monospace'
                     }).setOrigin(0.5);
-                    const plBtn = this.add.rectangle(106, y, 20, 20, 0x1a1a28).setInteractive();
-                    const plTxt = this.add.text(106, y, '+', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5);
+                    const plBtn = this.add.rectangle(106, y, 28, 28, 0x1a1a28).setInteractive();
+                    const plTxt = this.add.text(106, y, '+', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5).setInteractive();
 
-                    minBtn.on('pointerdown', () => {
+                    const dec = () => {
                         this.justClickedModal = true;
                         if (this.modalAmounts[rowKey] > 1) { this.modalAmounts[rowKey]--; this.openRoomControlsPanel(room); }
-                    });
-                    plBtn.on('pointerdown', () => {
+                    };
+                    const inc = () => {
                         this.justClickedModal = true;
                         if (this.modalAmounts[rowKey] < count) { this.modalAmounts[rowKey]++; this.openRoomControlsPanel(room); }
-                    });
+                    };
+                    minBtn.on('pointerdown', dec);
+                    minTxt.on('pointerdown', dec);
+                    plBtn.on('pointerdown', inc);
+                    plTxt.on('pointerdown', inc);
 
                     const qBtn = this.createPanelButton(145, y, 'QUEUE', () => {
                         const qAmt = this.modalAmounts[rowKey];
@@ -1163,22 +1174,26 @@ class ShipScene extends Phaser.Scene {
                         fontSize: '9px', fill: '#555555', fontFamily: 'monospace'
                     }).setOrigin(0.5);
 
-                    const minBtn = this.add.rectangle(62, y, 20, 20, 0x1a1a28).setInteractive();
-                    const minTxt = this.add.text(62, y, '-', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5);
+                    const minBtn = this.add.rectangle(62, y, 28, 28, 0x1a1a28).setInteractive();
+                    const minTxt = this.add.text(62, y, '-', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5).setInteractive();
                     const amtTxt = this.add.text(84, y, String(amt), {
                         fontSize: '10px', fill: '#cccccc', fontFamily: 'monospace'
                     }).setOrigin(0.5);
-                    const plBtn = this.add.rectangle(106, y, 20, 20, 0x1a1a28).setInteractive();
-                    const plTxt = this.add.text(106, y, '+', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5);
+                    const plBtn = this.add.rectangle(106, y, 28, 28, 0x1a1a28).setInteractive();
+                    const plTxt = this.add.text(106, y, '+', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5).setInteractive();
 
-                    minBtn.on('pointerdown', () => {
+                    const dec = () => {
                         this.justClickedModal = true;
                         if (this.modalAmounts[rowKey] > 1) { this.modalAmounts[rowKey]--; this.openRoomControlsPanel(room); }
-                    });
-                    plBtn.on('pointerdown', () => {
+                    };
+                    const inc = () => {
                         this.justClickedModal = true;
                         if (this.modalAmounts[rowKey] < canMake) { this.modalAmounts[rowKey]++; this.openRoomControlsPanel(room); }
-                    });
+                    };
+                    minBtn.on('pointerdown', dec);
+                    minTxt.on('pointerdown', dec);
+                    plBtn.on('pointerdown', inc);
+                    plTxt.on('pointerdown', inc);
 
                     const qBtn = this.createPanelButton(145, y, 'QUEUE', () => {
                         const qAmt = this.modalAmounts[rowKey];
@@ -1226,22 +1241,26 @@ class ShipScene extends Phaser.Scene {
                 fontSize: '8px', fill: '#444444', fontFamily: 'monospace'
             }).setOrigin(0, 0.5);
 
-            const minBtn = this.add.rectangle(62, y, 20, 20, 0x1a1a28).setInteractive();
-            const minTxt = this.add.text(62, y, '-', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5);
+            const minBtn = this.add.rectangle(62, y, 28, 28, 0x1a1a28).setInteractive();
+            const minTxt = this.add.text(62, y, '-', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5).setInteractive();
             const amtTxt = this.add.text(84, y, String(amt), {
                 fontSize: '10px', fill: '#cccccc', fontFamily: 'monospace'
             }).setOrigin(0.5);
-            const plBtn = this.add.rectangle(106, y, 20, 20, 0x1a1a28).setInteractive();
-            const plTxt = this.add.text(106, y, '+', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5);
+            const plBtn = this.add.rectangle(106, y, 28, 28, 0x1a1a28).setInteractive();
+            const plTxt = this.add.text(106, y, '+', { fontSize: '11px', fill: '#888888' }).setOrigin(0.5).setInteractive();
 
-            minBtn.on('pointerdown', () => {
+            const dec = () => {
                 this.justClickedModal = true;
                 if (this.modalAmounts[rowKey] > 1) { this.modalAmounts[rowKey]--; this.openRoomControlsPanel(room); }
-            });
-            plBtn.on('pointerdown', () => {
+            };
+            const inc = () => {
                 this.justClickedModal = true;
                 if (this.modalAmounts[rowKey] < canMake) { this.modalAmounts[rowKey]++; this.openRoomControlsPanel(room); }
-            });
+            };
+            minBtn.on('pointerdown', dec);
+            minTxt.on('pointerdown', dec);
+            plBtn.on('pointerdown', inc);
+            plTxt.on('pointerdown', inc);
 
             const qBtn = this.createPanelButton(145, y, 'QUEUE', () => {
                 const qAmt = Math.min(this.modalAmounts[rowKey], canMake);
@@ -1343,20 +1362,24 @@ class ShipScene extends Phaser.Scene {
             fontSize: '13px', fill: '#cccccc', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
-        const minusBtn = this.add.rectangle(20, 8, 24, 24, 0x1a1a28).setInteractive();
-        const minusTxt = this.add.text(20, 8, '-', { fontSize: '14px', fill: '#cccccc' }).setOrigin(0.5);
-        minusBtn.on('pointerdown', () => {
+        const minusBtn = this.add.rectangle(20, 8, 32, 32, 0x1a1a28).setInteractive();
+        const minusTxt = this.add.text(20, 8, '-', { fontSize: '14px', fill: '#cccccc' }).setOrigin(0.5).setInteractive();
+        const dec = () => {
             let val = parseInt(this.sellCustomText.text) || 0;
             if (val > 0) this.sellCustomText.setText(String(val - 1));
-        });
+        };
+        minusBtn.on('pointerdown', dec);
+        minusTxt.on('pointerdown', dec);
 
-        const plusBtn = this.add.rectangle(120, 8, 24, 24, 0x1a1a28).setInteractive();
-        const plusTxt = this.add.text(120, 8, '+', { fontSize: '14px', fill: '#cccccc' }).setOrigin(0.5);
-        plusBtn.on('pointerdown', () => {
+        const plusBtn = this.add.rectangle(120, 8, 32, 32, 0x1a1a28).setInteractive();
+        const plusTxt = this.add.text(120, 8, '+', { fontSize: '14px', fill: '#cccccc' }).setOrigin(0.5).setInteractive();
+        const inc = () => {
             let val = parseInt(this.sellCustomText.text) || 0;
             const max = this.pendingSellGem ? (this.shipInventory[this.pendingSellGem] || 0) : 0;
             if (val < max) this.sellCustomText.setText(String(val + 1));
-        });
+        };
+        plusBtn.on('pointerdown', inc);
+        plusTxt.on('pointerdown', inc);
 
         const sellCustomBtn = this.add.rectangle(70, 50, 100, 26, 0x224422).setInteractive();
         const sellCustomTxt = this.add.text(70, 50, 'SELL', {
