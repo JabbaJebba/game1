@@ -1,3 +1,16 @@
+## 2026-05-12 — Sell Celebration: Coin Sound + Credit Float Text
+- **Audio/Game Feel:** Added a satisfying procedural coin sound when selling gems at the trade terminal
+  - Two quick ascending sine pings: 880→1200Hz, then 1200→1600Hz, ~80ms each
+  - Classic register "cha-ching" feel — bright, celebratory, low amplitude (0.06–0.08)
+  - Fires on every successful sale alongside the existing credit update
+  - Uses existing Web Audio infrastructure; auto-resumes suspended context (browser-safe)
+- **QoL/UI:** Added floating "+Xcr" gold text that appears above the credits counter when selling
+  - Text drifts upward 30px and fades over 900ms — same pattern as mining loot text
+  - Gold color (`#c9a84c`) with black stroke for readability against the dark UI
+  - Creates a satisfying sell feedback loop: mining has loot text, selling has profit text
+  - Zero gameplay changes, zero new assets, zero save changes
+- Status: ✅ Pushed. Commit: `TBD`
+
 ## 2026-05-12 — Mining Streak Milestones
 - **QoL/Game Feel:** Added satisfying milestone celebrations for consecutive mining streaks
   - When the player reaches streak counts of 10, 25, or 50, a special celebration triggers

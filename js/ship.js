@@ -98,6 +98,9 @@ class ShipScene extends Phaser.Scene {
 
         this.cameras.main.fadeIn(150, 0, 0, 0);
 
+        // Web Audio for procedural UI sounds
+        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
         // Title
         this.add.text(640, 28, 'SHIP COMMAND', {
             fontSize: '16px', fill: '#445566', fontFamily: 'monospace', letterSpacing: 6
@@ -1411,7 +1414,12 @@ class ShipScene extends Phaser.Scene {
 
         this.shipInventory[gemName] -= qty;
         if (this.shipInventory[gemName] <= 0) delete this.shipInventory[gemName];
-        this.credits += qty * price;
+        const revenue = qty * price;
+        this.credits += revenue;
+
+        // Sell celebration — coin sound + floating credit text
+        this.playSellSound();
+        this.showSellFloatText(revenue);
 
         this.panelSellCustom = 0;
         if ((this.shipInventory[gemName] || 0) <= 0) {
@@ -1422,6 +1430,55 @@ class ShipScene extends Phaser.Scene {
             const room = this.shipGrid[this.selectedRoomCell.x][this.selectedRoomCell.y];
             if (room && room.type === 'trade') this.openRoomControlsPanel(room);
         }
+    }
+
+    playSellSound() {
+        if (!this.audioCtx) return;
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume().catch(() => {});
+        }
+        const ctx = this.audioCtx;
+        const now = ctx.currentTime;
+
+        // Two quick ascending sine pings — classic coin register sound
+        const ping1 = ctx.createOscillator();
+        ping1.type = 'sine';
+        ping1.frequency.setValueAtTime(880, now);
+        ping1.frequency.exponentialRampToValueAtTime(1200, now + 0.06);
+        const g1 = ctx.createGain();
+        g1.gain.setValueAtTime(0.08, now);
+        g1.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        ping1.connect(g1);
+        g1.connect(ctx.destination);
+        ping1.start(now);
+        ping1.stop(now + 0.08);
+
+        const ping2 = ctx.createOscillator();
+        ping2.type = 'sine';
+        ping2.frequency.setValueAtTime(1200, now + 0.06);
+        ping2.frequency.exponentialRampToValueAtTime(1600, now + 0.12);
+        const g2 = ctx.createGain();
+        g2.gain.setValueAtTime(0.06, now + 0.06);
+        g2.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+        ping2.connect(g2);
+        g2.connect(ctx.destination);
+        ping2.start(now + 0.06);
+        ping2.stop(now + 0.14);
+    }
+
+    showSellFloatText(revenue) {
+        const label = this.add.text(1200, 60, `+${revenue}cr`, {
+            fontSize: '14px', fill: '#c9a84c', fontFamily: 'monospace',
+            stroke: '#000000', strokeThickness: 2
+        }).setOrigin(1, 0.5).setScrollFactor(0).setDepth(100);
+        this.tweens.add({
+            targets: label,
+            y: label.y - 30,
+            alpha: 0,
+            duration: 900,
+            ease: 'Power1',
+            onComplete: () => label.destroy()
+        });
     }
 
     createTechTreePopup() {
