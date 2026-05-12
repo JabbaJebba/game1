@@ -1,3 +1,14 @@
+## 2026-05-12 — Mining Preview Fuel Cost Tooltip
+- **QoL/UI:** Added projected fuel cost display to the mining target preview
+  - When holding A/S/D, the preview now shows `−XML` (e.g. `−150ml`) above the first target tile
+  - Cost is calculated live from the actual tiles in the sweep: scans each target tile, skips air/bedrock, sums the per-tile fuel cost
+  - Heavy mech mining down (2 tiles × 75ml) shows `−150ml`; Scout mining left (2 tiles × 30ml) shows `−60ml`
+  - Text color matches the preview outline (orange when on cooldown, green when ready) with the same alpha
+  - Only appears when there are mineable tiles with non-zero cost; hidden for empty swings or when no mine key is held
+  - Helps players budget fuel in the tight economy — you see the cost before committing the swing
+  - Zero gameplay changes — purely informational, no new assets, minimal performance impact
+- Status: ✅ Pushed. Commit: TBD
+
 ## 2026-05-12 — Run Stats Chassis Label
 - **QoL/UI:** Added active chassis name to the run stats panel header
   - The first line now reads `RUN STATS — SCOUT` / `RUN STATS — MINER` / `RUN STATS — HEAVY`

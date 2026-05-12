@@ -124,6 +124,12 @@ class Player {
         this.minePreview = scene.add.graphics();
         this.minePreview.setDepth(5);
 
+        // Mine cost preview text — shows projected fuel cost for the swing
+        this.mineCostText = scene.add.text(0, 0, '', {
+            fontSize: '10px', fill: '#ffaa44', fontFamily: 'monospace',
+            stroke: '#000000', strokeThickness: 2
+        }).setOrigin(0.5, 1).setDepth(6).setVisible(false);
+
         // Mine cooldown ring
         this.cooldownRing = scene.add.graphics();
         this.cooldownRing.setDepth(6);
@@ -383,20 +389,33 @@ class Player {
             this.fallTrailTimer = 0;
         }
 
-        // Mining target preview — shows which tiles will be hit
+        // Mining target preview — shows which tiles will be hit + projected fuel cost
         this.minePreview.clear();
+        let targetTiles = [];
+        let costForSwing = 0;
         const miningKeyHeld = keys.mineLeft.isDown || keys.mineRight.isDown || keys.mineDown.isDown;
         if (miningKeyHeld) {
-            let targetTiles = [];
             if (keys.mineLeft.isDown) {
                 const { left, top, bottom } = this.getTileBounds();
-                for (let y = top; y <= bottom; y++) targetTiles.push({ x: left - 1, y });
+                for (let y = top; y <= bottom; y++) {
+                    targetTiles.push({ x: left - 1, y });
+                    const t = this.world.getTile(left - 1, y);
+                    if (t !== this.world.TILE_AIR && t !== this.world.TILE_BEDROCK) costForSwing += this.fuelCosts[t] || 0.05;
+                }
             } else if (keys.mineRight.isDown) {
                 const { right, top, bottom } = this.getTileBounds();
-                for (let y = top; y <= bottom; y++) targetTiles.push({ x: right + 1, y });
+                for (let y = top; y <= bottom; y++) {
+                    targetTiles.push({ x: right + 1, y });
+                    const t = this.world.getTile(right + 1, y);
+                    if (t !== this.world.TILE_AIR && t !== this.world.TILE_BEDROCK) costForSwing += this.fuelCosts[t] || 0.05;
+                }
             } else if (keys.mineDown.isDown && this.onGround) {
                 const { left, right, bottom } = this.getTileBounds();
-                for (let x = left; x <= right; x++) targetTiles.push({ x, y: bottom + 1 });
+                for (let x = left; x <= right; x++) {
+                    targetTiles.push({ x, y: bottom + 1 });
+                    const t = this.world.getTile(x, bottom + 1);
+                    if (t !== this.world.TILE_AIR && t !== this.world.TILE_BEDROCK) costForSwing += this.fuelCosts[t] || 0.05;
+                }
             }
             const progress = Math.min(1, (now - this.lastMineTime) / this.mineCooldown);
             const alpha = 0.25 + progress * 0.45;
@@ -405,6 +424,18 @@ class Player {
             targetTiles.forEach(t => {
                 this.minePreview.strokeRect(t.x * 32, t.y * 32, 32, 32);
             });
+            // Show projected cost near the first target tile
+            if (targetTiles.length > 0 && costForSwing > 0) {
+                const first = targetTiles[0];
+                this.mineCostText.setText(`−${(costForSwing * 1000).toFixed(0)}ml`);
+                this.mineCostText.setPosition(first.x * 32 + 16, first.y * 32 - 4);
+                this.mineCostText.setVisible(true);
+                this.mineCostText.setAlpha(alpha + 0.2);
+            } else {
+                this.mineCostText.setVisible(false);
+            }
+        } else {
+            this.mineCostText.setVisible(false);
         }
 
         // Mine cooldown ring — shows when holding a mine key and on cooldown
