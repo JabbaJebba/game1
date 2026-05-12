@@ -1,3 +1,12 @@
+## 2026-05-12 — Run Stats Chassis Label
+- **QoL/UI:** Added active chassis name to the run stats panel header
+  - The first line now reads `RUN STATS — SCOUT` / `RUN STATS — MINER` / `RUN STATS — HEAVY`
+  - Uses the existing `mechState.activeChassis` value — zero new data structures or save changes
+  - Uppercase formatting for consistency with the rest of the HUD
+  - Fills a genuine UI gap: chassis body color was visible but the name was never shown during a mining run
+  - Zero gameplay changes, zero new assets, zero performance impact
+- Status: ✅ Pushed. Commit: TBD
+
 ## 2026-05-12 — Galaxy Planet Selection Ring
 - **QoL/UI:** Added a visual selection ring around the currently selected planet in the galaxy map
   - Teal (`0x00d4aa`) dashed-style ellipse at 90×90px, positioned around the chosen planet when clicked

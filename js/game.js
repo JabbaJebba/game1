@@ -533,8 +533,9 @@ class GameScene extends Phaser.Scene {
             const price = this.gemPrices[name];
             if (price) runValue += count * price;
         }
+        const chassisLabel = (this.mechState.activeChassis || 'scout').toUpperCase();
         this.runStatsText.setText(
-            `RUN STATS\n` +
+            `RUN STATS — ${chassisLabel}\n` +
             `Mined: ${this.runStats.tilesMined}\n` +
             `Fuel: ${this.runStats.fuelUsed.toFixed(2)}L\n` +
             `Value: ${runValue}cr\n` +
