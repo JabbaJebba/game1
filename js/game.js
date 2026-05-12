@@ -597,13 +597,14 @@ class GameScene extends Phaser.Scene {
             drone.x = this.player.x + Math.cos(angle) * orbitRadius;
             drone.y = this.player.y - this.player.height / 2 + Math.sin(angle) * orbitRadius * 0.5;
 
-            // Drone mining logic — mine around the full player body, not a single tile
+            // Drone mining logic — mine within droneRange cells of the player's center
+            // (not bounding box) so range is consistent regardless of chassis size
             if (this.droneTimers[i] <= 0 && this.player.fuel > 2.0) {
-                const { left, right, top, bottom } = this.player.getTileBounds();
+                const centerX = Math.floor(this.player.x / 32);
+                const centerY = Math.floor((this.player.y - this.player.height / 2) / 32);
                 let mined = false;
-                // Search within droneRange cells of the player's entire bounding box
-                for (let ty = top - droneRange; ty <= bottom + droneRange && !mined; ty++) {
-                    for (let tx = left - droneRange; tx <= right + droneRange && !mined; tx++) {
+                for (let ty = centerY - droneRange; ty <= centerY + droneRange && !mined; ty++) {
+                    for (let tx = centerX - droneRange; tx <= centerX + droneRange && !mined; tx++) {
                         if (tx < 0 || tx >= this.worldWidth || ty < 0 || ty >= this.worldHeight) continue;
                         const tile = this.world.getTile(tx, ty);
                         // Target gems and metal ores only, skip rock and air
