@@ -255,9 +255,14 @@ class Player {
             ? Math.sin(this.scene.time.now * 0.003) * 1.2
             : 0;
 
+        // Walk bob — subtle up-down step motion when moving on ground
+        const walkBob = (this.onGround && Math.abs(this.vx) > 20)
+            ? Math.sin(this.x * 0.35) * 2.5
+            : 0;
+
         // Update sprite position
         this.sprite.x = this.x + this.mineRecoilX;
-        this.sprite.y = this.y + breathY + this.mineRecoilY;
+        this.sprite.y = this.y + breathY + walkBob + this.mineRecoilY;
 
         // Update shadow — stays at ground level, shrinks when airborne
         this.shadow.x = this.x + this.mineRecoilX;
@@ -277,13 +282,13 @@ class Player {
         // Update eyes
         const eyeOffsetX = this.facingRight ? 3 : -3;
         this.eyeLeft.x = this.x - 12 + eyeOffsetX + this.mineRecoilX;
-        this.eyeLeft.y = this.y - this.height + 18 + breathY + this.mineRecoilY;
+        this.eyeLeft.y = this.y - this.height + 18 + breathY + walkBob + this.mineRecoilY;
         this.eyeRight.x = this.x + 12 + eyeOffsetX + this.mineRecoilX;
-        this.eyeRight.y = this.y - this.height + 18 + breathY + this.mineRecoilY;
+        this.eyeRight.y = this.y - this.height + 18 + breathY + walkBob + this.mineRecoilY;
         this.pupilLeft.x = this.x - 12 + eyeOffsetX * 1.5 + this.mineRecoilX;
-        this.pupilLeft.y = this.y - this.height + 18 + breathY + this.mineRecoilY;
+        this.pupilLeft.y = this.y - this.height + 18 + breathY + walkBob + this.mineRecoilY;
         this.pupilRight.x = this.x + 12 + eyeOffsetX * 1.5 + this.mineRecoilX;
-        this.pupilRight.y = this.y - this.height + 18 + breathY + this.mineRecoilY;
+        this.pupilRight.y = this.y - this.height + 18 + breathY + walkBob + this.mineRecoilY;
 
         // Eye blinking
         const nowBlink = this.scene.time.now;

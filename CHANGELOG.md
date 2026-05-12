@@ -1,3 +1,14 @@
+## 2026-05-12 — Walking Bob Animation
+- **QoL/Game Feel:** Added a subtle walk bob to the player character when moving on the ground
+  - Body and eyes gently bob up and down based on horizontal position (`sin(x * 0.35) * 2.5px`)
+  - Tied to distance traveled, not time — bob syncs naturally with step rhythm regardless of speed
+  - Only activates when on ground and moving faster than 20 px/s; idle characters keep their existing breathing animation
+  - Applies to body sprite, both eyes, and both pupils — the whole character bobs together
+  - Shadow stays pinned to the ground (no bob) so it creates a clean "character moving over fixed shadow" effect
+  - Zero gameplay changes: logical position (`this.x`/`this.y`) is untouched, collision and snapping are unaffected
+  - Pairs with existing walk dust, speed lines, and idle breathing to make movement feel genuinely alive
+- Status: ⏳ In progress
+
 ## 2026-05-12 — Science Collection Sound
 - **Audio/Game Feel:** Added a bright discovery chime when collecting science at depth milestones
   - Two ascending sine waves: primary 523Hz → 880Hz, secondary 784Hz → 1319Hz
