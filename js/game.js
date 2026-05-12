@@ -204,7 +204,7 @@ class GameScene extends Phaser.Scene {
         this.stars = this.add.graphics();
 
         // Run statistics — track efficiency of current mining run
-        this.runStats = { tilesMined: 0, fuelUsed: 0, startTime: Date.now(), maxDepthReached: 0, depthMilestonesReached: [] };
+        this.runStats = { tilesMined: 0, fuelUsed: 0, startTime: Date.now(), maxDepthReached: 0, depthMilestonesReached: [], scienceGained: 0 };
         this.runStatsText = this.add.text(1100, 55, '', {
             fontSize: '12px', fill: '#aabbcc', fontFamily: 'monospace',
             stroke: '#000000', strokeThickness: 2
@@ -525,6 +525,7 @@ class GameScene extends Phaser.Scene {
                 this.scienceAwarded.push(milestone);
                 const scienceGain = milestone === 30 ? 5 : milestone === 60 ? 8 : 12;
                 this.mechState.science[this.planetTypeName] = (this.mechState.science[this.planetTypeName] || 0) + scienceGain;
+                this.runStats.scienceGained += scienceGain;
                 // Visual notification
                 const note = this.add.text(this.player.x, this.player.y - 60, `+${scienceGain} SCIENCE`, {
                     fontSize: '14px', fill: '#00d4aa', fontFamily: 'monospace', stroke: '#000000', strokeThickness: 2
@@ -544,14 +545,18 @@ class GameScene extends Phaser.Scene {
             if (price) runValue += count * price;
         }
         const chassisLabel = (this.mechState.activeChassis || 'scout').toUpperCase();
-        this.runStatsText.setText(
-            `RUN STATS — ${chassisLabel}\n` +
-            `Mined: ${this.runStats.tilesMined}\n` +
-            `Fuel: ${this.runStats.fuelUsed.toFixed(2)}L\n` +
-            `Value: ${runValue}cr\n` +
-            `Max: ${this.runStats.maxDepthReached}m\n` +
-            `Time: ${timeStr}`
-        );
+        let runStatsLines = [
+            `RUN STATS — ${chassisLabel}`,
+            `Mined: ${this.runStats.tilesMined}`,
+            `Fuel: ${this.runStats.fuelUsed.toFixed(2)}L`,
+            `Value: ${runValue}cr`,
+        ];
+        if (this.runStats.scienceGained > 0) {
+            runStatsLines.push(`Science: +${this.runStats.scienceGained}`);
+        }
+        runStatsLines.push(`Max: ${this.runStats.maxDepthReached}m`);
+        runStatsLines.push(`Time: ${timeStr}`);
+        this.runStatsText.setText(runStatsLines.join('\n'));
     }
 
     getInventoryHash() {
