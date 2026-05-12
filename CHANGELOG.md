@@ -5,7 +5,7 @@
   - Fires immediately after a successful `destroyRoom()` — the moment the room is torn down and credits are refunded
   - Pairs with the existing construction sound to create a complete audio feedback loop: build = lock/clunk, destroy = collapse/tear
   - Zero gameplay changes, zero visual changes, zero save changes
-- Status: ✅ Pushed. Commit: `TBD`
+- Status: ✅ Pushed. Commit: `dadb960`
 
 ## 2026-05-13 — Room Construction Sound
 - **Audio/Game Feel:** Added a satisfying mechanical construction sound when placing rooms in the ship grid
