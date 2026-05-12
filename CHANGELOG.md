@@ -6,7 +6,7 @@
   - Helps players avoid revisiting planet types they've already maxed out science from, making galaxy navigation more strategic
   - Science line only appears when >0 science has been collected; panel stays clean for unexplored planet types
   - Fills a genuine UI gap: science was tracked in ship scene but invisible when choosing your next mining destination
-- Status: 🔄 Pending push
+- Status: ✅ Pushed. Commit: `c5290a5`
 
 ## 2026-05-12 — Inventory Hotbar Value Sorting
 - **QoL/UI:** Inventory hotbar now sorts items by value, with the most valuable resources always appearing leftmost
