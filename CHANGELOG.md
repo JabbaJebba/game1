@@ -8,7 +8,7 @@
   - Uses existing Web Audio infrastructure; auto-resumes suspended context (browser-safe)
   - Fills the last remaining audio gap: mining, landing, and denial sounds were all present, but teleport was completely silent
   - Zero gameplay changes, zero visual changes, zero new assets
-- Status: ✅ Pushed. Commit: `TBD`
+- Status: ✅ Pushed. Commit: `a80e958`
 
 ## 2026-05-12 — Galaxy Science Indicators
 - **QoL/UI:** Added per-planet science tracking display to the galaxy map
