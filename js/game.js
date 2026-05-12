@@ -200,6 +200,10 @@ class GameScene extends Phaser.Scene {
         this.depthGaugeLabel = this.add.text(22, 185, 'DEPTH', {
             fontSize: '10px', fill: '#445566', fontFamily: 'monospace', letterSpacing: 2
         }).setOrigin(0.5).setScrollFactor(0);
+        this.depthGaugeValue = this.add.text(36, 200, '0m', {
+            fontSize: '11px', fill: '#ffffff', fontFamily: 'monospace',
+            stroke: '#000000', strokeThickness: 2
+        }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(1);
 
         this.timeOfDay = 0;
         this.stars = this.add.graphics();
@@ -548,6 +552,10 @@ class GameScene extends Phaser.Scene {
         const markerY = gy + gh - fillH;
         this.depthGauge.fillStyle(0xffffff, 1);
         this.depthGauge.fillRect(gx - 4, markerY - 1, gw + 8, 3);
+        // Numeric depth readout — follows the marker tick
+        this.depthGaugeValue.setPosition(gx + gw + 6, markerY);
+        this.depthGaugeValue.setText(`${depth}m`);
+        this.depthGaugeValue.setColor(depth < 20 ? '#88ff88' : depth < 80 ? '#ffff44' : depth < 150 ? '#ffaa44' : '#ff4444');
         // Chassis max depth limit marker
         const chassisMaxDepth = this.maxDepth || 9999;
         if (chassisMaxDepth < worldDepthRange) {
