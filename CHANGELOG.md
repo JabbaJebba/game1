@@ -6,7 +6,7 @@
   - Completes the jump feedback chain: takeoff dust + sound → fall trail → landing dust + sound + shake + squash
   - Uses existing Web Audio infrastructure; auto-resumes suspended context (browser-safe)
   - Zero gameplay changes, zero visual changes, zero new assets
-- Status: ✅ Pushed. Commit: `PENDING`
+- Status: ✅ Pushed. Commit: `0247c66`
 
 ## 2026-05-12 — Teleport Warp Sound
 - **Audio/Game Feel:** Added a synthesized warp sound when teleporting back to the ship
