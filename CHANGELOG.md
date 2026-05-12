@@ -1,3 +1,11 @@
+## 2026-05-13 — Drone Range: Consistent Center-Based Search
+- **Bugfix/QoL:** Fixed drone mining range to use the player's center tile as the search origin instead of the character's bounding box edges
+  - Previously, big chassis (Heavy 2×3) searched a larger area than small chassis (Scout 1×2) because `droneRange` was added to the bounding box extents
+  - Now all chassis get the same consistent square search area: `(2×droneRange+1) × (2×droneRange+1)` tiles centered on the player
+  - Base range (level 0): 5×5 tiles | Level 1: 7×7 | Level 2: 9×9 | etc.
+  - Zero gameplay balance changes — just fixes the unintended chassis-size dependency
+- Status: ✅ Pushed. Commit: `e64dc93`
+
 ## 2026-05-13 — Room Destruction Sound
 - **Audio/Game Feel:** Added a satisfying structural collapse sound when destroying rooms in the ship grid
   - Three-layer procedural synthesis: low rumbling noise (400Hz→150Hz lowpass) for heavy debris falling, descending sawtooth (280→60Hz) for metallic tearing/groaning, and a brief highpass noise burst (2000Hz) for spark/scatter detail
