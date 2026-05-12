@@ -1038,6 +1038,30 @@ class GameScene extends Phaser.Scene {
         });
     }
 
+    playJumpSound() {
+        if (!this.audioCtx) return;
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume().catch(() => {});
+        }
+        const ctx = this.audioCtx;
+        const now = ctx.currentTime;
+        const dur = 0.12;
+
+        // Quick springy "whoosh" — light, upward, energetic
+        const osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(580, now + dur * 0.4);
+        osc.frequency.exponentialRampToValueAtTime(180, now + dur);
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + dur);
+    }
+
     playLandingSound(vy) {
         if (!this.audioCtx) return;
         if (this.audioCtx.state === 'suspended') {

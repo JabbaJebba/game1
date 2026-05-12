@@ -167,6 +167,7 @@ class Player {
             this.coyoteTimer = 0;
             this.jumpBuffer = 0;
             this.scene.spawnJumpDust(this.x, this.y);
+            this.scene.playJumpSound();
         }
 
         // Jump buffering — if jump pressed in air, queue it for landing
@@ -190,6 +191,7 @@ class Player {
             this.jumpBuffer = 0;
             this.coyoteTimer = 0;
             this.scene.spawnJumpDust(this.x, this.y);
+            this.scene.playJumpSound();
         }
 
         // Start coyote window when walking off a ledge

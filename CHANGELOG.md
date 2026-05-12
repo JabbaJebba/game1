@@ -1,3 +1,13 @@
+## 2026-05-12 — Jump Takeoff Sound
+- **Audio/Game Feel:** Added a quick springy "whoosh" sound when the player jumps
+  - Sine wave sweep: 320Hz → 580Hz → 180Hz over ~120ms — light, upward, energetic feel
+  - Very low amplitude (0.06 gain) so it never grates during repeated platforming
+  - Fires alongside existing `spawnJumpDust()` on both normal jumps and buffered jumps
+  - Completes the jump feedback chain: takeoff dust + sound → fall trail → landing dust + sound + shake + squash
+  - Uses existing Web Audio infrastructure; auto-resumes suspended context (browser-safe)
+  - Zero gameplay changes, zero visual changes, zero new assets
+- Status: ✅ Pushed. Commit: `PENDING`
+
 ## 2026-05-12 — Teleport Warp Sound
 - **Audio/Game Feel:** Added a synthesized warp sound when teleporting back to the ship
   - Primary sine sweep: 180Hz → 900Hz over ~200ms — classic "beam me up" rising pitch
