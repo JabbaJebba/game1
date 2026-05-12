@@ -668,6 +668,7 @@ class ShipScene extends Phaser.Scene {
             if (this.credits >= def.cost) {
                 if (this.placeRoom(gx, gy, this.selectedRoom)) {
                     this.credits -= def.cost;
+                    this.playBuildSound();
                     this.calculatePower();
                     this.updateUI();
                     this.drawShipGrid();
@@ -1488,6 +1489,48 @@ class ShipScene extends Phaser.Scene {
         g2.connect(ctx.destination);
         ping2.start(now + 0.06);
         ping2.stop(now + 0.14);
+    }
+
+    playBuildSound() {
+        if (!this.audioCtx) return;
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume().catch(() => {});
+        }
+        const ctx = this.audioCtx;
+        const now = ctx.currentTime;
+
+        // Low filtered noise — heavy mechanical thunk
+        const bufferSize = Math.floor(ctx.sampleRate * 0.1);
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+        }
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+        const nf = ctx.createBiquadFilter();
+        nf.type = 'lowpass';
+        nf.frequency.value = 600;
+        const ng = ctx.createGain();
+        ng.gain.setValueAtTime(0.1, now);
+        ng.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        noise.connect(nf);
+        nf.connect(ng);
+        ng.connect(ctx.destination);
+        noise.start(now);
+
+        // Short descending triangle — metallic lock/clunk
+        const osc = ctx.createOscillator();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(120, now + 0.08);
+        const og = ctx.createGain();
+        og.gain.setValueAtTime(0.08, now);
+        og.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        osc.connect(og);
+        og.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.1);
     }
 
     showSellFloatText(revenue) {

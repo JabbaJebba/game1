@@ -1,3 +1,14 @@
+## 2026-05-13 — Room Construction Sound
+- **Audio/Game Feel:** Added a satisfying mechanical construction sound when placing rooms in the ship grid
+  - Two-layer procedural synthesis: low filtered noise (600Hz lowpass) for a heavy mechanical thunk, plus a short descending triangle wave (320→120Hz) for a metallic lock/clunk feel
+  - Total duration ~100ms, low amplitude (0.08–0.1 gain) so it never becomes annoying during repeated building
+  - Fires immediately after a successful `placeRoom()` — the moment the room locks into the grid
+  - Follows the same Web Audio pattern as existing ship sounds (auto-resumes suspended context, browser-safe)
+  - Fills a genuine audio gap: selling had a coin sound, but building — one of the most common ship actions — was completely silent
+  - Pairs with the existing save confirmation flash to create a complete feedback loop: sound + flash = "your room is placed and saved"
+  - Zero gameplay changes, zero visual changes, zero save changes
+- Status: ⏳ Pending push
+
 ## 2026-05-13 — Insufficient-Fuel Warning on Mining Preview
 - **QoL/UI:** The mining target preview now turns red when you don't have enough fuel to mine all targeted tiles
   - Previously the preview only showed orange (on cooldown) or green (ready) — there was no visual warning that a swing would fail due to low fuel
