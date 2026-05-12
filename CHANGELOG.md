@@ -6,7 +6,7 @@
   - All text labels on top of buttons are now also interactive — clicking the text itself fires the action
   - `createPanelButton` helper now makes its text label interactive too (fixes QUEUE, DESTROY, BACK, SELL, UPGRADE, etc.)
   - Zero gameplay changes, zero visual changes beyond slightly larger invisible hit boxes
-- Status: ⏳ In progress
+- Status: ✅ Pushed. Commit: `a97eb56`
 
 ## 2026-05-12 — Galaxy Map: Visited Planet Indicators
 - **QoL/UI:** Added a subtle visited-planet badge to the galaxy map
