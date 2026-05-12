@@ -1272,6 +1272,43 @@ class GameScene extends Phaser.Scene {
         }
     }
 
+    playStreakSound(streak) {
+        if (!this.audioCtx) return;
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume().catch(() => {});
+        }
+        const ctx = this.audioCtx;
+        const now = ctx.currentTime;
+        const base = streak === 10 ? 523 : streak === 25 ? 659 : 880;
+
+        // Ascending major triad — bright and victorious
+        [0, 0.08, 0.16].forEach((delay, i) => {
+            const freq = base * (i === 0 ? 1 : i === 1 ? 1.25 : 1.5);
+            const osc = ctx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + delay);
+            const g = ctx.createGain();
+            g.gain.setValueAtTime(0.07, now + delay);
+            g.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.18);
+            osc.connect(g);
+            g.connect(ctx.destination);
+            osc.start(now + delay);
+            osc.stop(now + delay + 0.18);
+        });
+
+        // Shimmer harmonic on top
+        const shimmer = ctx.createOscillator();
+        shimmer.type = 'triangle';
+        shimmer.frequency.setValueAtTime(base * 2, now + 0.12);
+        const sg = ctx.createGain();
+        sg.gain.setValueAtTime(0.03, now + 0.12);
+        sg.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+        shimmer.connect(sg);
+        sg.connect(ctx.destination);
+        shimmer.start(now + 0.12);
+        shimmer.stop(now + 0.28);
+    }
+
     getTileName(tile) {
         const names = {
             [this.world.TILE_AIR]: 'Air',

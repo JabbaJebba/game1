@@ -1,3 +1,13 @@
+## 2026-05-13 — Mining Streak Milestone Sound
+- **QoL/Audio:** Added celebratory procedural chimes when mining streaks hit 10×, 25×, and 50×
+  - Ascending major triad (sine tones) — brighter and higher for bigger milestones
+  - Shimmer harmonic on top for extra sparkle
+  - Completes the existing visual celebration (screen shake, text pulse, particle burst) with audio feedback
+  - Uses the existing Web Audio synthesizer — no external assets needed
+- Status: ✅ Pushed. Commit: TBD
+
+---
+
 ## 2026-05-13 — Depth Gauge: Live Numeric Readout
 - **QoL/UI:** Added a live numeric depth readout to the vertical depth gauge on the left edge of the screen
   - The value (e.g., `47m`, `156m`) now follows the white marker tick as you descend

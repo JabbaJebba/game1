@@ -644,6 +644,7 @@ class Player {
                     });
                     const sparkleColor = this.miningStreak >= 50 ? 0xffd700 : 0xffaa44;
                     this.scene.spawnGemSparkle(this.x, this.y - this.height * 0.5, sparkleColor);
+                    this.scene.playStreakSound(this.miningStreak);
                 }
             }
             this.streakedThisSwing = true;
