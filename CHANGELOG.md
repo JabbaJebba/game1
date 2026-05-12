@@ -1,3 +1,15 @@
+## 2026-05-12 — Teleport Warp Sound
+- **Audio/Game Feel:** Added a synthesized warp sound when teleporting back to the ship
+  - Primary sine sweep: 180Hz → 900Hz over ~200ms — classic "beam me up" rising pitch
+  - Secondary harmonic at double frequency for richness and sci-fi sheen
+  - Brief bandpass-filtered noise burst (400Hz → 2000Hz) for materialization grit
+  - Total duration ~280ms, very low amplitude (0.05–0.1 gain) so it never dominates
+  - Fires at the start of `teleportBack()` — the moment you press T or click TELEPORT
+  - Uses existing Web Audio infrastructure; auto-resumes suspended context (browser-safe)
+  - Fills the last remaining audio gap: mining, landing, and denial sounds were all present, but teleport was completely silent
+  - Zero gameplay changes, zero visual changes, zero new assets
+- Status: ✅ Pushed. Commit: `TBD`
+
 ## 2026-05-12 — Galaxy Science Indicators
 - **QoL/UI:** Added per-planet science tracking display to the galaxy map
   - When selecting a planet, the info panel now shows `Science: X 🔬` if science has been collected from that planet's rock type

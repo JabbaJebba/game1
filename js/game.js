@@ -257,7 +257,65 @@ class GameScene extends Phaser.Scene {
         });
     }
 
+    playTeleportSound() {
+        if (!this.audioCtx) return;
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume().catch(() => {});
+        }
+        const ctx = this.audioCtx;
+        const now = ctx.currentTime;
+        const dur = 0.28;
+
+        // Primary sweep — low to high sine
+        const osc1 = ctx.createOscillator();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(180, now);
+        osc1.frequency.exponentialRampToValueAtTime(900, now + dur * 0.7);
+        const g1 = ctx.createGain();
+        g1.gain.setValueAtTime(0.1, now);
+        g1.gain.exponentialRampToValueAtTime(0.001, now + dur);
+        osc1.connect(g1);
+        g1.connect(ctx.destination);
+        osc1.start(now);
+        osc1.stop(now + dur);
+
+        // Secondary harmonic sweep
+        const osc2 = ctx.createOscillator();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(360, now);
+        osc2.frequency.exponentialRampToValueAtTime(1800, now + dur * 0.7);
+        const g2 = ctx.createGain();
+        g2.gain.setValueAtTime(0.05, now);
+        g2.gain.exponentialRampToValueAtTime(0.001, now + dur);
+        osc2.connect(g2);
+        g2.connect(ctx.destination);
+        osc2.start(now);
+        osc2.stop(now + dur);
+
+        // Brief noise texture for "materialization" grit
+        const bufferSize = Math.floor(ctx.sampleRate * 0.12);
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+        }
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+        const nf = ctx.createBiquadFilter();
+        nf.type = 'bandpass';
+        nf.frequency.setValueAtTime(400, now);
+        nf.frequency.exponentialRampToValueAtTime(2000, now + 0.1);
+        const ng = ctx.createGain();
+        ng.gain.setValueAtTime(0.04, now);
+        ng.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        noise.connect(nf);
+        nf.connect(ng);
+        ng.connect(ctx.destination);
+        noise.start(now);
+    }
+
     teleportBack() {
+        this.playTeleportSound();
         // Merge player inventory into ship inventory (convert tile IDs to names)
         for (const [tileId, count] of Object.entries(this.player.inventory)) {
             const name = this.getTileName(parseInt(tileId));
