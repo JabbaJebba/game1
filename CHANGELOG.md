@@ -5,7 +5,7 @@
   - Uppercase formatting for consistency with the rest of the HUD
   - Fills a genuine UI gap: chassis body color was visible but the name was never shown during a mining run
   - Zero gameplay changes, zero new assets, zero performance impact
-- Status: ✅ Pushed. Commit: TBD
+- Status: ✅ Pushed. Commit: `374da33`
 
 ## 2026-05-12 — Galaxy Planet Selection Ring
 - **QoL/UI:** Added a visual selection ring around the currently selected planet in the galaxy map
