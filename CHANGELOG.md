@@ -6,7 +6,7 @@
   - Planet objects are now stored in `this.planetObjects` array so the ring can lookup position by planet reference
   - Pairs with the existing hover scale effect to give the galaxy map clear visual state: idle → hover (scale up) → selected (persistent ring)
   - Purely visual — no gameplay, no data changes, no scene transition changes
-- Status: ✅ Pushed. Commit: TBD
+- Status: ✅ Pushed. Commit: `d062ae8`
 
 ## 2026-05-12 — Chassis Max Depth Gauge Marker
 - **QoL/UI:** Added a visual max-depth limit marker to the depth gauge
