@@ -5,6 +5,6 @@
   - Now 1-tile characters snap to `tile*32+16` whenever `onGround && |vx| < 5`, regardless of key state
   - 2-tile characters are unaffected — their offset stays `0` and they naturally straddle boundaries
   - Shadow position is now also updated inside the snap block (was previously drifting one frame behind)
-- Status: ✅ Pushed. Commit: `TBD`
+- Status: ✅ Pushed. Commit: `0f8bd8d`
 
 ---
