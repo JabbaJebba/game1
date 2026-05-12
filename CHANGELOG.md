@@ -5,7 +5,7 @@
   - Players can see the warning **before** committing the swing, giving them time to teleport back instead of wasting a cooldown on a failed mine
   - The red state takes priority over the green ready state but still yields to the orange cooldown state — cooldown is always shown first
   - Zero gameplay changes — purely informational, no new assets, minimal performance impact
-- Status: ✅ Pushed. Commit: `TBD`
+- Status: ✅ Pushed. Commit: `d4bd5bf`
 
 ## 2026-05-12 — Larger Button Hit Areas (+/−, DESTROY, QUEUE)
 - **UI/UX:** Expanded click targets for all small quantity buttons in ship room panels
