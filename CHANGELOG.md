@@ -11,7 +11,7 @@
   - Trade Terminal now lists alloys alongside gems under a new "─ ALLOYS ─" section
   - Multi-input recipe support already existed in the smelter UI — alloys display their ingredient counts correctly
 - Why: Metals had no economic value beyond tech tree upgrades. Alloys give players a reason to stockpile ore and run their smelters for profit, not just progression.
-- Status: ✅ Pushed. Commit: `PENDING`
+- Status: ✅ Pushed. Commit: `ffee76a`
 
 ---
 
