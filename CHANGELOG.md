@@ -1,4 +1,13 @@
 
+## 2026-05-14 — Bug Fix: Black Screen on Launch
+- **Fix:** Fixed black screen that occurred after clicking LAUNCH from Galaxy Map
+  - Root cause: `speedModCount` was referenced in Player constructor before it was defined (undefined passed to Player config)
+  - Fix: Moved `this.speedModCount = mech.modules.filter(m => m === 'speed').length` to execute before Player creation
+  - Removed duplicate assignment after Player creation
+- Status: ✅ Pushed. Commit: `6abd2a2`
+
+---
+
 ## 2026-05-14 — Fuel Catalyst: Second Science Upgrade
 - **Content Expansion / Science Currency:** Added **Fuel Catalyst** — the second permanent science upgrade in the Mech Workshop
   - Costs **15 science points** (one-time permanent unlock)
