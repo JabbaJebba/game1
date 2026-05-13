@@ -6,7 +6,7 @@
   - Subtle 90ms screen shake (0.003 intensity) — lighter than mining, discovery-themed
   - Flash uses the same `#00d4aa` science color for visual consistency
   - Complements the existing floating text and audio chime without competing with them
-- Status: ✅ Pushed. Commit: TBD
+- Status: ✅ Pushed. Commit: `c8963d2`
 
 ---
 
