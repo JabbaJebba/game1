@@ -9,7 +9,7 @@
   - Trade Terminal now lists Starsteel alongside Bronze and Electrum under "─ ALLOYS ─"
   - Uses the existing multi-input smelter UI — ingredient counts display automatically
 - Why: Titanium had no sellable product. Players who pushed deep for Ti now have a reason to run their smelters for profit, not just progression.
-- Status: 🔄 Pending push
+- Status: ✅ Pushed. Commit: `13aca36`
 
 ---
 
