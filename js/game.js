@@ -91,6 +91,7 @@ class GameScene extends Phaser.Scene {
         const maxPlayerFuel = chassisDef.baseFuel + fuelModBonus;
         let fuelForRun = Math.min(maxPlayerFuel, this.shipFuel);
         this.shipFuel -= fuelForRun; // Deduct from ship tank
+        this.speedModCount = mech.modules.filter(m => m === 'speed').length;
         this.player = new Player(this, spawnX, spawnY, {
             fuel: fuelForRun,
             efficiencyLevel: this.techState.efficiencyLevel || 0,
@@ -103,7 +104,6 @@ class GameScene extends Phaser.Scene {
         this.maxDepth = chassisDef.maxDepth;
         this.fuelBurnRate = chassisDef.fuelBurn;
         this.droneCount = mech.modules.filter(m => m === 'drone').length;
-        this.speedModCount = mech.modules.filter(m => m === 'speed').length;
         this.scannerCount = mech.modules.filter(m => m === 'scanner').length;
         this.scannerPulseTimer = 0;
         this.scannerPulsePhase = 0;
