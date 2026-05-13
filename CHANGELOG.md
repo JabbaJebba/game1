@@ -8,6 +8,7 @@
   - Drones, scanner pulse, inventory hotbar, metal sparkles, and all ore-detection systems recognize Platinum
   - Sound effects properly classify Platinum as metal (bandpass filter, metallic triangle oscillator)
 - Why: Gives Heavy mech (and deep-pushing Miner/Scout) exclusive endgame content; creates a new resource pyramid peak
+- Status: ✅ Pushed. Commit: `2cf865e`
 
 ---
 
