@@ -1,5 +1,18 @@
 ---
 
+## 2026-05-13 — Auric Ingot: Premium Platinum-Gold Alloy
+- **Content Expansion / Processing Chain:** Added a fourth alloy recipe to the Smelter — the endgame premium alloy that gives Platinum economic value
+  - **Auric Ingot** — 1 Platinum Ore + 2 Gold Ore → 1 Auric Ingot (6.0s)
+    - Sell price: 180cr
+    - Bridges the gap between Starsteel (120cr) and Diamond (200cr)
+    - Turns Platinum — previously only useful for tech tree upgrades — into the most profitable smelter product
+  - Trade Terminal now lists Auric alongside Bronze, Electrum, and Starsteel under "─ ALLOYS ─"
+  - Longest cook time (6.0s) reflects the premium nature and rarity of inputs
+- Why: Platinum had no sellable product. Players who push deep for Pt now have a high-value alloy to justify the effort, completing the alloy rarity ladder.
+- Status: ⏳ Pending push
+
+---
+
 ## 2026-05-13 — Starsteel Alloy
 - **Content Expansion / Processing Chain:** Added a third alloy recipe to the Smelter, completing the mid-tier alloy line and giving Titanium economic value beyond tech tree upgrades
   - **Starsteel Ingot** — 2 Titanium Ore + 1 Iron Ore → 1 Starsteel Ingot (5.0s)

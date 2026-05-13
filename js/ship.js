@@ -152,7 +152,7 @@ class ShipScene extends Phaser.Scene {
 
         this.gemPrices = {
             'Ruby': 50, 'Sapphire': 75, 'Emerald': 100, 'Diamond': 200, 'Amethyst': 80, 'Topaz': 60,
-            'Bronze Ingot': 35, 'Electrum Ingot': 90, 'Starsteel Ingot': 120,
+            'Bronze Ingot': 35, 'Electrum Ingot': 90, 'Starsteel Ingot': 120, 'Auric Ingot': 180,
         };
 
         this.fuelPrices = { 5: 400, 25: 2000 };
@@ -206,6 +206,7 @@ class ShipScene extends Phaser.Scene {
                 { id: 'bronze_ingot', name: 'Bronze Ingot', input: { 'Copper Ore': 2, 'Iron Ore': 1 }, output: { 'Bronze Ingot': 1 }, time: 2500 },
                 { id: 'electrum_ingot', name: 'Electrum Ingot', input: { 'Gold Ore': 1, 'Copper Ore': 1 }, output: { 'Electrum Ingot': 1 }, time: 3000 },
                 { id: 'starsteel_ingot', name: 'Starsteel Ingot', input: { 'Titanium Ore': 2, 'Iron Ore': 1 }, output: { 'Starsteel Ingot': 1 }, time: 5000 },
+                { id: 'auric_ingot', name: 'Auric Ingot', input: { 'Platinum Ore': 1, 'Gold Ore': 2 }, output: { 'Auric Ingot': 1 }, time: 6000 },
             ],
             crusher: [
                 { id: 'crush', name: 'Crush Rock', input: {}, output: {}, time: 2000, dynamic: true },
@@ -945,7 +946,7 @@ class ShipScene extends Phaser.Scene {
             } else {
                 // ── Normal trade view ──
                 const gems = ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst', 'Topaz'];
-                const alloys = ['Bronze Ingot', 'Electrum Ingot', 'Starsteel Ingot'];
+                const alloys = ['Bronze Ingot', 'Electrum Ingot', 'Starsteel Ingot', 'Auric Ingot'];
                 this.roomPanelContent.setText(
                     '─ GEMS ─\n' +
                     gems.map(g => {
