@@ -8,7 +8,7 @@
   - Mech Workshop UI: shows total accumulated science, unlock button when affordable, locked message when not, checkmark when active
   - Science total is computed across all visited planet types automatically
 - Why: Science had no purpose — it was collected and displayed but never spent. Deep Scan gives players a meaningful decision: hoard science or spend it early for better ore discovery.
-- Status: ✅ Pushed. Commit: `TBD`
+- Status: ✅ Pushed. Commit: `0fafa94`
 
 ---
 
