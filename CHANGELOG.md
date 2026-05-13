@@ -11,7 +11,7 @@
   - Mech Workshop UI: new 🔍 SCANNER button between FUEL and DRONE; slot boxes show "SCAN"; stats line shows `Scan: N`
   - Ship status bar shows scan count alongside fuel/drone stats
 - Why: Fills a gap in the mech module system — drones mine autonomously, fuel extends range, scanner helps FIND the good stuff
-- Status: 🔄 In progress
+- Status: ✅ Pushed. Commit: `25c836e`
 
 ---
 
