@@ -10,7 +10,7 @@
   - Mech Workshop UI: appears below Deep Scan; shows unlock button when affordable, locked message when not, checkmark when active
   - Science total computed across all visited planet types automatically
 - Why: Science had only one spending option (Deep Scan). Fuel Catalyst gives players a meaningful early choice: invest science for immediate fuel savings that compound across every run, or save for scanner range first.
-- Status: ✅ Pushed. Commit: `PENDING`
+- Status: ✅ Pushed. Commit: `31cf7c3`
 
 ---
 
