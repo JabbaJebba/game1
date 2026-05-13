@@ -39,7 +39,8 @@ class Player {
         this.isMining = false;
 
         // Mining cooldown (ms)
-        this.mineCooldown = 180;
+        const miningSpeedLevel = data.miningSpeedLevel || 0;
+        this.mineCooldown = Math.max(120, 180 - miningSpeedLevel * 10);
         this.lastMineTime = 0;
 
         const chassisColors = {

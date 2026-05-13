@@ -17,7 +17,7 @@ class ShipScene extends Phaser.Scene {
         this.shipFuel = data.shipFuel !== undefined ? data.shipFuel : 100;
         this.shipFuelCapacity = data.shipFuelCapacity !== undefined ? data.shipFuelCapacity : 100;
         this.rockCompositions = data.rockCompositions || {};
-        this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0, droneRangeLevel: 0 };
+        this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0, droneRangeLevel: 0, miningSpeedLevel: 0 };
         this.processingQueues = data.processingQueues || {};
         this.mechState = data.mechState || {
             unlockedChassis: ['scout'],
@@ -183,6 +183,14 @@ class ShipScene extends Phaser.Scene {
                 { level: 3, cost: { credits: 20000 }, bonus: 1 },
                 { level: 4, cost: { credits: 40000 }, bonus: 1 },
                 { level: 5, cost: { credits: 80000 }, bonus: 1 },
+            ],
+            miningSpeed: [
+                { level: 1, cost: { credits: 1000 }, bonus: 1 },
+                { level: 2, cost: { credits: 2500 }, bonus: 1 },
+                { level: 3, cost: { 'Copper Ingot': 50, credits: 5000 }, bonus: 1 },
+                { level: 4, cost: { 'Copper Ingot': 100, 'Iron Ingot': 50, credits: 10000 }, bonus: 1 },
+                { level: 5, cost: { 'Copper Ingot': 150, 'Iron Ingot': 100, 'Gold Ingot': 50, credits: 20000 }, bonus: 1 },
+                { level: 6, cost: { 'Copper Ingot': 200, 'Iron Ingot': 150, 'Gold Ingot': 100, 'Titanium Ingot': 50, credits: 40000 }, bonus: 1 },
             ]
         };
 
@@ -995,7 +1003,8 @@ class ShipScene extends Phaser.Scene {
             this.roomPanelContent.setText(
                 `Fuel Tank Level: ${this.techState.fuelTankLevel || 0} / 6\n` +
                 `Efficiency Level: ${this.techState.efficiencyLevel || 0} / 10\n` +
-                `Drone Range Level: ${this.techState.droneRangeLevel || 0} / 5`
+                `Drone Range Level: ${this.techState.droneRangeLevel || 0} / 5\n` +
+                `Mining Speed Level: ${this.techState.miningSpeedLevel || 0} / 6`
             );
             const btn = this.createPanelButton(0, -ph / 2 + 190, 'OPEN TECH TREE', () => {
                 this.closeRoomControlsPanel();
@@ -1634,12 +1643,16 @@ class ShipScene extends Phaser.Scene {
         this.techFuelTabText = this.add.text(-150, -182, 'FUEL TANK', {
             fontSize: '11px', fill: '#cccccc', fontFamily: 'monospace'
         }).setOrigin(0.5);
-        this.techEffTab = this.add.rectangle(0, -182, 130, 26, 0x111118).setInteractive();
-        this.techEffTabText = this.add.text(0, -182, 'EFFICIENCY', {
+        this.techEffTab = this.add.rectangle(-50, -182, 130, 26, 0x111118).setInteractive();
+        this.techEffTabText = this.add.text(-50, -182, 'EFFICIENCY', {
             fontSize: '11px', fill: '#666666', fontFamily: 'monospace'
         }).setOrigin(0.5);
-        this.techDroneTab = this.add.rectangle(150, -182, 130, 26, 0x111118).setInteractive();
-        this.techDroneTabText = this.add.text(150, -182, 'DRONE RANGE', {
+        this.techDroneTab = this.add.rectangle(50, -182, 130, 26, 0x111118).setInteractive();
+        this.techDroneTabText = this.add.text(50, -182, 'DRONE RANGE', {
+            fontSize: '11px', fill: '#666666', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+        this.techMiningTab = this.add.rectangle(150, -182, 130, 26, 0x111118).setInteractive();
+        this.techMiningTabText = this.add.text(150, -182, 'MINING SPD', {
             fontSize: '11px', fill: '#666666', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
@@ -1654,6 +1667,10 @@ class ShipScene extends Phaser.Scene {
         this.techDroneTab.on('pointerdown', () => {
             this.justClickedModal = true;
             this.switchTechTab('droneRange');
+        });
+        this.techMiningTab.on('pointerdown', () => {
+            this.justClickedModal = true;
+            this.switchTechTab('miningSpeed');
         });
 
         this.techSubtitle = this.add.text(0, -152, '', {
@@ -1676,6 +1693,7 @@ class ShipScene extends Phaser.Scene {
             this.techBg, this.techTitle, this.techSubtitle, this.techContent,
             this.techFuelTab, this.techFuelTabText, this.techEffTab, this.techEffTabText,
             this.techDroneTab, this.techDroneTabText,
+            this.techMiningTab, this.techMiningTabText,
             closeBtn, closeTxt
         ]);
         this.techTab = 'fuelTank';
@@ -1687,6 +1705,7 @@ class ShipScene extends Phaser.Scene {
             fuelTank: { btn: this.techFuelTab, text: this.techFuelTabText },
             efficiency: { btn: this.techEffTab, text: this.techEffTabText },
             droneRange: { btn: this.techDroneTab, text: this.techDroneTabText },
+            miningSpeed: { btn: this.techMiningTab, text: this.techMiningTabText },
         };
         Object.entries(tabs).forEach(([key, { btn, text }]) => {
             if (key === tab) {
@@ -1719,6 +1738,10 @@ class ShipScene extends Phaser.Scene {
             const baseRange = 2;
             const currentRange = baseRange + currentLevel;
             this.techSubtitle.setText(`Drone Range: ${currentRange} cells (base ${baseRange} + ${currentLevel})`);
+        } else if (branch === 'miningSpeed') {
+            const baseMs = 180;
+            const currentMs = Math.max(120, baseMs - currentLevel * 10);
+            this.techSubtitle.setText(`Mining Speed: ${currentMs}ms (base ${baseMs}ms − ${currentLevel * 10})`);
         }
 
         let y = -128;
@@ -1732,7 +1755,7 @@ class ShipScene extends Phaser.Scene {
 
             const statusText = isUnlocked ? '✓' : (isNext ? '→' : '−');
             const textColor = isUnlocked ? '#44aa66' : (isNext ? '#cccccc' : '#444444');
-            const bonusLabel = branch === 'fuelTank' ? `+${lvl.bonus}L` : branch === 'efficiency' ? `−${lvl.bonus}ml` : `+${lvl.bonus} cell`;
+            const bonusLabel = branch === 'fuelTank' ? `+${lvl.bonus}L` : branch === 'efficiency' ? `−${lvl.bonus}ml` : branch === 'miningSpeed' ? `−${lvl.bonus * 10}ms` : `+${lvl.bonus} cell`;
 
             const label = this.add.text(-210, y, `Lv${lvl.level}  ${bonusLabel}`, {
                 fontSize: '12px', fill: textColor, fontFamily: 'monospace'

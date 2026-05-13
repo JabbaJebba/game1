@@ -12,7 +12,7 @@ class GameScene extends Phaser.Scene {
         this.shipFuelCapacity = data.shipFuelCapacity !== undefined ? data.shipFuelCapacity : 100;
         this.rockType = data.rockType || { name: 'Stone' };
         this.rockCompositions = data.rockCompositions || {};
-        this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0, droneRangeLevel: 0 };
+        this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0, droneRangeLevel: 0, miningSpeedLevel: 0 };
         this.processingQueues = data.processingQueues || {};
         this.mechState = data.mechState || {
             unlockedChassis: ['scout'],
@@ -91,6 +91,7 @@ class GameScene extends Phaser.Scene {
         this.player = new Player(this, spawnX, spawnY, {
             fuel: fuelForRun,
             efficiencyLevel: this.techState.efficiencyLevel || 0,
+            miningSpeedLevel: this.techState.miningSpeedLevel || 0,
             chassis: mech.activeChassis,
             fuelBurn: chassisDef.fuelBurn,
         });

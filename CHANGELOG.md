@@ -1,5 +1,22 @@
 ---
 
+## 2026-05-13 — Tech Tree Expansion: Mining Speed Branch
+- **Tech Tree Expansion:** Added a 4th branch — `miningSpeed` — to the Tech Tree popup
+  - 6 levels total, each reducing player mining cooldown by 10ms
+  - Base: 180ms → L6: 120ms (33% faster mining at max)
+  - Cost progression: credits early → Copper/Iron/Gold/Titanium ingots + credits at higher tiers
+    - L1: 1,000cr | L2: 2,500cr | L3: 50 Cu + 5,000cr | L4: 100 Cu + 50 Fe + 10,000cr
+    - L5: 150 Cu + 100 Fe + 50 Au + 20,000cr | L6: 200 Cu + 150 Fe + 100 Au + 50 Ti + 40,000cr
+  - New tab button "MINING SPD" in the tech tree popup alongside Fuel Tank / Efficiency / Drone Range
+  - Bonus label shows `−10ms` per level in the upgrade list
+  - Subtitle displays current cooldown: `Mining Speed: 150ms (base 180ms − 30)`
+  - Drill room panel now shows Mining Speed Level alongside Fuel Tank / Efficiency / Drone Range
+  - Player constructor reads `miningSpeedLevel` and computes `mineCooldown = max(120, 180 - level*10)`
+- Why: Boss wanted tech tree expansion; this gives players a direct way to invest resources for faster mining
+- Status: 🔄 In progress
+
+---
+
 ## 2026-05-13 — Titanium (Ti): Fourth Metal Tier
 - **Content Expansion:** Added Titanium (Ti) as a rare, deep-depth metal tier
   - Spawns in small veins (4-8 tiles, thickness 1-2) starting at 75% depth, below Gold
