@@ -6,7 +6,7 @@
   - Updates live during the run so players can see their efficiency in real-time
   - Helps players compare different chassis builds and mining strategies
   - Only appears once fuel has actually been consumed (no premature "0.0" clutter)
-- Status: 🔄 Ready to push
+- Status: ✅ Pushed. Commit: `8194701`
 
 ---
 
