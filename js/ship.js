@@ -151,7 +151,8 @@ class ShipScene extends Phaser.Scene {
         };
 
         this.gemPrices = {
-            'Ruby': 50, 'Sapphire': 75, 'Emerald': 100, 'Diamond': 200, 'Amethyst': 80,
+            'Ruby': 50, 'Sapphire': 75, 'Emerald': 100, 'Diamond': 200, 'Amethyst': 80, 'Topaz': 60,
+            'Bronze Ingot': 35, 'Electrum Ingot': 90,
         };
 
         this.fuelPrices = { 5: 400, 25: 2000 };
@@ -202,6 +203,8 @@ class ShipScene extends Phaser.Scene {
                 { id: 'gold_ingot', name: 'Gold Ingot', input: { 'Gold Ore': 3 }, output: { 'Gold Ingot': 1 }, time: 3000 },
                 { id: 'titanium_ingot', name: 'Titanium Ingot', input: { 'Titanium Ore': 3 }, output: { 'Titanium Ingot': 1 }, time: 4000 },
                 { id: 'platinum_ingot', name: 'Platinum Ingot', input: { 'Platinum Ore': 4 }, output: { 'Platinum Ingot': 1 }, time: 5000 },
+                { id: 'bronze_ingot', name: 'Bronze Ingot', input: { 'Copper Ore': 2, 'Iron Ore': 1 }, output: { 'Bronze Ingot': 1 }, time: 2500 },
+                { id: 'electrum_ingot', name: 'Electrum Ingot', input: { 'Gold Ore': 1, 'Copper Ore': 1 }, output: { 'Electrum Ingot': 1 }, time: 3000 },
             ],
             crusher: [
                 { id: 'crush', name: 'Crush Rock', input: {}, output: {}, time: 2000, dynamic: true },
@@ -940,22 +943,28 @@ class ShipScene extends Phaser.Scene {
 
             } else {
                 // ── Normal trade view ──
+                const gems = ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst', 'Topaz'];
+                const alloys = ['Bronze Ingot', 'Electrum Ingot'];
                 this.roomPanelContent.setText(
                     '─ GEMS ─\n' +
-                    ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst', 'Topaz'].map(g => {
+                    gems.map(g => {
                         const c = this.shipInventory[g] || 0;
                         return `  ${g}: ${c}  @${this.gemPrices[g]}cr`;
+                    }).join('\n') + '\n\n─ ALLOYS ─\n' +
+                    alloys.map(a => {
+                        const c = this.shipInventory[a] || 0;
+                        return `  ${a}: ${c}  @${this.gemPrices[a]}cr`;
                     }).join('\n') + '\n\n─ FUEL ─\n' +
                     Object.entries(this.fuelPrices).map(([amt, cost]) => `  +${amt}L  —  ${cost}cr`).join('\n')
                 );
 
                 y = -ph / 2 + 230;
-                ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst', 'Topaz'].forEach(gemName => {
-                    const count = this.shipInventory[gemName] || 0;
+                [...gems, ...alloys].forEach(itemName => {
+                    const count = this.shipInventory[itemName] || 0;
                     if (count > 0) {
-                        const btn = this.createPanelButton(0, y, `SELL ${gemName}`, () => {
+                        const btn = this.createPanelButton(0, y, `SELL ${itemName}`, () => {
                             this.justClickedModal = true;
-                            this.panelSellMode = gemName;
+                            this.panelSellMode = itemName;
                             this.panelSellCustom = 0;
                             this.openRoomControlsPanel(room);
                         }, 220, 26, 0x224422, '#88cc88');

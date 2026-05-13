@@ -1,5 +1,20 @@
 ---
 
+## 2026-05-13 — Alloy Smelting: Bronze & Electrum
+- **Content Expansion / Processing Chain:** Added two alloy recipes to the Smelter, creating a new economic path for metal ores
+  - **Bronze Ingot** — 2 Copper Ore + 1 Iron Ore → 1 Bronze Ingot (2.5s)
+    - Sell price: 35cr
+    - Turns common surface metals into a sellable product
+  - **Electrum Ingot** — 1 Gold Ore + 1 Copper Ore → 1 Electrum Ingot (3.0s)
+    - Sell price: 90cr
+    - Premium alloy leveraging rare gold veins
+  - Trade Terminal now lists alloys alongside gems under a new "─ ALLOYS ─" section
+  - Multi-input recipe support already existed in the smelter UI — alloys display their ingredient counts correctly
+- Why: Metals had no economic value beyond tech tree upgrades. Alloys give players a reason to stockpile ore and run their smelters for profit, not just progression.
+- Status: ✅ Pushed. Commit: `PENDING`
+
+---
+
 ## 2026-05-13 — Platinum (Pt) Ore Tier
 - **Content Expansion:** Added **Platinum (Pt)** — 5th metal tier, silvery-white (#E5E4E2), "Pt" symbol on tiles
   - Spawns very deep: only below 260m from surface, in tiny veins (1-2 tiles per vein, max 6 vein size), very rare
