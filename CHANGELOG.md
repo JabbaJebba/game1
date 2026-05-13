@@ -12,7 +12,7 @@
   - Inventory sorting priority: 40 (between Gold 50 and Iron 30)
   - Sound profile: bandpass filter at 1800Hz (metallic, like Cu/Fe/Au)
 - Why: Gives Heavy mech a reason to exist — only chassis that can reach 700m+ where Ti spawns
-- Status: ✅ Pushed. Commit: `398b45e`
+- Status: ✅ Pushed. Commit: `398b45e` + fix `85a10c5`
 
 ---
 
