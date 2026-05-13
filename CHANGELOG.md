@@ -1,3 +1,14 @@
+---
+
+## 2026-05-13 — Ship Status: Active Mech Chassis Display
+- **QoL/UI:** Added an active mech chassis indicator to the ship status bar
+  - Shows `🦾 Scout`, `🦾 Miner`, or `🦾 Heavy` below the science/credits line
+  - Updates automatically when switching chassis in the Mech Configuration modal
+  - Helps players quickly confirm their loadout before launching
+- Status: 🔄 In progress
+
+---
+
 ## 2026-05-13 — Drone Mining: Circular Radius Fix
 - **Bugfix/QoL:** Fixed drone mining range to use proper circular radius from the player's bottom-center (drill position)
   - Old: square scan from body center — heavy mechs (2×3) couldn't mine tiles below their feet

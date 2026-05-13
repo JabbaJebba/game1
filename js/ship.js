@@ -118,6 +118,11 @@ class ShipScene extends Phaser.Scene {
             fontSize: '13px', fill: '#c9a84c', fontFamily: 'monospace'
         }).setOrigin(1, 0.5);
 
+        // Mech chassis indicator
+        this.statusMech = this.add.text(640, 82, '', {
+            fontSize: '11px', fill: '#888888', fontFamily: 'monospace'
+        }).setOrigin(0.5, 0.5);
+
         // Ship fuel bar — visual horizontal bar matching the mining scene fuel bar
         const sBarX = 80;
         const sBarY = 76;
@@ -1959,6 +1964,9 @@ class ShipScene extends Phaser.Scene {
         const totalScience = Object.values(this.mechState.science || {}).reduce((a, b) => a + (b || 0), 0);
         this.statusScience.setText(`🔬 ${totalScience} SCIENCE`);
         this.statusCredits.setText(`${this.credits.toLocaleString()} cr 💰`);
+        const chassisNames = { scout: 'Scout', miner: 'Miner', heavy: 'Heavy' };
+        const active = this.mechState.activeChassis || 'scout';
+        this.statusMech.setText(`🦾 ${chassisNames[active]}`);
         // Update ship fuel bar fill
         const fuelPct = Math.max(0, Math.min(1, this.shipFuel / this.shipFuelCapacity));
         const maxFillW = 218;
