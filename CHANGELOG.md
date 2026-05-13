@@ -1,3 +1,13 @@
+## 2026-05-13 — Drone Mining: Circular Radius Fix
+- **Bugfix/QoL:** Fixed drone mining range to use proper circular radius from the player's bottom-center (drill position)
+  - Old: square scan from body center — heavy mechs (2×3) couldn't mine tiles below their feet
+  - New: circular scan from bottom-center — all chassis sizes mine consistently
+  - Tiles beyond `droneRange` Euclidean distance are now properly skipped (no more corner mining)
+  - Scout (1×2), Miner (2×2), and Heavy (2×3) all benefit from accurate targeting
+- Status: ✅ Pushed. Commit: `TBD`
+
+---
+
 ## 2026-05-13 — Depth Milestone Sound
 - **QoL/Audio:** Added ascending procedural chimes when reaching depth milestones (50m, 100m, 150m, 200m)
   - Pitch scales with depth — 350Hz at 50m up to 850Hz at 200m
