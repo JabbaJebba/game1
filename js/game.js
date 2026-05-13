@@ -46,12 +46,14 @@ class GameScene extends Phaser.Scene {
             [this.world.TILE_EMERALD]: 0x50C878,
             [this.world.TILE_DIAMOND]: 0xB9F2FF,
             [this.world.TILE_AMETHYST]: 0x9966CC,
+            [this.world.TILE_TITANIUM]: 0x778899,
         };
 
         this.metalSymbols = {
             [this.world.TILE_COPPER]: 'Cu',
             [this.world.TILE_IRON]: 'Fe',
             [this.world.TILE_GOLD]: 'Au',
+            [this.world.TILE_TITANIUM]: 'Ti',
         };
 
         this.labelCache = new Map();
@@ -627,7 +629,7 @@ class GameScene extends Phaser.Scene {
                         const tile = this.world.getTile(tx, ty);
                         // Target gems and metal ores only, skip rock and air
                         if (tile === this.world.TILE_COPPER || tile === this.world.TILE_IRON ||
-                            tile === this.world.TILE_GOLD || tile === this.world.TILE_RUBY ||
+                            tile === this.world.TILE_GOLD || tile === this.world.TILE_TITANIUM || tile === this.world.TILE_RUBY ||
                             tile === this.world.TILE_SAPPHIRE || tile === this.world.TILE_EMERALD ||
                             tile === this.world.TILE_DIAMOND || tile === this.world.TILE_AMETHYST) {
                             // Mine it
@@ -649,7 +651,7 @@ class GameScene extends Phaser.Scene {
                                           tile === this.world.TILE_EMERALD || tile === this.world.TILE_DIAMOND ||
                                           tile === this.world.TILE_AMETHYST;
                             if (isGem) this.spawnGemSparkle(tx * 32 + 16, ty * 32 + 16, this.tileColors[tile]);
-                            const isMetal = tile === this.world.TILE_COPPER || tile === this.world.TILE_IRON || tile === this.world.TILE_GOLD;
+                            const isMetal = tile === this.world.TILE_COPPER || tile === this.world.TILE_IRON || tile === this.world.TILE_GOLD || tile === this.world.TILE_TITANIUM;
                             if (isMetal) this.spawnMetalSparks(tx, ty);
                             mined = true;
                         }
@@ -731,7 +733,7 @@ class GameScene extends Phaser.Scene {
                     [this.world.TILE_DIAMOND]: 500, [this.world.TILE_EMERALD]: 400,
                     [this.world.TILE_AMETHYST]: 300, [this.world.TILE_RUBY]: 200,
                     [this.world.TILE_SAPPHIRE]: 100, [this.world.TILE_GOLD]: 50,
-                    [this.world.TILE_IRON]: 30, [this.world.TILE_COPPER]: 20,
+                    [this.world.TILE_TITANIUM]: 40, [this.world.TILE_IRON]: 30, [this.world.TILE_COPPER]: 20,
                     [this.world.TILE_ROCK]: 1, [this.world.TILE_GRASS]: 0,
                 };
                 return (priority[parseInt(b[0])] || 0) - (priority[parseInt(a[0])] || 0);
@@ -1240,7 +1242,7 @@ class GameScene extends Phaser.Scene {
         const isGem = tile === this.world.TILE_RUBY || tile === this.world.TILE_SAPPHIRE ||
                       tile === this.world.TILE_EMERALD || tile === this.world.TILE_DIAMOND ||
                       tile === this.world.TILE_AMETHYST;
-        const isMetal = tile === this.world.TILE_COPPER || tile === this.world.TILE_IRON || tile === this.world.TILE_GOLD;
+        const isMetal = tile === this.world.TILE_COPPER || tile === this.world.TILE_IRON || tile === this.world.TILE_GOLD || tile === this.world.TILE_TITANIUM;
         const dur = isGem ? 0.12 : 0.08;
         const bufferSize = Math.floor(ctx.sampleRate * dur);
         const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
@@ -1343,6 +1345,7 @@ class GameScene extends Phaser.Scene {
             [this.world.TILE_EMERALD]: 'Emerald',
             [this.world.TILE_DIAMOND]: 'Diamond',
             [this.world.TILE_AMETHYST]: 'Amethyst',
+            [this.world.TILE_TITANIUM]: 'Titanium Ore',
         };
         return names[tile] || 'Unknown';
     }

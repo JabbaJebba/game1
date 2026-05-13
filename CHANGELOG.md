@@ -1,5 +1,21 @@
 ---
 
+## 2026-05-13 — Titanium (Ti): Fourth Metal Tier
+- **Content Expansion:** Added Titanium (Ti) as a rare, deep-depth metal tier
+  - Spawns in small veins (4-8 tiles, thickness 1-2) starting at 75% depth, below Gold
+  - Slate gray color (`#778899`) with `Ti` element symbol rendered on ore tiles
+  - Health: 120 (harder than Gold's 100) — rewards Heavy mech's deeper reach
+  - Fuel cost: same base rate as other ores (scaled by efficiency tech)
+  - Processed in Smelter: 3 Titanium Ore → 1 Titanium Ingot (4s, slower than Gold)
+  - Extracted from crushed rock via Refinery if the planet's composition supports it
+  - Drones will target and mine Titanium ore automatically
+  - Inventory sorting priority: 40 (between Gold 50 and Iron 30)
+  - Sound profile: bandpass filter at 1800Hz (metallic, like Cu/Fe/Au)
+- Why: Gives Heavy mech a reason to exist — only chassis that can reach 700m+ where Ti spawns
+- Status: 🔄 In progress
+
+---
+
 ## 2026-05-13 — Science Collection: Visual Flash & Screen Shake
 - **QoL/Game Feel:** Added visual and haptic feedback to science collection for a more satisfying discovery moment
   - Brief teal glow flash expands around the player when science is awarded

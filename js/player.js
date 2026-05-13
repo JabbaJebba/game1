@@ -87,6 +87,7 @@ class Player {
             [this.world.TILE_EMERALD]: miningCost,
             [this.world.TILE_DIAMOND]: miningCost,
             [this.world.TILE_AMETHYST]: miningCost,
+            [this.world.TILE_TITANIUM]: miningCost,
         };
 
         // Inventory
@@ -663,6 +664,7 @@ class Player {
         if (tile === this.world.TILE_EMERALD) return 'Emerald';
         if (tile === this.world.TILE_DIAMOND) return 'Diamond';
         if (tile === this.world.TILE_AMETHYST) return 'Amethyst';
+        if (tile === this.world.TILE_TITANIUM) return 'Titanium Ore';
         return 'Unknown';
     }
 
@@ -676,6 +678,7 @@ class Player {
         if (tile === this.world.TILE_EMERALD) return '#44ff88';
         if (tile === this.world.TILE_DIAMOND) return '#88eeff';
         if (tile === this.world.TILE_AMETHYST) return '#cc88ff';
+        if (tile === this.world.TILE_TITANIUM) return '#aabbcc';
         return '#ffffff';
     }
 
@@ -732,6 +735,8 @@ class Player {
             itemName = 'Diamond';
         } else if (tile === this.world.TILE_AMETHYST) {
             itemName = 'Amethyst';
+        } else if (tile === this.world.TILE_TITANIUM) {
+            itemName = 'Titanium Ore';
         } else {
             itemName = String(tile);
         }

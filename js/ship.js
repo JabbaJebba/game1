@@ -191,8 +191,7 @@ class ShipScene extends Phaser.Scene {
                 { id: 'copper_ingot', name: 'Copper Ingot', input: { 'Copper Ore': 3 }, output: { 'Copper Ingot': 1 }, time: 3000 },
                 { id: 'iron_ingot', name: 'Iron Ingot', input: { 'Iron Ore': 3 }, output: { 'Iron Ingot': 1 }, time: 3000 },
                 { id: 'gold_ingot', name: 'Gold Ingot', input: { 'Gold Ore': 3 }, output: { 'Gold Ingot': 1 }, time: 3000 },
-            ],
-            crusher: [
+                { id: 'titanium_ingot', name: 'Titanium Ingot', input: { 'Titanium Ore': 3 }, output: { 'Titanium Ingot': 1 }, time: 4000 },
                 { id: 'crush', name: 'Crush Rock', input: {}, output: {}, time: 2000, dynamic: true },
             ],
             refinery: [
@@ -360,6 +359,7 @@ class ShipScene extends Phaser.Scene {
             if (Math.random() < comp.copper) out['Copper Ore'] = (out['Copper Ore'] || 0) + 1 + Math.floor(Math.random() * 2);
             if (Math.random() < comp.iron) out['Iron Ore'] = (out['Iron Ore'] || 0) + 1 + Math.floor(Math.random() * 2);
             if (Math.random() < comp.gold) out['Gold Ore'] = (out['Gold Ore'] || 0) + 1;
+            if (Math.random() < comp.titanium) out['Titanium Ore'] = (out['Titanium Ore'] || 0) + 1;
             if (Math.random() < comp.gemChance) {
                 const gems = ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst'];
                 const gem = gems[Math.floor(Math.random() * gems.length)];
