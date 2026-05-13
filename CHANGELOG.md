@@ -1,3 +1,13 @@
+## 2026-05-13 — Depth Milestone Sound
+- **QoL/Audio:** Added ascending procedural chimes when reaching depth milestones (50m, 100m, 150m, 200m)
+  - Pitch scales with depth — 350Hz at 50m up to 850Hz at 200m
+  - Ascending sweep with shimmer harmonic for a "discovery" feel
+  - Complements the existing floating text notification with audio feedback
+  - Uses the existing Web Audio synthesizer — no external assets needed
+- Status: 🔄 Ready to push.
+
+---
+
 ## 2026-05-13 — Mining Streak Milestone Sound
 - **QoL/Audio:** Added celebratory procedural chimes when mining streaks hit 10×, 25×, and 50×
   - Ascending major triad (sine tones) — brighter and higher for bigger milestones

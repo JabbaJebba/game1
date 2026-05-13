@@ -485,6 +485,7 @@ class GameScene extends Phaser.Scene {
             if (depth >= m && !this.runStats.depthMilestonesReached.includes(m)) {
                 this.runStats.depthMilestonesReached.push(m);
                 this.showFloatText(this.player.x, this.player.y - 80, `${m}m`, '#44ddff', '18px');
+                this.playDepthMilestoneSound(m);
             }
         });
 
@@ -1360,6 +1361,42 @@ class GameScene extends Phaser.Scene {
         g2.connect(ctx.destination);
         osc2.start(now + 0.04);
         osc2.stop(now + 0.20);
+    }
+
+    playDepthMilestoneSound(depth) {
+        if (!this.audioCtx) return;
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume().catch(() => {});
+        }
+        const ctx = this.audioCtx;
+        const now = ctx.currentTime;
+        const base = 350 + (depth / 200) * 500; // 350Hz at 50m, 850Hz at 200m
+
+        // Ascending sweep — brighter for deeper milestones
+        const osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(base, now);
+        osc.frequency.exponentialRampToValueAtTime(base * 1.5, now + 0.14);
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.06, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.20);
+        osc.connect(g);
+        g.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.20);
+
+        // Higher harmonic for shimmer
+        const osc2 = ctx.createOscillator();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(base * 2, now + 0.04);
+        osc2.frequency.exponentialRampToValueAtTime(base * 3, now + 0.16);
+        const g2 = ctx.createGain();
+        g2.gain.setValueAtTime(0.03, now + 0.04);
+        g2.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+        osc2.connect(g2);
+        g2.connect(ctx.destination);
+        osc2.start(now + 0.04);
+        osc2.stop(now + 0.24);
     }
 
     generateStars() {
