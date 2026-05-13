@@ -83,6 +83,8 @@ class WorldGenerator {
         this.TILE_AMETHYST = 11;
         this.TILE_TITANIUM = 12;
         
+        this.TILE_TOPAZ = 13;
+        
         this.generate();
     }
     
@@ -130,6 +132,8 @@ class WorldGenerator {
         this.createVeins(this.TILE_IRON, 25, surfaceY + 40, surfaceY + 160, 6, 12, 2, 3);
         this.createVeins(this.TILE_GOLD, 18, surfaceY + 100, surfaceY + 285, 5, 10, 1, 2);
         this.createVeins(this.TILE_TITANIUM, 8, surfaceY + 180, surfaceY + 350, 4, 8, 1, 2);
+        
+        this.createVeins(this.TILE_TOPAZ, 14, surfaceY + 80, surfaceY + 220, 2, 4, 1, 1);
         
         this.createVeins(this.TILE_RUBY, 20, surfaceY + 10, surfaceY + 120, 2, 4, 1, 1);
         this.createVeins(this.TILE_SAPPHIRE, 18, surfaceY + 30, surfaceY + 160, 2, 4, 1, 1);

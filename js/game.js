@@ -47,6 +47,7 @@ class GameScene extends Phaser.Scene {
             [this.world.TILE_DIAMOND]: 0xB9F2FF,
             [this.world.TILE_AMETHYST]: 0x9966CC,
             [this.world.TILE_TITANIUM]: 0x778899,
+            [this.world.TILE_TOPAZ]: 0xFFAA00,
         };
 
         this.metalSymbols = {
@@ -98,6 +99,10 @@ class GameScene extends Phaser.Scene {
         this.maxDepth = chassisDef.maxDepth;
         this.fuelBurnRate = chassisDef.fuelBurn;
         this.droneCount = mech.modules.filter(m => m === 'drone').length;
+        this.scannerCount = mech.modules.filter(m => m === 'scanner').length;
+        this.scannerPulseTimer = 0;
+        this.scannerPulsePhase = 0;
+        this.scannerGraphics = this.add.graphics().setDepth(3);
         this.drones = [];
 
         // ── Science Tracking ──
@@ -223,7 +228,7 @@ class GameScene extends Phaser.Scene {
         this.lastInvHash = '';
 
         this.gemPrices = {
-            'Ruby': 50, 'Sapphire': 75, 'Emerald': 100, 'Diamond': 200, 'Amethyst': 80,
+            'Ruby': 50, 'Sapphire': 75, 'Emerald': 100, 'Diamond': 200, 'Amethyst': 80, 'Topaz': 125,
         };
 
         // Web Audio synthesizer for procedural sound effects (no external assets)
@@ -632,7 +637,7 @@ class GameScene extends Phaser.Scene {
                         if (tile === this.world.TILE_COPPER || tile === this.world.TILE_IRON ||
                             tile === this.world.TILE_GOLD || tile === this.world.TILE_TITANIUM || tile === this.world.TILE_RUBY ||
                             tile === this.world.TILE_SAPPHIRE || tile === this.world.TILE_EMERALD ||
-                            tile === this.world.TILE_DIAMOND || tile === this.world.TILE_AMETHYST) {
+                            tile === this.world.TILE_DIAMOND || tile === this.world.TILE_AMETHYST || tile === this.world.TILE_TOPAZ) {
                             // Mine it
                             this.world.setTile(tx, ty, this.world.TILE_AIR);
                             this.updateTile(tx, ty);
@@ -650,7 +655,7 @@ class GameScene extends Phaser.Scene {
                             this.showFloatText(tx * 32 + 16, ty * 32 - 8, `+1 ${itemName}`, itemColor);
                             const isGem = tile === this.world.TILE_RUBY || tile === this.world.TILE_SAPPHIRE ||
                                           tile === this.world.TILE_EMERALD || tile === this.world.TILE_DIAMOND ||
-                                          tile === this.world.TILE_AMETHYST;
+                                          tile === this.world.TILE_AMETHYST || tile === this.world.TILE_TOPAZ;
                             if (isGem) this.spawnGemSparkle(tx * 32 + 16, ty * 32 + 16, this.tileColors[tile]);
                             const isMetal = tile === this.world.TILE_COPPER || tile === this.world.TILE_IRON || tile === this.world.TILE_GOLD || tile === this.world.TILE_TITANIUM;
                             if (isMetal) this.spawnMetalSparks(tx, ty);
@@ -663,6 +668,17 @@ class GameScene extends Phaser.Scene {
                 this.droneTimers[i] -= delta;
             }
         });
+
+        // ── Scanner Pulse ──
+        if (this.scannerCount > 0) {
+            this.scannerPulseTimer -= delta;
+            if (this.scannerPulseTimer <= 0) {
+                this.scannerPulseTimer = 3000; // pulse every 3s
+                this.scannerPulsePhase = 1.0;
+                this.playScannerPulseSound();
+            }
+            this.scannerPulsePhase = Math.max(0, this.scannerPulsePhase - delta / 1000);
+        }
 
         // ── Science Collection ──
         const currentDepth = Math.max(0, Math.floor(this.player.y / 32) - (this.world.getSurfaceY(Math.floor(this.player.x / 32)) || 0));
@@ -732,7 +748,7 @@ class GameScene extends Phaser.Scene {
             .sort((a, b) => {
                 const priority = {
                     [this.world.TILE_DIAMOND]: 500, [this.world.TILE_EMERALD]: 400,
-                    [this.world.TILE_AMETHYST]: 300, [this.world.TILE_RUBY]: 200,
+                    [this.world.TILE_TOPAZ]: 350, [this.world.TILE_AMETHYST]: 300, [this.world.TILE_RUBY]: 200,
                     [this.world.TILE_SAPPHIRE]: 100, [this.world.TILE_GOLD]: 50,
                     [this.world.TILE_TITANIUM]: 40, [this.world.TILE_IRON]: 30, [this.world.TILE_COPPER]: 20,
                     [this.world.TILE_ROCK]: 1, [this.world.TILE_GRASS]: 0,
@@ -803,7 +819,7 @@ class GameScene extends Phaser.Scene {
                     const py = y * 32;
                     const isGem = tile === this.world.TILE_RUBY || tile === this.world.TILE_SAPPHIRE ||
                                   tile === this.world.TILE_EMERALD || tile === this.world.TILE_DIAMOND ||
-                                  tile === this.world.TILE_AMETHYST;
+                                  tile === this.world.TILE_AMETHYST || tile === this.world.TILE_TOPAZ;
                     const pulse = isGem ? Math.sin((this.currentTime || 0) * 0.003 + x * 0.3 + y * 0.3) * 0.12 + 0.88 : 1;
                     let alpha = isGem ? pulse * this.tileAlpha : this.tileAlpha;
                     // Player torch — brighten tiles near player at night
@@ -852,6 +868,30 @@ class GameScene extends Phaser.Scene {
                 label.setVisible(false);
             }
         }
+
+        // Scanner pulse — highlight ore/gem tiles within range
+        this.scannerGraphics.clear();
+        if (this.scannerPulsePhase > 0 && this.scannerCount > 0) {
+            const scanRange = 4 + this.scannerCount * 3;
+            const ptx = Math.floor(this.player.x / 32);
+            const pty = Math.floor((this.player.y - this.player.height / 2) / 32);
+            const scanAlpha = this.scannerPulsePhase * 0.5;
+            for (let sx = Math.max(startX, ptx - scanRange); sx <= Math.min(endX - 1, ptx + scanRange); sx++) {
+                for (let sy = Math.max(startY, pty - scanRange); sy <= Math.min(endY - 1, pty + scanRange); sy++) {
+                    const tile = this.world.getTile(sx, sy);
+                    const isOre = tile === this.world.TILE_COPPER || tile === this.world.TILE_IRON ||
+                                  tile === this.world.TILE_GOLD || tile === this.world.TILE_TITANIUM;
+                    const isGem = tile === this.world.TILE_RUBY || tile === this.world.TILE_SAPPHIRE ||
+                                  tile === this.world.TILE_EMERALD || tile === this.world.TILE_DIAMOND ||
+                                  tile === this.world.TILE_AMETHYST || tile === this.world.TILE_TOPAZ;
+                    if (isOre || isGem) {
+                        const scColor = this.tileColors[tile] || 0xffffff;
+                        this.scannerGraphics.lineStyle(2, scColor, scanAlpha);
+                        this.scannerGraphics.strokeRect(sx * 32, sy * 32, 32, 32);
+                    }
+                }
+            }
+        }
     }
 
     updateTile(x, y) {
@@ -866,7 +906,7 @@ class GameScene extends Phaser.Scene {
             const color = this.tileColors[tile] || 0xffffff;
             const isGem = tile === this.world.TILE_RUBY || tile === this.world.TILE_SAPPHIRE ||
                           tile === this.world.TILE_EMERALD || tile === this.world.TILE_DIAMOND ||
-                          tile === this.world.TILE_AMETHYST;
+                          tile === this.world.TILE_AMETHYST || tile === this.world.TILE_TOPAZ;
             let alpha = isGem ? (Math.sin((this.currentTime || 0) * 0.003 + x * 0.3 + y * 0.3) * 0.12 + 0.88) * this.tileAlpha : this.tileAlpha;
             // Player torch — brighten tiles near player at night
             if (this.tileAlpha < 1) {
@@ -1242,7 +1282,7 @@ class GameScene extends Phaser.Scene {
         const ctx = this.audioCtx;
         const isGem = tile === this.world.TILE_RUBY || tile === this.world.TILE_SAPPHIRE ||
                       tile === this.world.TILE_EMERALD || tile === this.world.TILE_DIAMOND ||
-                      tile === this.world.TILE_AMETHYST;
+                      tile === this.world.TILE_AMETHYST || tile === this.world.TILE_TOPAZ;
         const isMetal = tile === this.world.TILE_COPPER || tile === this.world.TILE_IRON || tile === this.world.TILE_GOLD || tile === this.world.TILE_TITANIUM;
         const dur = isGem ? 0.12 : 0.08;
         const bufferSize = Math.floor(ctx.sampleRate * dur);
@@ -1347,6 +1387,7 @@ class GameScene extends Phaser.Scene {
             [this.world.TILE_DIAMOND]: 'Diamond',
             [this.world.TILE_AMETHYST]: 'Amethyst',
             [this.world.TILE_TITANIUM]: 'Titanium Ore',
+            [this.world.TILE_TOPAZ]: 'Topaz',
         };
         return names[tile] || 'Unknown';
     }
@@ -1384,6 +1425,42 @@ class GameScene extends Phaser.Scene {
         g2.connect(ctx.destination);
         osc2.start(now + 0.04);
         osc2.stop(now + 0.20);
+    }
+
+    playScannerPulseSound() {
+        if (!this.audioCtx) return;
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume().catch(() => {});
+        }
+        const ctx = this.audioCtx;
+        const now = ctx.currentTime;
+        const dur = 0.12;
+
+        // Quick ascending chirp — "ping" of discovery
+        const osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(1200, now + dur * 0.5);
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.04, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+        osc.connect(g);
+        g.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + dur);
+
+        // Subtle harmonic echo
+        const osc2 = ctx.createOscillator();
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(1200, now + 0.04);
+        osc2.frequency.exponentialRampToValueAtTime(1800, now + 0.08);
+        const g2 = ctx.createGain();
+        g2.gain.setValueAtTime(0.02, now + 0.04);
+        g2.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc2.connect(g2);
+        g2.connect(ctx.destination);
+        osc2.start(now + 0.04);
+        osc2.stop(now + 0.12);
     }
 
     playDepthMilestoneSound(depth) {

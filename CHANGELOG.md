@@ -1,5 +1,20 @@
 ---
 
+## 2026-05-13 — Mech Scanner Module
+- **Content Expansion:** Added the 🔍 **Scanner Module** as a new mech loadout option in the Mech Workshop
+  - Install up to 4 scanner modules (one per slot), each expanding pulse range
+  - Every 3 seconds, a visual pulse sweeps outward from the player, highlighting ore and gem tiles within range with colored outlines
+  - Base range: 4 tiles + 3 tiles per scanner module (4 → 7 → 10 → 13 tiles)
+  - Colored outlines match the tile's natural color — no new UI chrome, just the world lighting up
+  - Fades over 1 second for a smooth "ping" feel
+  - Accompanied by a procedural ascending chirp (600Hz → 1200Hz, 120ms) for audio feedback
+  - Mech Workshop UI: new 🔍 SCANNER button between FUEL and DRONE; slot boxes show "SCAN"; stats line shows `Scan: N`
+  - Ship status bar shows scan count alongside fuel/drone stats
+- Why: Fills a gap in the mech module system — drones mine autonomously, fuel extends range, scanner helps FIND the good stuff
+- Status: 🔄 In progress
+
+---
+
 ## 2026-05-13 — Tech Tree Expansion: Mining Speed Branch
 - **Tech Tree Expansion:** Added a 4th branch — `miningSpeed` — to the Tech Tree popup
   - 6 levels total, each reducing player mining cooldown by 10ms

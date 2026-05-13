@@ -371,7 +371,7 @@ class ShipScene extends Phaser.Scene {
             if (Math.random() < comp.gold) out['Gold Ore'] = (out['Gold Ore'] || 0) + 1;
             if (Math.random() < comp.titanium) out['Titanium Ore'] = (out['Titanium Ore'] || 0) + 1;
             if (Math.random() < comp.gemChance) {
-                const gems = ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst'];
+                const gems = ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst', 'Topaz'];
                 const gem = gems[Math.floor(Math.random() * gems.length)];
                 out[gem] = (out[gem] || 0) + 1;
             }
@@ -940,7 +940,7 @@ class ShipScene extends Phaser.Scene {
                 // ── Normal trade view ──
                 this.roomPanelContent.setText(
                     '─ GEMS ─\n' +
-                    ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst'].map(g => {
+                    ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst', 'Topaz'].map(g => {
                         const c = this.shipInventory[g] || 0;
                         return `  ${g}: ${c}  @${this.gemPrices[g]}cr`;
                     }).join('\n') + '\n\n─ FUEL ─\n' +
@@ -948,7 +948,7 @@ class ShipScene extends Phaser.Scene {
                 );
 
                 y = -ph / 2 + 230;
-                ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst'].forEach(gemName => {
+                ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst', 'Topaz'].forEach(gemName => {
                     const count = this.shipInventory[gemName] || 0;
                     if (count > 0) {
                         const btn = this.createPanelButton(0, y, `SELL ${gemName}`, () => {
@@ -1327,7 +1327,7 @@ class ShipScene extends Phaser.Scene {
             results.push(`${qty} Gold Ore`);
         }
         if (Math.random() < comp.gemChance) {
-            const gems = ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst'];
+            const gems = ['Ruby', 'Sapphire', 'Emerald', 'Diamond', 'Amethyst', 'Topaz'];
             const gem = gems[Math.floor(Math.random() * gems.length)];
             this.shipInventory[gem] = (this.shipInventory[gem] || 0) + 1;
             results.push(`1 ${gem}`);
@@ -2211,7 +2211,7 @@ class ShipScene extends Phaser.Scene {
             const slot = this.add.rectangle(x, y, 70, 50, hasMod ? 0x1a251a : 0x151515).setInteractive();
             slot.setStrokeStyle(2, hasMod ? 0x44aa44 : 0x222233);
 
-            const label = this.add.text(x, y, hasMod ? (mod === 'fuel' ? '+10L' : 'DRONE') : 'EMPTY', {
+            const label = this.add.text(x, y, hasMod ? (mod === 'fuel' ? '+10L' : mod === 'drone' ? 'DRONE' : 'SCAN') : 'EMPTY', {
                 fontSize: hasMod ? '11px' : '10px',
                 fill: hasMod ? '#88cc88' : '#333333',
                 fontFamily: 'monospace'
@@ -2235,25 +2235,31 @@ class ShipScene extends Phaser.Scene {
 
         // ── Add Module Buttons ──
         if (state.modules.length < slotCount) {
-            const fuelBtn = this.createMechModuleButton(-80, y, '⛽ FUEL TANK +10L', () => {
+            const fuelBtn = this.createMechModuleButton(-140, y, '⛽ FUEL +10L', () => {
                 state.modules.push('fuel');
                 this.saveGame();
                 this.renderMechConfig();
             }, 0x1a1a15, '#cc8844');
-            const droneBtn = this.createMechModuleButton(80, y, '🤖 DRONE', () => {
+            const scannerBtn = this.createMechModuleButton(0, y, '🔍 SCANNER', () => {
+                state.modules.push('scanner');
+                this.saveGame();
+                this.renderMechConfig();
+            }, 0x1a1510, '#ccaa44');
+            const droneBtn = this.createMechModuleButton(140, y, '🤖 DRONE', () => {
                 state.modules.push('drone');
                 this.saveGame();
                 this.renderMechConfig();
             }, 0x15151a, '#8888cc');
-            this.mechContent.add([fuelBtn.rect, fuelBtn.text, droneBtn.rect, droneBtn.text]);
+            this.mechContent.add([fuelBtn.rect, fuelBtn.text, scannerBtn.rect, scannerBtn.text, droneBtn.rect, droneBtn.text]);
         }
         y += 45;
 
         // ── Stats Summary ──
         const totalFuel = activeDef.baseFuel + state.modules.filter(m => m === 'fuel').length * 10;
         const droneCount = state.modules.filter(m => m === 'drone').length;
+        const scannerCount = state.modules.filter(m => m === 'scanner').length;
         const summary = this.add.text(0, y,
-            `Fuel Capacity: ${totalFuel}L  |  Drones: ${droneCount}  |  Burn: ${(activeDef.fuelBurn * 1000).toFixed(0)}ml/tile`, {
+            `Fuel: ${totalFuel}L  |  Drones: ${droneCount}  |  Scan: ${scannerCount}  |  Burn: ${(activeDef.fuelBurn * 1000).toFixed(0)}ml/tile`, {
             fontSize: '11px', fill: '#888888', fontFamily: 'monospace'
         }).setOrigin(0.5);
         this.mechContent.add(summary);

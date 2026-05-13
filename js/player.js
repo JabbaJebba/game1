@@ -89,6 +89,7 @@ class Player {
             [this.world.TILE_DIAMOND]: miningCost,
             [this.world.TILE_AMETHYST]: miningCost,
             [this.world.TILE_TITANIUM]: miningCost,
+            [this.world.TILE_TOPAZ]: miningCost,
         };
 
         // Inventory
@@ -602,7 +603,7 @@ class Player {
         // Gem sparkle — upward floating particles on gem finds
         const isGem = tile === this.world.TILE_RUBY || tile === this.world.TILE_SAPPHIRE ||
                       tile === this.world.TILE_EMERALD || tile === this.world.TILE_DIAMOND ||
-                      tile === this.world.TILE_AMETHYST;
+                      tile === this.world.TILE_AMETHYST || tile === this.world.TILE_TOPAZ;
         if (isGem) {
             this.scene.spawnGemSparkle(this.x, this.y - this.height * 0.6, tileColor);
         }
@@ -666,6 +667,7 @@ class Player {
         if (tile === this.world.TILE_DIAMOND) return 'Diamond';
         if (tile === this.world.TILE_AMETHYST) return 'Amethyst';
         if (tile === this.world.TILE_TITANIUM) return 'Titanium Ore';
+        if (tile === this.world.TILE_TOPAZ) return 'Topaz';
         return 'Unknown';
     }
 
@@ -680,6 +682,7 @@ class Player {
         if (tile === this.world.TILE_DIAMOND) return '#88eeff';
         if (tile === this.world.TILE_AMETHYST) return '#cc88ff';
         if (tile === this.world.TILE_TITANIUM) return '#aabbcc';
+        if (tile === this.world.TILE_TOPAZ) return '#ffaa00';
         return '#ffffff';
     }
 
@@ -738,6 +741,8 @@ class Player {
             itemName = 'Amethyst';
         } else if (tile === this.world.TILE_TITANIUM) {
             itemName = 'Titanium Ore';
+        } else if (tile === this.world.TILE_TOPAZ) {
+            itemName = 'Topaz';
         } else {
             itemName = String(tile);
         }
