@@ -1,4 +1,13 @@
 
+## 2026-05-14 — Bug Fix: Black Screen on Launch (v2)
+- **Fix:** Fixed black screen that STILL occurred after clicking LAUNCH from Galaxy Map
+  - Root cause: Old save files were missing `mechState.modules`, `mechState.science`, `mechState.visitedPlanets`, `mechState.fuelCatalystUnlocked`, `mechState.deepScanUnlocked`, and `techState.miningSpeedLevel`
+  - When GameScene tried to call `mech.modules.filter(...)` on undefined, it threw and the scene crashed mid-creation — leaving the screen black from GalaxyScene's fadeOut
+  - Fix: Added backfill logic in `init()` for all three scenes (ShipScene, GalaxyScene, GameScene) to ensure every expected mechState/techState key exists before any code uses it
+- Status: ✅ Pushed. Commit: `44ab3ab`
+
+---
+
 ## 2026-05-14 — Bug Fix: Black Screen on Launch
 - **Fix:** Fixed black screen that occurred after clicking LAUNCH from Galaxy Map
   - Root cause: `speedModCount` was referenced in Player constructor before it was defined (undefined passed to Player config)
