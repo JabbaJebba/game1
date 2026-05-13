@@ -11,7 +11,9 @@ class GalaxyScene extends Phaser.Scene {
         this.shipFuelCapacity = data.shipFuelCapacity !== undefined ? data.shipFuelCapacity : 100;
         this.engineLevel = this.calculateEngineLevel();
         this.rockCompositions = data.rockCompositions || {};
-        this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0, droneRangeLevel: 0 };
+        this.techState = data.techState || { fuelTankLevel: 0, efficiencyLevel: 0, droneRangeLevel: 0, miningSpeedLevel: 0 };
+        // Backfill missing techState keys for old saves
+        if (this.techState.miningSpeedLevel === undefined) this.techState.miningSpeedLevel = 0;
         this.processingQueues = data.processingQueues || {};
         this.mechState = data.mechState || {
             unlockedChassis: ['scout'],
@@ -20,6 +22,13 @@ class GalaxyScene extends Phaser.Scene {
             science: {},
             visitedPlanets: {},
         };
+        // Ensure all expected mechState keys exist (for old saves)
+        if (!this.mechState.modules) this.mechState.modules = [];
+        if (!this.mechState.science) this.mechState.science = {};
+        if (!this.mechState.visitedPlanets) this.mechState.visitedPlanets = {};
+        if (!this.mechState.unlockedChassis) this.mechState.unlockedChassis = ['scout'];
+        if (this.mechState.fuelCatalystUnlocked === undefined) this.mechState.fuelCatalystUnlocked = false;
+        if (this.mechState.deepScanUnlocked === undefined) this.mechState.deepScanUnlocked = false;
         this.launchTime = data.launchTime || null;
     }
 

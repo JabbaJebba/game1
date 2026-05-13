@@ -26,6 +26,13 @@ class ShipScene extends Phaser.Scene {
             science: {},
             visitedPlanets: {},
         };
+        // Backfill missing keys for old saves
+        if (!this.mechState.modules) this.mechState.modules = [];
+        if (!this.mechState.science) this.mechState.science = {};
+        if (!this.mechState.visitedPlanets) this.mechState.visitedPlanets = {};
+        if (!this.mechState.unlockedChassis) this.mechState.unlockedChassis = ['scout'];
+        if (this.mechState.fuelCatalystUnlocked === undefined) this.mechState.fuelCatalystUnlocked = false;
+        if (this.mechState.deepScanUnlocked === undefined) this.mechState.deepScanUnlocked = false;
         // Offline processing: if we were away, catch up
         const savedLaunchTime = data.launchTime || this.launchTime || null;
         if (savedLaunchTime) {
