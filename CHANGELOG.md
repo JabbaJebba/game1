@@ -1,5 +1,17 @@
 ---
 
+## 2026-05-14 — Deep Scan: Science-Purchased Permanent Upgrade
+- **Content Expansion / Science Currency:** Added the first science spending mechanic — **Deep Scan** upgrade in the Mech Workshop
+  - Costs **20 science points** (one-time permanent unlock)
+  - Effect: **+3 base scanner pulse range** — even without scanner modules equipped, the pulse reaches 7 tiles instead of 4
+  - With 4 scanner modules: range goes from 16 tiles → **19 tiles** (massive coverage)
+  - Mech Workshop UI: shows total accumulated science, unlock button when affordable, locked message when not, checkmark when active
+  - Science total is computed across all visited planet types automatically
+- Why: Science had no purpose — it was collected and displayed but never spent. Deep Scan gives players a meaningful decision: hoard science or spend it early for better ore discovery.
+- Status: ✅ Pushed. Commit: `TBD`
+
+---
+
 ## 2026-05-14 — Speed Booster Mech Module
 - **Content Expansion / Mech Configuration:** Added the ⚡ **Speed Booster** as a new mech loadout option in the Mech Workshop
   - Install up to 4 speed modules (one per slot), each increasing movement agility

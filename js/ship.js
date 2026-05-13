@@ -2286,6 +2286,59 @@ class ShipScene extends Phaser.Scene {
         this.mechContent.add(summary);
         y += 50;
 
+        // ── Science Upgrades ──
+        const totalScience = Object.values(state.science || {}).reduce((a, b) => a + (b || 0), 0);
+        const sciTitle = this.add.text(0, y, 'SCIENCE', {
+            fontSize: '12px', fill: '#555555', fontFamily: 'monospace', letterSpacing: 2
+        }).setOrigin(0.5);
+        this.mechContent.add(sciTitle);
+        y += 26;
+
+        const sciCount = this.add.text(0, y, `🔬 ${totalScience} science collected`, {
+            fontSize: '10px', fill: '#666666', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+        this.mechContent.add(sciCount);
+        y += 32;
+
+        if (!state.deepScanUnlocked) {
+            if (totalScience >= 20) {
+                const buyBtn = this.add.rectangle(0, y, 260, 34, 0x151a15).setInteractive();
+                buyBtn.setStrokeStyle(2, 0x44aa44);
+                const buyTxt = this.add.text(0, y, 'UNLOCK DEEP SCAN  —  20 🔬', {
+                    fontSize: '11px', fill: '#44aa44', fontFamily: 'monospace'
+                }).setOrigin(0.5);
+                buyBtn.on('pointerover', () => buyBtn.setFillStyle(0x1a2a1a));
+                buyBtn.on('pointerout', () => buyBtn.setFillStyle(0x151a15));
+                buyBtn.on('pointerdown', () => {
+                    this.justClickedModal = true;
+                    state.deepScanUnlocked = true;
+                    this.saveGame();
+                    this.renderMechConfig();
+                });
+                this.mechContent.add([buyBtn, buyTxt]);
+                const buyDesc = this.add.text(0, y + 24, '+3 base scanner pulse range', {
+                    fontSize: '9px', fill: '#444444', fontFamily: 'monospace'
+                }).setOrigin(0.5);
+                this.mechContent.add(buyDesc);
+                y += 44;
+            } else {
+                const need = 20 - totalScience;
+                const lockTxt = this.add.text(0, y, `DEEP SCAN locked — need ${need} more 🔬`, {
+                    fontSize: '10px', fill: '#444444', fontFamily: 'monospace'
+                }).setOrigin(0.5);
+                this.mechContent.add(lockTxt);
+                y += 30;
+            }
+        } else {
+            const activeTxt = this.add.text(0, y, '✓ DEEP SCAN — +3 base scanner range', {
+                fontSize: '10px', fill: '#44aa44', fontFamily: 'monospace'
+            }).setOrigin(0.5);
+            this.mechContent.add(activeTxt);
+            y += 30;
+        }
+
+        y += 20;
+
         // ── Launch Button ──
         const launchBtn = this.add.rectangle(0, y, 200, 40, 0x1a2a2a).setInteractive();
         const launchTxt = this.add.text(0, y, 'PROCEED TO GALAXY', {

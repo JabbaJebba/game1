@@ -876,7 +876,7 @@ class GameScene extends Phaser.Scene {
         // Scanner pulse — highlight ore/gem tiles within range
         this.scannerGraphics.clear();
         if (this.scannerPulsePhase > 0 && this.scannerCount > 0) {
-            const scanRange = 4 + this.scannerCount * 3;
+            const scanRange = 4 + this.scannerCount * 3 + (this.mechState.deepScanUnlocked ? 3 : 0);
             const ptx = Math.floor(this.player.x / 32);
             const pty = Math.floor((this.player.y - this.player.height / 2) / 32);
             const scanAlpha = this.scannerPulsePhase * 0.5;
