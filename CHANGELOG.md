@@ -1,5 +1,18 @@
 ---
 
+## 2026-05-13 — Starsteel Alloy
+- **Content Expansion / Processing Chain:** Added a third alloy recipe to the Smelter, completing the mid-tier alloy line and giving Titanium economic value beyond tech tree upgrades
+  - **Starsteel Ingot** — 2 Titanium Ore + 1 Iron Ore → 1 Starsteel Ingot (5.0s)
+    - Sell price: 120cr
+    - Bridges the gap between Electrum (90cr) and raw gems like Emerald (100cr)
+    - Turns Titanium — previously only useful for tech tree upgrades — into a profitable smelter product
+  - Trade Terminal now lists Starsteel alongside Bronze and Electrum under "─ ALLOYS ─"
+  - Uses the existing multi-input smelter UI — ingredient counts display automatically
+- Why: Titanium had no sellable product. Players who pushed deep for Ti now have a reason to run their smelters for profit, not just progression.
+- Status: 🔄 Pending push
+
+---
+
 ## 2026-05-13 — Alloy Smelting: Bronze & Electrum
 - **Content Expansion / Processing Chain:** Added two alloy recipes to the Smelter, creating a new economic path for metal ores
   - **Bronze Ingot** — 2 Copper Ore + 1 Iron Ore → 1 Bronze Ingot (2.5s)
