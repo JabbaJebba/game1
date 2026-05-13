@@ -4,7 +4,7 @@
   - New: circular scan from bottom-center — all chassis sizes mine consistently
   - Tiles beyond `droneRange` Euclidean distance are now properly skipped (no more corner mining)
   - Scout (1×2), Miner (2×2), and Heavy (2×3) all benefit from accurate targeting
-- Status: ✅ Pushed. Commit: `TBD`
+- Status: ✅ Pushed. Commit: `55fa5f3`
 
 ---
 
