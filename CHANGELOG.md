@@ -11,7 +11,7 @@
   - Ship status bar shows `⚡×N` next to the active chassis name
   - Player constructor reads `speedModCount` and scales `speed`/`jumpPower` multiplicatively
 - Why: Fills the final gap in the mech module system — players can now choose between range (fuel), automation (drones), discovery (scanner), and mobility (speed). Speed modules make the Heavy chassis feel less sluggish and give Scouts a new role as fast prospectors.
-- Status: ⏳ Ready to push
+- Status: ✅ Pushed. Commit: `18ee123`
 
 ---
 
