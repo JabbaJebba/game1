@@ -328,6 +328,10 @@ class GameScene extends Phaser.Scene {
             `📏  ${this.runStats.maxDepthReached}m max depth`,
             `⛽  ${this.runStats.fuelUsed.toFixed(2)}L fuel consumed`,
         ];
+        if (this.runStats.fuelUsed > 0) {
+            const efficiency = (this.runStats.tilesMined / this.runStats.fuelUsed).toFixed(1);
+            lines.push(`⚡  ${efficiency} tiles/L`);
+        }
         if (this.runStats.scienceGained > 0) lines.push(`🔬  +${this.runStats.scienceGained} science`);
         lines.push(`⏱  ${elapsedSec}s on surface`);
         lines.push(`💰  ${runValue} in gems`);
@@ -690,8 +694,12 @@ class GameScene extends Phaser.Scene {
             `RUN STATS — ${chassisLabel}`,
             `Mined: ${this.runStats.tilesMined}`,
             `Fuel: ${this.runStats.fuelUsed.toFixed(2)}L`,
-            `Value: ${runValue}cr`,
         ];
+        if (this.runStats.fuelUsed > 0) {
+            const liveEfficiency = (this.runStats.tilesMined / this.runStats.fuelUsed).toFixed(1);
+            runStatsLines.push(`Eff: ${liveEfficiency} tiles/L`);
+        }
+        runStatsLines.push(`Value: ${runValue}cr`);
         if (this.runStats.scienceGained > 0) {
             runStatsLines.push(`Science: +${this.runStats.scienceGained}`);
         }

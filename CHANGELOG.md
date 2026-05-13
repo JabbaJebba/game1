@@ -1,5 +1,15 @@
 ---
 
+## 2026-05-13 — Run Efficiency Metric
+- **QoL/UI:** Added live fuel efficiency tracking to both the in-run stats panel and the return summary
+  - Shows `tiles/L` — how many tiles you mine per liter of fuel consumed
+  - Updates live during the run so players can see their efficiency in real-time
+  - Helps players compare different chassis builds and mining strategies
+  - Only appears once fuel has actually been consumed (no premature "0.0" clutter)
+- Status: 🔄 Ready to push
+
+---
+
 ## 2026-05-13 — Ship Status: Active Mech Chassis Display
 - **QoL/UI:** Added an active mech chassis indicator to the ship status bar
   - Shows `🦾 Scout`, `🦾 Miner`, or `🦾 Heavy` below the science/credits line
