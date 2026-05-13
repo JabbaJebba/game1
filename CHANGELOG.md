@@ -5,7 +5,7 @@
   - Shows `🦾 Scout`, `🦾 Miner`, or `🦾 Heavy` below the science/credits line
   - Updates automatically when switching chassis in the Mech Configuration modal
   - Helps players quickly confirm their loadout before launching
-- Status: 🔄 In progress
+- Status: ✅ Pushed. Commit: `89b0bc4`
 
 ---
 
