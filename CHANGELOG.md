@@ -9,7 +9,7 @@
   - Trade Terminal now lists Auric alongside Bronze, Electrum, and Starsteel under "─ ALLOYS ─"
   - Longest cook time (6.0s) reflects the premium nature and rarity of inputs
 - Why: Platinum had no sellable product. Players who push deep for Pt now have a high-value alloy to justify the effort, completing the alloy rarity ladder.
-- Status: ⏳ Pending push
+- Status: ✅ Pushed. Commit: `f1b7aba`
 
 ---
 
