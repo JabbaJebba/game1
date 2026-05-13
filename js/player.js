@@ -28,8 +28,9 @@ class Player {
         this.vy = 0;
 
         // Movement constants
-        this.speed = 180;
-        this.jumpPower = 420;
+        const speedModCount = data.speedModCount || 0;
+        this.speed = 180 * (1 + speedModCount * 0.15);
+        this.jumpPower = 420 * (1 + speedModCount * 0.08);
         this.gravity = 1100;
         this.friction = 0.82;
 

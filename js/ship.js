@@ -2004,7 +2004,9 @@ class ShipScene extends Phaser.Scene {
         this.statusCredits.setText(`${this.credits.toLocaleString()} cr 💰`);
         const chassisNames = { scout: 'Scout', miner: 'Miner', heavy: 'Heavy' };
         const active = this.mechState.activeChassis || 'scout';
-        this.statusMech.setText(`🦾 ${chassisNames[active]}`);
+        const speedCount = (this.mechState.modules || []).filter(m => m === 'speed').length;
+        const speedTag = speedCount > 0 ? `  ⚡×${speedCount}` : '';
+        this.statusMech.setText(`🦾 ${chassisNames[active]}${speedTag}`);
         // Update ship fuel bar fill
         const fuelPct = Math.max(0, Math.min(1, this.shipFuel / this.shipFuelCapacity));
         const maxFillW = 218;
@@ -2224,7 +2226,7 @@ class ShipScene extends Phaser.Scene {
             const slot = this.add.rectangle(x, y, 70, 50, hasMod ? 0x1a251a : 0x151515).setInteractive();
             slot.setStrokeStyle(2, hasMod ? 0x44aa44 : 0x222233);
 
-            const label = this.add.text(x, y, hasMod ? (mod === 'fuel' ? '+10L' : mod === 'drone' ? 'DRONE' : 'SCAN') : 'EMPTY', {
+            const label = this.add.text(x, y, hasMod ? (mod === 'fuel' ? '+10L' : mod === 'drone' ? 'DRONE' : mod === 'speed' ? 'SPD' : 'SCAN') : 'EMPTY', {
                 fontSize: hasMod ? '11px' : '10px',
                 fill: hasMod ? '#88cc88' : '#333333',
                 fontFamily: 'monospace'
@@ -2248,22 +2250,27 @@ class ShipScene extends Phaser.Scene {
 
         // ── Add Module Buttons ──
         if (state.modules.length < slotCount) {
-            const fuelBtn = this.createMechModuleButton(-140, y, '⛽ FUEL +10L', () => {
+            const fuelBtn = this.createMechModuleButton(-180, y, '⛽ FUEL +10L', () => {
                 state.modules.push('fuel');
                 this.saveGame();
                 this.renderMechConfig();
             }, 0x1a1a15, '#cc8844');
-            const scannerBtn = this.createMechModuleButton(0, y, '🔍 SCANNER', () => {
+            const scannerBtn = this.createMechModuleButton(-60, y, '🔍 SCANNER', () => {
                 state.modules.push('scanner');
                 this.saveGame();
                 this.renderMechConfig();
             }, 0x1a1510, '#ccaa44');
-            const droneBtn = this.createMechModuleButton(140, y, '🤖 DRONE', () => {
+            const droneBtn = this.createMechModuleButton(60, y, '🤖 DRONE', () => {
                 state.modules.push('drone');
                 this.saveGame();
                 this.renderMechConfig();
             }, 0x15151a, '#8888cc');
-            this.mechContent.add([fuelBtn.rect, fuelBtn.text, scannerBtn.rect, scannerBtn.text, droneBtn.rect, droneBtn.text]);
+            const speedBtn = this.createMechModuleButton(180, y, '⚡ SPEED', () => {
+                state.modules.push('speed');
+                this.saveGame();
+                this.renderMechConfig();
+            }, 0x1a1515, '#cc4444');
+            this.mechContent.add([fuelBtn.rect, fuelBtn.text, scannerBtn.rect, scannerBtn.text, droneBtn.rect, droneBtn.text, speedBtn.rect, speedBtn.text]);
         }
         y += 45;
 
@@ -2271,8 +2278,9 @@ class ShipScene extends Phaser.Scene {
         const totalFuel = activeDef.baseFuel + state.modules.filter(m => m === 'fuel').length * 10;
         const droneCount = state.modules.filter(m => m === 'drone').length;
         const scannerCount = state.modules.filter(m => m === 'scanner').length;
+        const speedCount = state.modules.filter(m => m === 'speed').length;
         const summary = this.add.text(0, y,
-            `Fuel: ${totalFuel}L  |  Drones: ${droneCount}  |  Scan: ${scannerCount}  |  Burn: ${(activeDef.fuelBurn * 1000).toFixed(0)}ml/tile`, {
+            `Fuel: ${totalFuel}L  |  Drones: ${droneCount}  |  Scan: ${scannerCount}  |  Spd: ${speedCount}  |  Burn: ${(activeDef.fuelBurn * 1000).toFixed(0)}ml/tile`, {
             fontSize: '11px', fill: '#888888', fontFamily: 'monospace'
         }).setOrigin(0.5);
         this.mechContent.add(summary);

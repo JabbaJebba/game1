@@ -1,5 +1,20 @@
 ---
 
+## 2026-05-14 — Speed Booster Mech Module
+- **Content Expansion / Mech Configuration:** Added the ⚡ **Speed Booster** as a new mech loadout option in the Mech Workshop
+  - Install up to 4 speed modules (one per slot), each increasing movement agility
+  - Every speed module grants **+15% movement speed** and **+8% jump power**
+    - 1 module: 207 speed / 454 jump (scout feels noticeably quicker)
+    - 4 modules: 288 speed / 554 jump (heavy can actually move)
+  - Mech Workshop UI: new ⚡ SPEED button alongside FUEL/SCANNER/DRONE; slot boxes show "SPD"
+  - Stats line shows `Spd: N` alongside fuel/drone/scan counts
+  - Ship status bar shows `⚡×N` next to the active chassis name
+  - Player constructor reads `speedModCount` and scales `speed`/`jumpPower` multiplicatively
+- Why: Fills the final gap in the mech module system — players can now choose between range (fuel), automation (drones), discovery (scanner), and mobility (speed). Speed modules make the Heavy chassis feel less sluggish and give Scouts a new role as fast prospectors.
+- Status: ⏳ Ready to push
+
+---
+
 ## 2026-05-13 — Auric Ingot: Premium Platinum-Gold Alloy
 - **Content Expansion / Processing Chain:** Added a fourth alloy recipe to the Smelter — the endgame premium alloy that gives Platinum economic value
   - **Auric Ingot** — 1 Platinum Ore + 2 Gold Ore → 1 Auric Ingot (6.0s)

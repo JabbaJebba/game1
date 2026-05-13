@@ -97,10 +97,12 @@ class GameScene extends Phaser.Scene {
             miningSpeedLevel: this.techState.miningSpeedLevel || 0,
             chassis: mech.activeChassis,
             fuelBurn: chassisDef.fuelBurn,
+            speedModCount: this.speedModCount,
         });
         this.maxDepth = chassisDef.maxDepth;
         this.fuelBurnRate = chassisDef.fuelBurn;
         this.droneCount = mech.modules.filter(m => m === 'drone').length;
+        this.speedModCount = mech.modules.filter(m => m === 'speed').length;
         this.scannerCount = mech.modules.filter(m => m === 'scanner').length;
         this.scannerPulseTimer = 0;
         this.scannerPulsePhase = 0;
