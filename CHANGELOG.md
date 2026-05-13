@@ -4,7 +4,7 @@
   - Ascending sweep with shimmer harmonic for a "discovery" feel
   - Complements the existing floating text notification with audio feedback
   - Uses the existing Web Audio synthesizer — no external assets needed
-- Status: 🔄 Ready to push.
+- Status: ✅ Pushed. Commit: `7e308b8`
 
 ---
 
