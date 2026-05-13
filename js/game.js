@@ -98,6 +98,7 @@ class GameScene extends Phaser.Scene {
             chassis: mech.activeChassis,
             fuelBurn: chassisDef.fuelBurn,
             speedModCount: this.speedModCount,
+            fuelCatalystUnlocked: this.mechState.fuelCatalystUnlocked || false,
         });
         this.maxDepth = chassisDef.maxDepth;
         this.fuelBurnRate = chassisDef.fuelBurn;

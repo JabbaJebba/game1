@@ -2337,6 +2337,43 @@ class ShipScene extends Phaser.Scene {
             y += 30;
         }
 
+        if (!state.fuelCatalystUnlocked) {
+            if (totalScience >= 15) {
+                const buyBtn2 = this.add.rectangle(0, y, 260, 34, 0x151a15).setInteractive();
+                buyBtn2.setStrokeStyle(2, 0x44aa44);
+                const buyTxt2 = this.add.text(0, y, 'UNLOCK FUEL CATALYST  —  15 🔬', {
+                    fontSize: '11px', fill: '#44aa44', fontFamily: 'monospace'
+                }).setOrigin(0.5);
+                buyBtn2.on('pointerover', () => buyBtn2.setFillStyle(0x1a2a1a));
+                buyBtn2.on('pointerout', () => buyBtn2.setFillStyle(0x151a15));
+                buyBtn2.on('pointerdown', () => {
+                    this.justClickedModal = true;
+                    state.fuelCatalystUnlocked = true;
+                    this.saveGame();
+                    this.renderMechConfig();
+                });
+                this.mechContent.add([buyBtn2, buyTxt2]);
+                const buyDesc2 = this.add.text(0, y + 24, '-10% fuel consumption on all mechs', {
+                    fontSize: '9px', fill: '#444444', fontFamily: 'monospace'
+                }).setOrigin(0.5);
+                this.mechContent.add(buyDesc2);
+                y += 44;
+            } else {
+                const need2 = 15 - totalScience;
+                const lockTxt2 = this.add.text(0, y, `FUEL CATALYST locked — need ${need2} more 🔬`, {
+                    fontSize: '10px', fill: '#444444', fontFamily: 'monospace'
+                }).setOrigin(0.5);
+                this.mechContent.add(lockTxt2);
+                y += 30;
+            }
+        } else {
+            const activeTxt2 = this.add.text(0, y, '✓ FUEL CATALYST — -10% fuel burn', {
+                fontSize: '10px', fill: '#44aa44', fontFamily: 'monospace'
+            }).setOrigin(0.5);
+            this.mechContent.add(activeTxt2);
+            y += 30;
+        }
+
         y += 20;
 
         // ── Launch Button ──

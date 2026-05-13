@@ -1,3 +1,17 @@
+
+## 2026-05-14 — Fuel Catalyst: Second Science Upgrade
+- **Content Expansion / Science Currency:** Added **Fuel Catalyst** — the second permanent science upgrade in the Mech Workshop
+  - Costs **15 science points** (one-time permanent unlock)
+  - Effect: **-10% fuel consumption** on all mech chassis permanently
+    - Scout: 30ml → 27ml per tile
+    - Miner: 50ml → 45ml per tile
+    - Heavy: 75ml → 67.5ml per tile
+  - Stacks multiplicatively with Efficiency tech (Level 10 Scout: 40ml → 36ml)
+  - Mech Workshop UI: appears below Deep Scan; shows unlock button when affordable, locked message when not, checkmark when active
+  - Science total computed across all visited planet types automatically
+- Why: Science had only one spending option (Deep Scan). Fuel Catalyst gives players a meaningful early choice: invest science for immediate fuel savings that compound across every run, or save for scanner range first.
+- Status: ✅ Pushed. Commit: `PENDING`
+
 ---
 
 ## 2026-05-14 — Deep Scan: Science-Purchased Permanent Upgrade

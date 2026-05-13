@@ -76,8 +76,9 @@ class Player {
         this.fuel = this.maxFuel;
         const effLevel = data.efficiencyLevel || 0;
         const baseCost = data.fuelBurn || 0.05;
-        const effReduction = effLevel * 0.001;
-        const miningCost = Math.max(0.04, baseCost - effReduction);
+        const effReduction = (data.efficiencyLevel || 0) * 0.001;
+        const catalystMult = data.fuelCatalystUnlocked ? 0.9 : 1.0;
+        const miningCost = Math.max(0.04, baseCost - effReduction) * catalystMult;
         this.fuelCosts = {
             [this.world.TILE_GRASS]: miningCost,
             [this.world.TILE_ROCK]: miningCost,
