@@ -13,7 +13,7 @@
   - Drill room panel now shows Mining Speed Level alongside Fuel Tank / Efficiency / Drone Range
   - Player constructor reads `miningSpeedLevel` and computes `mineCooldown = max(120, 180 - level*10)`
 - Why: Boss wanted tech tree expansion; this gives players a direct way to invest resources for faster mining
-- Status: 🔄 In progress
+- Status: ✅ Pushed. Commit: `5ea81af`
 
 ---
 
