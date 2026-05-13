@@ -674,6 +674,12 @@ class GameScene extends Phaser.Scene {
                     fontSize: '14px', fill: '#00d4aa', fontFamily: 'monospace', stroke: '#000000', strokeThickness: 2
                 }).setOrigin(0.5);
                 this.tweens.add({ targets: note, y: note.y - 40, alpha: 0, duration: 1500, ease: 'Power1', onComplete: () => note.destroy() });
+                // Science collection flash — brief teal glow around player
+                const sciFlash = this.add.rectangle(this.player.x, this.player.y - this.player.height / 2, this.player.width + 20, this.player.height + 20, 0x00d4aa, 0.25);
+                sciFlash.setDepth(10);
+                this.tweens.add({ targets: sciFlash, alpha: 0, scaleX: 1.6, scaleY: 1.6, duration: 500, ease: 'Power1', onComplete: () => sciFlash.destroy() });
+                // Subtle screen shake for discovery feel
+                this.cameras.main.shake(90, 0.003);
                 // Audio notification — bright discovery chime
                 this.playScienceSound();
             }

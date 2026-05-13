@@ -1,5 +1,15 @@
 ---
 
+## 2026-05-13 — Science Collection: Visual Flash & Screen Shake
+- **QoL/Game Feel:** Added visual and haptic feedback to science collection for a more satisfying discovery moment
+  - Brief teal glow flash expands around the player when science is awarded
+  - Subtle 90ms screen shake (0.003 intensity) — lighter than mining, discovery-themed
+  - Flash uses the same `#00d4aa` science color for visual consistency
+  - Complements the existing floating text and audio chime without competing with them
+- Status: ✅ Pushed. Commit: TBD
+
+---
+
 ## 2026-05-13 — Run Efficiency Metric
 - **QoL/UI:** Added live fuel efficiency tracking to both the in-run stats panel and the return summary
   - Shows `tiles/L` — how many tiles you mine per liter of fuel consumed
