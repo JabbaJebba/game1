@@ -192,6 +192,8 @@ class ShipScene extends Phaser.Scene {
                 { id: 'iron_ingot', name: 'Iron Ingot', input: { 'Iron Ore': 3 }, output: { 'Iron Ingot': 1 }, time: 3000 },
                 { id: 'gold_ingot', name: 'Gold Ingot', input: { 'Gold Ore': 3 }, output: { 'Gold Ingot': 1 }, time: 3000 },
                 { id: 'titanium_ingot', name: 'Titanium Ingot', input: { 'Titanium Ore': 3 }, output: { 'Titanium Ingot': 1 }, time: 4000 },
+            ],
+            crusher: [
                 { id: 'crush', name: 'Crush Rock', input: {}, output: {}, time: 2000, dynamic: true },
             ],
             refinery: [
