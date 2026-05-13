@@ -89,6 +89,7 @@ class Player {
             [this.world.TILE_DIAMOND]: miningCost,
             [this.world.TILE_AMETHYST]: miningCost,
             [this.world.TILE_TITANIUM]: miningCost,
+            [this.world.TILE_PLATINUM]: miningCost,
             [this.world.TILE_TOPAZ]: miningCost,
         };
 
@@ -667,6 +668,7 @@ class Player {
         if (tile === this.world.TILE_DIAMOND) return 'Diamond';
         if (tile === this.world.TILE_AMETHYST) return 'Amethyst';
         if (tile === this.world.TILE_TITANIUM) return 'Titanium Ore';
+        if (tile === this.world.TILE_PLATINUM) return 'Platinum Ore';
         if (tile === this.world.TILE_TOPAZ) return 'Topaz';
         return 'Unknown';
     }
@@ -682,6 +684,7 @@ class Player {
         if (tile === this.world.TILE_DIAMOND) return '#88eeff';
         if (tile === this.world.TILE_AMETHYST) return '#cc88ff';
         if (tile === this.world.TILE_TITANIUM) return '#aabbcc';
+        if (tile === this.world.TILE_PLATINUM) return '#dddddd';
         if (tile === this.world.TILE_TOPAZ) return '#ffaa00';
         return '#ffffff';
     }
@@ -741,6 +744,8 @@ class Player {
             itemName = 'Amethyst';
         } else if (tile === this.world.TILE_TITANIUM) {
             itemName = 'Titanium Ore';
+        } else if (tile === this.world.TILE_PLATINUM) {
+            itemName = 'Platinum Ore';
         } else if (tile === this.world.TILE_TOPAZ) {
             itemName = 'Topaz';
         } else {

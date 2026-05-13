@@ -191,6 +191,7 @@ class ShipScene extends Phaser.Scene {
                 { level: 4, cost: { 'Copper Ingot': 100, 'Iron Ingot': 50, credits: 10000 }, bonus: 1 },
                 { level: 5, cost: { 'Copper Ingot': 150, 'Iron Ingot': 100, 'Gold Ingot': 50, credits: 20000 }, bonus: 1 },
                 { level: 6, cost: { 'Copper Ingot': 200, 'Iron Ingot': 150, 'Gold Ingot': 100, 'Titanium Ingot': 50, credits: 40000 }, bonus: 1 },
+                { level: 7, cost: { 'Copper Ingot': 250, 'Iron Ingot': 200, 'Gold Ingot': 150, 'Titanium Ingot': 100, 'Platinum Ingot': 50, credits: 80000 }, bonus: 1 },
             ]
         };
 
@@ -200,6 +201,7 @@ class ShipScene extends Phaser.Scene {
                 { id: 'iron_ingot', name: 'Iron Ingot', input: { 'Iron Ore': 3 }, output: { 'Iron Ingot': 1 }, time: 3000 },
                 { id: 'gold_ingot', name: 'Gold Ingot', input: { 'Gold Ore': 3 }, output: { 'Gold Ingot': 1 }, time: 3000 },
                 { id: 'titanium_ingot', name: 'Titanium Ingot', input: { 'Titanium Ore': 3 }, output: { 'Titanium Ingot': 1 }, time: 4000 },
+                { id: 'platinum_ingot', name: 'Platinum Ingot', input: { 'Platinum Ore': 4 }, output: { 'Platinum Ingot': 1 }, time: 5000 },
             ],
             crusher: [
                 { id: 'crush', name: 'Crush Rock', input: {}, output: {}, time: 2000, dynamic: true },

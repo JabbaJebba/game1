@@ -1,5 +1,16 @@
 ---
 
+## 2026-05-13 — Platinum (Pt) Ore Tier
+- **Content Expansion:** Added **Platinum (Pt)** — 5th metal tier, silvery-white (#E5E4E2), "Pt" symbol on tiles
+  - Spawns very deep: only below 260m from surface, in tiny veins (1-2 tiles per vein, max 6 vein size), very rare
+  - Requires 4 Platinum Ore → 1 Platinum Ingot in Smelter (5s cook time) — more expensive than Titanium's 3:1
+  - Mining Speed tech tree extended to **level 7** — requires 50 Platinum Ingots + 250 Cu + 200 Fe + 150 Au + 100 Ti + 80,000cr
+  - Drones, scanner pulse, inventory hotbar, metal sparkles, and all ore-detection systems recognize Platinum
+  - Sound effects properly classify Platinum as metal (bandpass filter, metallic triangle oscillator)
+- Why: Gives Heavy mech (and deep-pushing Miner/Scout) exclusive endgame content; creates a new resource pyramid peak
+
+---
+
 ## 2026-05-13 — Mech Scanner Module
 - **Content Expansion:** Added the 🔍 **Scanner Module** as a new mech loadout option in the Mech Workshop
   - Install up to 4 scanner modules (one per slot), each expanding pulse range
