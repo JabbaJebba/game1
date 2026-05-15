@@ -203,6 +203,13 @@ class GameScene extends Phaser.Scene {
         this.cursorHighlight.setStrokeStyle(2, 0xffffff, 0.8);
         this.cursorHighlight.setFillStyle(0xffffff, 0.1);
 
+        // Tile hover tooltip
+        this.tileTooltip = this.add.text(0, 0, '', {
+            fontSize: '11px', fill: '#ffffff', fontFamily: 'monospace',
+            stroke: '#000000', strokeThickness: 2, backgroundColor: '#00000088',
+            padding: { x: 4, y: 2 }
+        }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(100);
+
         this.infoText = this.add.text(10, 10, '', {
             fontSize: '16px',
             fill: '#ffffff',
