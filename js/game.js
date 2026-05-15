@@ -4,6 +4,7 @@ class GameScene extends Phaser.Scene {
     }
 
     init(data) {
+        console.log('[GameScene] init() called with data:', data);
         this.planet = data.planet || { name: 'Asteroid Alpha', depth: 300, size: 200, richness: 0.8 };
         this.shipGrid = data.shipGrid || [];
         this.shipInventory = data.shipInventory || {};
@@ -21,6 +22,9 @@ class GameScene extends Phaser.Scene {
             science: {},
             visitedPlanets: {},
         };
+        console.log('[GameScene] planet:', this.planet.name, 'size:', this.planet.size, 'depth:', this.planet.depth);
+        console.log('[GameScene] rockType:', this.rockType.name);
+        console.log('[GameScene] mechState.activeChassis:', this.mechState.activeChassis);
         // Backfill missing keys for old saves
         if (!this.mechState.modules) this.mechState.modules = [];
         if (!this.mechState.science) this.mechState.science = {};
@@ -32,11 +36,28 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
+        try {
+            console.log('[GameScene] create() started');
+        
         this.worldWidth = this.planet.size;
         this.worldHeight = this.planet.depth;
         this.tileSize = 32;
-
-        this.world = new WorldGenerator(this.worldWidth, this.worldHeight, this.rockType);
+        
+        if (!this.worldWidth || !this.worldHeight) {
+            console.error('[GameScene] Invalid world dimensions:', this.worldWidth, this.worldHeight, this.planet);
+            this.worldWidth = this.worldWidth || 200;
+            this.worldHeight = this.worldHeight || 300;
+        }
+        
+        console.log('[GameScene] World dimensions:', this.worldWidth, 'x', this.worldHeight);
+        
+        try {
+            this.world = new WorldGenerator(this.worldWidth, this.worldHeight, this.rockType);
+            console.log('[GameScene] WorldGenerator created');
+        } catch (e) {
+            console.error('[GameScene] WorldGenerator failed:', e);
+            throw e;
+        }
 
         this.tileGraphics = this.add.graphics();
 
@@ -69,7 +90,12 @@ class GameScene extends Phaser.Scene {
         this.labelCache = new Map();
         this.drawnMetals = new Set();
 
+        // Initialize tileAlpha before first renderWorld call to prevent NaN alpha values
+        this.tileAlpha = 1;
+        this.currentTime = 0;
+
         this.renderWorld();
+        console.log('[GameScene] renderWorld() completed');
 
         this.keys = {
             left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),
@@ -84,7 +110,13 @@ class GameScene extends Phaser.Scene {
         };
 
         let spawnX = Math.floor(this.worldWidth / 2);
-        let spawnY = this.world.getSurfaceY(spawnX) - 5;
+        let spawnY = this.world.getSurfaceY(spawnX);
+        if (spawnY === null || spawnY === undefined) {
+            console.error('[GameScene] getSurfaceY returned null/undefined for x=', spawnX);
+            spawnY = Math.floor(this.worldHeight * 0.2);
+        }
+        spawnY -= 5;
+        console.log('[GameScene] Spawn position:', spawnX, spawnY);
 
         // ── Mech Configuration ──
         const chassisDefs = {
@@ -99,6 +131,9 @@ class GameScene extends Phaser.Scene {
         let fuelForRun = Math.min(maxPlayerFuel, this.shipFuel);
         this.shipFuel -= fuelForRun; // Deduct from ship tank
         this.speedModCount = mech.modules.filter(m => m === 'speed').length;
+        
+        console.log('[GameScene] Creating player with fuel:', fuelForRun, 'maxFuel:', maxPlayerFuel, 'chassis:', mech.activeChassis);
+        
         this.player = new Player(this, spawnX, spawnY, {
             fuel: fuelForRun,
             efficiencyLevel: this.techState.efficiencyLevel || 0,
@@ -108,6 +143,7 @@ class GameScene extends Phaser.Scene {
             speedModCount: this.speedModCount,
             fuelCatalystUnlocked: this.mechState.fuelCatalystUnlocked || false,
         });
+        console.log('[GameScene] Player created');
         this.maxDepth = chassisDef.maxDepth;
         this.fuelBurnRate = chassisDef.fuelBurn;
         this.droneCount = mech.modules.filter(m => m === 'drone').length;
@@ -208,12 +244,7 @@ class GameScene extends Phaser.Scene {
             stroke: '#000000', strokeThickness: 1
         }).setOrigin(0.5).setScrollFactor(0);
 
-        // Tile hover tooltip
-        this.tileTooltip = this.add.text(0, 0, '', {
-            fontSize: '11px', fill: '#ffffff', fontFamily: 'monospace',
-            stroke: '#000000', strokeThickness: 2, backgroundColor: '#00000088',
-            padding: { x: 4, y: 2 }
-        }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(100);
+
 
         // Depth gauge
         this.depthGauge = this.add.graphics().setScrollFactor(0).setDepth(0);
@@ -264,6 +295,11 @@ class GameScene extends Phaser.Scene {
         }
 
         this.cameras.main.fadeIn(150, 0, 0, 0);
+        console.log('[GameScene] create() completed successfully');
+        } catch (e) {
+            console.error('[GameScene] CRASH in create():', e);
+            throw e;
+        }
     }
 
     showSaveFlash() {
@@ -803,10 +839,12 @@ class GameScene extends Phaser.Scene {
     getVisibleTileRange() {
         const cam = this.cameras.main;
         const margin = 2;
+        const camWidth = cam.width || 1280;
+        const camHeight = cam.height || 720;
         const startX = Math.floor((cam.scrollX - margin * this.tileSize) / this.tileSize);
-        const endX = Math.ceil((cam.scrollX + cam.width + margin * this.tileSize) / this.tileSize);
+        const endX = Math.ceil((cam.scrollX + camWidth + margin * this.tileSize) / this.tileSize);
         const startY = Math.floor((cam.scrollY - margin * this.tileSize) / this.tileSize);
-        const endY = Math.ceil((cam.scrollY + cam.height + margin * this.tileSize) / this.tileSize);
+        const endY = Math.ceil((cam.scrollY + camHeight + margin * this.tileSize) / this.tileSize);
 
         return {
             startX: Math.max(0, startX),

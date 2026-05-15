@@ -198,8 +198,10 @@ class GalaxyScene extends Phaser.Scene {
             }
             // Store composition for this rock type
             this.rockCompositions[rt.name] = { ...rt };
+            console.log('[GalaxyScene] Launching to planet:', planet.name, 'rockType:', rt.name);
             this.cameras.main.fadeOut(150, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', () => {
+                console.log('[GalaxyScene] Fade complete, starting GameScene');
                 this.mechState.visitedPlanets[planet.name] = true;
                 this.scene.start('GameScene', {
                     planet: planet,
