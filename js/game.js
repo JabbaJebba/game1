@@ -302,9 +302,21 @@ class GameScene extends Phaser.Scene {
         }
 
         this.cameras.main.fadeIn(150, 0, 0, 0);
+        
+        // Debug overlay — shows if create() completed
+        const debugText = this.add.text(10, 10, 'GameScene.create() OK', {
+            fontSize: '12px', fill: '#00ff00', fontFamily: 'monospace',
+            stroke: '#000000', strokeThickness: 2
+        }).setScrollFactor(0).setDepth(1000);
+        
         console.log('[GameScene] create() completed successfully');
         } catch (e) {
             console.error('[GameScene] CRASH in create():', e);
+            // Show error on screen
+            const errText = this.add.text(640, 360, 'CREATE ERROR: ' + e.message, {
+                fontSize: '16px', fill: '#ff0000', fontFamily: 'monospace',
+                stroke: '#000000', strokeThickness: 2, backgroundColor: '#00000088'
+            }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
             throw e;
         }
     }
@@ -507,6 +519,7 @@ class GameScene extends Phaser.Scene {
     }
 
     update(time, delta) {
+        try {
         this.currentTime = time;
         this.player.update(delta);
         this.renderWorld();
@@ -786,6 +799,14 @@ class GameScene extends Phaser.Scene {
         runStatsLines.push(`Max: ${this.runStats.maxDepthReached}m`);
         runStatsLines.push(`Time: ${timeStr}`);
         this.runStatsText.setText(runStatsLines.join('\n'));
+        } catch (e) {
+            console.error('[GameScene] CRASH in update():', e);
+            // Show error on screen
+            const errText = this.add.text(640, 360, 'UPDATE ERROR: ' + e.message, {
+                fontSize: '14px', fill: '#ff0000', fontFamily: 'monospace',
+                stroke: '#000000', strokeThickness: 2, backgroundColor: '#00000088'
+            }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
+        }
     }
 
     getInventoryHash() {

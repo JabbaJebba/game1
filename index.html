@@ -28,13 +28,18 @@
     <script>
         window.addEventListener('error', function(e) {
             console.error('[GLOBAL ERROR]', e.message, 'at', e.filename, ':', e.lineno);
+            // Show error on screen for debugging
+            const errDiv = document.createElement('div');
+            errDiv.style.cssText = 'position:fixed;top:10px;left:10px;z-index:9999;background:rgba(255,0,0,0.9);color:#fff;padding:10px;font-family:monospace;font-size:12px;max-width:800px;white-space:pre-wrap;';
+            errDiv.textContent = 'ERROR: ' + e.message + '\n at ' + e.filename + ':' + e.lineno;
+            document.body.appendChild(errDiv);
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
-    <script src="js/world.js"></script>
-    <script src="js/player.js"></script>
-    <script src="js/ship.js"></script>
-    <script src="js/galaxy.js"></script>
-    <script src="js/game.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js?v=2"></script>
+    <script src="js/world.js?v=2"></script>
+    <script src="js/player.js?v=2"></script>
+    <script src="js/ship.js?v=2"></script>
+    <script src="js/galaxy.js?v=2"></script>
+    <script src="js/game.js?v=2"></script>
 </body>
 </html>
